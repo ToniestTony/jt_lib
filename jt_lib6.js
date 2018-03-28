@@ -1011,7 +1011,6 @@ JT library guide
         
         window.onload = function(){
             jt=new JT("can",150,100,60,'setup','update','app');
-            jt.assets.image("mario.png","mario");
         }
     </script>
 </html>
@@ -1179,7 +1178,6 @@ Various math method can be found in the jt_lib, check them out at around the 775
         
         window.onload = function(){
             jt=new JT("can",150,100,60,'setup','update','app');
-            jt.assets.image("mario.png","mario");
         }
     </script>
 </html>
