@@ -1007,7 +1007,7 @@ JT library guide
             }
         }
         
-        var lib=undefined;
+        var jt=undefined;
         
         window.onload = function(){
             jt=new JT("can",150,100,60,'setup','update','app');
@@ -1154,26 +1154,19 @@ Various math method can be found in the jt_lib, check them out at around the 775
 
 <html>
     <head>
-        <title>Tony Level Maker</title>
+        <title>App</title>
         <style>
             canvas{
                 border: 1px solid black;
-            }
-            button{
-                display: inline-block;
             }
         </style>
     </head>
     <body>
         <canvas id="can"></canvas>
     </body>
-    <script src="jt_libv5.js"></script>
+    <script src="jt_lib6.js"></script>
     <script>
-        
         var app={
-            preload:function(){
-                
-            },
             setup:function(){
                 
             },
@@ -1182,7 +1175,12 @@ Various math method can be found in the jt_lib, check them out at around the 775
             }
         }
         
-        jt.canvas.init("can",800,600,60,["preload","setup","update","app"])
+        var jt=undefined;
+        
+        window.onload = function(){
+            jt=new JT("can",150,100,60,'setup','update','app');
+            jt.assets.image("mario.png","mario");
+        }
     </script>
 </html>
 
