@@ -201,6 +201,12 @@ function JT(canvas_id,w,h,fps,setupName,updateName,objName){
                         this.context.keyboard.keysdown[keyCount].press=false;
                     }
                 }
+                
+                //remove mouse press
+                if(this.context.mouse.down==true && this.context.mouse.press==true){
+                    this.context.mouse.press=false;
+                }
+                
 
                 this.updateAnims();
                 this.updateAlarms();
@@ -884,10 +890,17 @@ function JT(canvas_id,w,h,fps,setupName,updateName,objName){
     this.mouse={
         x:0,
         y:0,
+        press:false,
         down:false,
-        //check if mouse is pressing inside these coordinates
-        check:function(x,y,w,h){
-            if(this.down==true && this.x>=x && this.x<= x+w && this.y>=y && this.y<=y+h){
+        //check if mouse is pressing inside these coordinates, if type is true, check if mouse is pressed instead of down
+        check:function(x,y,w,h,type){
+            var checking=this.down;
+            if(type!=undefined){
+                if(type==true){
+                    checking=this.press;
+                }
+            }
+            if(checking==true && this.x>=x && this.x<= x+w && this.y>=y && this.y<=y+h){
                 return true;
             }else{
                 return false;
@@ -905,10 +918,12 @@ function JT(canvas_id,w,h,fps,setupName,updateName,objName){
 
         context.canvas.src.addEventListener("mousedown", function(evt) {
             context.mouse.down=true;
+            context.mouse.press=true;
         });
 
         context.canvas.src.addEventListener("mouseup", function(evt) {
             context.mouse.down=false;
+            context.mouse.press=false;
         });
 
         document.addEventListener("keydown", function(){
@@ -945,6 +960,7 @@ function JT(canvas_id,w,h,fps,setupName,updateName,objName){
 JTv6:
 -changed the jt object to a jt constructor
 -added mouse checks
+-added mouse press
 -added music repetition
 -added changing fontSize from jt.draw.text
 -added key presses
