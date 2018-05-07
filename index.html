@@ -2,30 +2,45 @@
     <head>
         <title>App</title>
         <style>
+            *{
+                padding: 0px;
+                margin: 0px;
+            }
             canvas{
-                border: 1px solid black;
+                //border: 1px solid black;
+                display: block;
             }
         </style>
     </head>
     <body>
+        <div>
         <canvas id="can"></canvas>
+<!--        <small>Made with <a href="https://github.com/ToniestTony/jt_lib7">jt_lib7.js</a></small>-->
+            </div>
     </body>
-    <script src="jt_lib6.js"></script>
+    <script src="jt_lib7.js"></script>
+    
     <script>
+        
         var app={
             setup:function(){
+                //setup
                 
             },
             update:function(){
-                jt.draw.bg("white");
-                jt.draw.rect(10,10,10,10,"red");
+                //update
+              
+                //draw
             }
         }
         
         var jt=undefined;
         
         window.onload = function(){
-            jt=new JT("can",150,100,60,'setup','update','app');
+            jt=new JT("can");
+            //jt.newSound("sound.wav","sound");
+            //jt.newImage("image.png","image");
+            //jt.newAnim("anim.png","anim");
         }
     </script>
 </html>
