@@ -3,7 +3,7 @@ function JT(id,w,h,fps,setupName,updateName,objName){
     //initialize the canvas
     this.init=function(id,w,h,fps,setupName,updateName,objName){
         //add attributes to the canvas object of JT
-        this.version=6;
+        this.version=7;
         var actualId=id;
         
         if(typeof(id)=="object"){
@@ -1262,7 +1262,6 @@ function JT(id,w,h,fps,setupName,updateName,objName){
                     this.ctx.fillText(string,(x*camW)-(camX*camW),(y*camH)-(camY*camH))
                     break;
                 case "textB":
-                    console.log('test')
                     this.ctx.strokeText(string,(x*camW)-(camX*camW),(y*camH)-(camY*camH))
                     break;
                 case "line":
@@ -1311,7 +1310,7 @@ function JT(id,w,h,fps,setupName,updateName,objName){
                 return Math.floor(Math.random()*(max-min+1)+min);
             }else{
                 //all 3
-                return Math.floor(Math.random()*((max*variable)-(min*variable)+1)+(min*variable))/variable;
+                return Math.floor(Math.random()*((max/variable)-(min/variable)+1)+(min/variable))*variable;
             }
             
         },
@@ -2235,38 +2234,6 @@ general
 	!changer keyboard pour mot plus court, input?
 	!ajouter array des noms de touches (ex: "a"=65)
 
-JT library guide
-
-1-Initialize
-1.1-Getting started
-1.2-Different names and methods
-
-2-Ressources
-2.1-Preloading ressources
-2.2-Drawing/playing ressources
-2.3-Virtual Camera
-2.4-Accessing ressources
-2.5-Drawing shapes
-
-3-Input
-3.1-Keyboard
-3.2-Mouse
-
-4-Others
-4.1-Alarms
-4.2-Random
-4.3-Collisions
-4.4-Math
-
-5.1-Oject Template
-
-
-
-
-
-//1-Initialize
-
-1.1:First off, you'll need to create an HTML file that links this library and that has a canvas like so:
 
 <html>
     <head>
@@ -2280,7 +2247,7 @@ JT library guide
     <body>
         <canvas id="can"></canvas>
     </body>
-    <script src="jt_lib6.js"></script>
+    <script src="jt_lib7.js"></script>
     <script>
         var app={
             setup:function(){
@@ -2298,172 +2265,4 @@ JT library guide
         }
     </script>
 </html>
-
-The three functions are used to preload ressources, setup the app and then update with a loop
-
-The method jt.canvas.init should be called at the end of the script
-
-
-1.2:You can also change the function names, although you have to specify it to the init like so:
-
-function setup2(){}
-function update2(){}
-
-jt=new JT("can",150,100,60,'setup2','update2');
-
-You can also put the functions as methods inside an object like so:
-
-var object={
-    setup:function(){},
-    update:function(){}
-}
-
-jt=new JT("can",150,100,60,'setup2','update2','object');
-
-The first four parameters of the init method are the canvas HTML id, the width, the height and the FPS rate
-
-
-
-
-
-//2-Ressources
-
-2.1:Preloading ressources is easy in the JT library, just load them inside the preload function
-
-function preload(){
-    jt.assets.image("imageSrc","imageName");//loading an image
-    jt.assets.sound("soundSrc","soundName")//loading a sound jt.assets.anim("animSrc","animName","numberOfFrames","animationSpeed")//loading an animation
-}
-
-the animationSpeed is equal to the FPS rate of the canvas, so 1 = the FPS in the canvas, to make it twice as slow, it should be 0.5
-
-
-2.2:Drawing/playing ressources
-
-function update(){
-    jt.draw.image("imageName");
-    jt.draw.anim("animName");
-    jt.assets.play("soundName");
-}
-
-
-2.3:Virtual Camera
-The virtual camera lets you move the view inside the canvas, you can change it's x,y,width and height like so:
-
-jt.draw.cam.x++;
-
-You can also create a camera shake effect like so:
-
-jt.loop.shake(force,duration,reduce);
-
-
-2.4:Accessing ressources
-
-You can access your assets like so:
-jt.assets.images["imageName"]
-
-
-2.5:Drawing shapes
-
-Drawing a rectangle:
-jt.draw.rect(x,y,w,h,color,rotation)
-
-Drawing a circle:
-jt.draw.circle(x,y,radius,color)
-
-Drawing a line:
-jt.draw.line(x1,y1,x2,y2,width,color,rotation)
-
-Changing the font:
-jt.draw.font(fontName,size)
-
-Drawing text:
-jt.draw.text(string,x,y,color,textAlign,rotation)
-
-
-
-
-
-//3:Inputs are separated into keyboard and mouse
-
-3.1:Keyboard inputs can be checked using the check method:
-
-jt.keyboard.check(keyCode)//will return true or false
-
-You can also deactivate a key with the jt.keyboard.release(keyCode)
-
-Keycodes can be found here : http://keycode.info/
-
-For example, 37 to 40 are the arrow keys, starting from left and going clockwise
-
-
-3.2:Mouse can be directly checked with jt.mouse.x/jt.mouse.y/jt.mouse.down (if the mouse button is down)
-
-
-
-
-
-//4:Others are other functions in JT
-
-4.1:Alarms are objects with a time attribute that goes down constantly
-They can used to delay actions, you can create one like so:
-jt.loop.addAlarm(name,time);
-
-And you can check if the alarm is done with:
-jt.loop.checkAlarm(name) which will return a true or false, and it will also destroy the alarm if its time is <=0
-
-
-4.2:Random
-
-The random method will already round up the numbers
-jt.math.random(minimum,maximum)
-
-
-4.3:collision
-To verify collision between 2 rectangles (objects who have a x,y,w and h attributes)
-
-jt.collision.rect(object1,object2)
-
-
-4.4:Math
-
-Various math method can be found in the jt_lib, check them out at around the 775th line of this html file!
-
-
-
-
-
-//5-Object template:
-
-<html>
-    <head>
-        <title>App</title>
-        <style>
-            canvas{
-                border: 1px solid black;
-            }
-        </style>
-    </head>
-    <body>
-        <canvas id="can"></canvas>
-    </body>
-    <script src="jt_lib6.js"></script>
-    <script>
-        var app={
-            setup:function(){
-                
-            },
-            update:function(){
-                
-            }
-        }
-        
-        var jt=undefined;
-        
-        window.onload = function(){
-            jt=new JT("can",150,100,60,'setup','update','app');
-        }
-    </script>
-</html>
-
 */
