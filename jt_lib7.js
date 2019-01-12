@@ -729,7 +729,13 @@ function JT(id,w,h,fps,setupName,updateName,objName){
         },
         //pause a sound
         pause:function(name){
-            this.sounds[name].pause();  
+            this.sounds[name].pause();
+        },
+		//unpause a sound
+        unpause:function(name){
+			this.sounds[name].volume=this.vol;
+            if(this.mut==true){this.sounds[name].volume=0;}
+            this.sounds[name].play();  
         },
         //stop a sound (reset it to 0)
         stop:function(name){
@@ -1860,6 +1866,10 @@ function JT(id,w,h,fps,setupName,updateName,objName){
     
     this.pause=function(name){
         return this.assets.pause(name);
+    }
+	
+	this.unpause=function(name){
+        return this.assets.unpause(name);
     }
     
     this.stop=function(name){
