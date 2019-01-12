@@ -707,6 +707,11 @@ function JT(id,w,h,fps,setupName,updateName,objName){
                 this.vol=vol;
                 if(this.vol<0){this.vol=0;}
                 if(this.vol>1){this.vol=1;}
+				for(var sound in this.sounds){
+					if(this.sounds.hasOwnProperty(sound)){
+						this.sounds[sound].volume=this.vol;
+					}
+				}
             }else{
                 return this.vol;
             }
@@ -716,6 +721,11 @@ function JT(id,w,h,fps,setupName,updateName,objName){
         mute:function(bool){
           if(bool!=undefined){
               this.mut=bool;
+			  for(var sound in this.sounds){
+					if(this.sounds.hasOwnProperty(sound)){
+						if(this.mut==true){this.sounds[sound].volume=0;}else{this.sounds[sound].volume=this.vol;}
+					}
+				}
           }  else{
               return this.mut;
           }
@@ -724,7 +734,7 @@ function JT(id,w,h,fps,setupName,updateName,objName){
         play:function(name){
             this.stop(name);
             this.sounds[name].volume=this.vol;
-            if(this.mut==true){this.sounds[name].volume=0;}
+            if(this.mut==true){this.sounds[name].volume=0;}else{this.sounds[name].volume=this.vol;}
             this.sounds[name].play();  
         },
         //pause a sound
@@ -734,7 +744,7 @@ function JT(id,w,h,fps,setupName,updateName,objName){
 		//unpause a sound
         unpause:function(name){
 			this.sounds[name].volume=this.vol;
-            if(this.mut==true){this.sounds[name].volume=0;}
+            if(this.mut==true){this.sounds[name].volume=0;}else{this.sounds[name].volume=this.vol;}
             this.sounds[name].play();  
         },
         //stop a sound (reset it to 0)
