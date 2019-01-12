@@ -1460,6 +1460,12 @@ function JT(id,w,h,fps,setupName,updateName,objName){
             
             backspace:8,
             enter:13,
+			shift:16,
+			control:17,
+			ctrl:17,
+			controlL:17,
+			ctrlL:17,
+			alt:18,
             escape:27,
             space:32,
             left:37,
@@ -1514,6 +1520,8 @@ function JT(id,w,h,fps,setupName,updateName,objName){
             num7:103,
             num8:104,
             num9:105,
+			controlR:223,
+			ctrlR:223
         },
         keysdown:[],
         check: function(keyCode) {
