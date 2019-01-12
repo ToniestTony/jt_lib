@@ -1114,7 +1114,19 @@ function JT(id,w,h,fps,setupName,updateName,objName){
                     this.ctx.restore();
                 }
             }
-          },
+        },
+		
+		animFrame:function(name,frame){
+			var anim=this.assets.anims[name];
+			
+			var f=frame;
+			if(f!=undefined){
+				f=0;
+			}
+			
+			anim.frame=f;
+			anim.distance=anim.speed*f;
+		},
 
         //Gradients
 
@@ -1923,6 +1935,14 @@ function JT(id,w,h,fps,setupName,updateName,objName){
     
     this.anim=function(name,newX,newY,w,h,rotation){
         return this.draw.anim(name,newX,newY,w,h,rotation)
+    }
+	
+	this.animFrame=function(name,frame){
+        return this.draw.animFrame(name,frame)
+    }
+	
+	this.animF=function(name,frame){
+        return this.draw.animFrame(name,frame)
     }
     
     this.linear=function(name,x1,y1,x2,y2,stops){
