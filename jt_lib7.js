@@ -3,7 +3,7 @@ function JT(id,w,h,fps,setupName,updateName,objName){
     //initialize the canvas
     this.init=function(id,w,h,fps,setupName,updateName,objName){
         //add attributes to the canvas object of JT
-        this.version=7;
+        this.version=8;
         var actualId=id;
         
         if(typeof(id)=="object"){
@@ -41,9 +41,9 @@ function JT(id,w,h,fps,setupName,updateName,objName){
         
         
         if(setupName!=undefined){
-            if(objName!=undefined){this.loop.obj=objName}
-            if(updateName!=undefined){this.loop.updateName=updateName;this.loop.setupName=setupName}
-            else if(setupName!=undefined){this.loop.updateName=setupName}
+            if(objName!=undefined){this.loop.obj=objName;}
+            if(updateName!=undefined){this.loop.updateName=updateName;this.loop.setupName=setupName;}
+            else if(setupName!=undefined){this.loop.updateName=setupName;}
         }else{
             this.loop.obj="app";
             this.loop.updateName="update";
@@ -57,12 +57,12 @@ function JT(id,w,h,fps,setupName,updateName,objName){
         }
         
         //trademark
-        console.log('(JT'+this.version+')Made with jt_lib'+this.version+'.js (https://github.com/ToniestTony/jt_lib6)')
+        console.log('(JT'+this.version+')Made with jt_lib'+this.version+'.js (https://github.com/ToniestTony/jt_lib6)');
 
         this.loop.preload(this,fps);
 
         this.createEventListeners(this);
-    }
+    };
     
     //canvas
     this.canvas={
@@ -116,6 +116,9 @@ function JT(id,w,h,fps,setupName,updateName,objName){
             
             this.context.mouse.canvas.w=w;
             this.context.mouse.canvas.h=h;
+			
+			this.context.touch.canvas.w=w;
+            this.context.touch.canvas.h=h;
         },
         setId(id){
             this.id=id;
@@ -225,18 +228,23 @@ function JT(id,w,h,fps,setupName,updateName,objName){
             this.context.mouse.draw=this.context.draw;
             this.context.mouse.canvas.w=this.context.canvas.src.width;
             this.context.mouse.canvas.h=this.context.canvas.src.height;
+			
+            this.context.touch.draw=this.context.draw;
+			this.context.touch.canvas.w=this.context.canvas.src.width;
+            this.context.touch.canvas.h=this.context.canvas.src.height;
             
             this.context.assets.loop=this;
             this.context.assets.col=this.context.collision;
             
             this.context.canvas.smoothing(false)
+			
             if(this.obj!=undefined){
                 window[this.obj][this.setupName]();
             }else{
                 window[this.setupName]();
             }
+			
             this.setupDone=true;
-
         },
         //start the main loop
         startLoop: function(){
@@ -384,8 +392,13 @@ function JT(id,w,h,fps,setupName,updateName,objName){
                 }
                 
                 //remove mouse press
-                if(this.context.mouse.down==true && this.context.mouse.press==true){
+                if(this.context.mouse.press==true){
                     this.context.mouse.press=false;
+                }
+				
+				//remove touch press
+                if(this.context.touch.press==true){
+                    this.context.touch.press=false;
                 }
                 
                 //wave
@@ -839,6 +852,11 @@ function JT(id,w,h,fps,setupName,updateName,objName){
             this.cam.active=bool;
             return this. cam.active;
         },
+		
+		//change alpha
+		alpha:function(alpha){
+			this.ctx.globalAlpha=alpha;
+		},
 
         //Drawing a background
         bg: function(color) {
@@ -1639,10 +1657,58 @@ function JT(id,w,h,fps,setupName,updateName,objName){
             }
         },
     }
+	
+	//***** TOUCH *****//
+	this.touch={
+		touches:undefined,
+		down:false,
+		press:false,
+		force:0,
+		draw:undefined,
+		canvas:{w:0,h:0},
+		//check if touch is pressing inside these coordinates, if type is true, check if touch is pressed instead of down
+		check:function(x,y,w,h,press,cam){
+            if(x==undefined){x=0;}
+            if(y==undefined){y=0;}
+            if(w==undefined){w=this.canvas.w;}
+            if(h==undefined){h=this.canvas.h;}
+            var checking=this.down;
+            if(press!=undefined){
+                if(press==true){
+                    checking=this.press;
+                }
+            }
+            
+            if(cam==undefined){
+                cam=this.draw.cam.active;
+            }
+			
+			var force=0;
+			if(checking){
+				for(var i=0;i<this.touches.length;i++){
+					var touch=this.touches[i];
+					var tX=touch.cX;
+					var tY=touch.cY;
+					if(cam==false){
+						tX=touch.x;
+						tY=touch.y;
+					}
+					
+					if(tX>=x && tX<= x+w && tY>=y && tY<=y+h){
+						force++;
+					}
+				}
+			}
+			
+			return force;
+        },
+	}
     
 
     this.createEventListeners=function(context) {
         context.canvas.src.addEventListener("mousemove", function(evt) {
+			evt.preventDefault();
+			
             var rect = context.canvas.src.getBoundingClientRect();
             
             var camW=Math.abs(context.canvas.src.width/context.draw.cam.w)
@@ -1661,16 +1727,178 @@ function JT(id,w,h,fps,setupName,updateName,objName){
         });
 
         context.canvas.src.addEventListener("mousedown", function(evt) {
+			evt.preventDefault();
+			
             context.mouse.down=true;
             context.mouse.press=true;
         });
 
         context.canvas.src.addEventListener("mouseup", function(evt) {
+			evt.preventDefault();
+			
             context.mouse.down=false;
             context.mouse.press=false;
         });
+		
+		
+		context.canvas.src.addEventListener("touchstart", function(evt) {
+			evt.preventDefault();
+			
+			var rect = context.canvas.src.getBoundingClientRect();
+            
+            var camW=Math.abs(context.canvas.src.width/context.draw.cam.w)
+            var camH=Math.abs(context.canvas.src.height/context.draw.cam.h)
+            var camX=context.draw.cam.x;
+            var camY=context.draw.cam.y;
+			
+			var touches=[];
+			
+			var force=0;
+			
+			for(var i=0;i<evt.touches.length;i++){
+				var touch=evt.touches[i];
+				force++;
+				var tX=Math.round(((touch.clientX-rect.left)/(rect.right-rect.left))*context.canvas.src.width);
+				var tY=Math.round(((touch.clientY-rect.top)/(rect.bottom-rect.top))*context.canvas.src.height);
+				
+				touches[i]={};
+				touches[i].x=tX;
+				touches[i].y=tY;
+				
+				touches[i].cX = (tX/camW)+camX;
+				touches[i].cY = (tY/camH)+camY;
+			}
+            context.touch.touches=touches;
+			
+			if(force>0){
+				context.touch.down=true;
+				context.touch.press=true;
+			}else{
+				context.touch.down=false;
+				context.touch.press=false;
+			}
+			
+			context.touch.force=force;
+        });
+		
+		context.canvas.src.addEventListener("touchmove", function(evt) {
+			evt.preventDefault();
+			
+			var rect = context.canvas.src.getBoundingClientRect();
+            
+            var camW=Math.abs(context.canvas.src.width/context.draw.cam.w)
+            var camH=Math.abs(context.canvas.src.height/context.draw.cam.h)
+            var camX=context.draw.cam.x;
+            var camY=context.draw.cam.y;
+			
+			var touches=[];
+			
+			var force=0;
+			
+			for(var i=0;i<evt.touches.length;i++){
+				var touch=evt.touches[i];
+				force++;
+				var tX=Math.round(((touch.clientX-rect.left)/(rect.right-rect.left))*context.canvas.src.width);
+				var tY=Math.round(((touch.clientY-rect.top)/(rect.bottom-rect.top))*context.canvas.src.height);
+				
+				touches[i]={};
+				touches[i].x=tX;
+				touches[i].y=tY;
+				
+				touches[i].cX = (tX/camW)+camX;
+				touches[i].cY = (tY/camH)+camY;
+			}
+			
+            context.touch.touches=touches;
+			
+			if(force>0){
+				context.touch.down=true;
+			}else{
+				context.touch.down=false;
+			}
+			
+			context.touch.force=force;
+        });
+		
+		context.canvas.src.addEventListener("touchend", function(evt) {
+			evt.preventDefault();
+			
+			var rect = context.canvas.src.getBoundingClientRect();
+            
+            var camW=Math.abs(context.canvas.src.width/context.draw.cam.w)
+            var camH=Math.abs(context.canvas.src.height/context.draw.cam.h)
+            var camX=context.draw.cam.x;
+            var camY=context.draw.cam.y;
+			
+			var touches=[];
+			
+			var force=0;
+			
+			for(var i=0;i<evt.touches.length;i++){
+				var touch=evt.touches[i];
+				force++;
+				var tX=Math.round(((touch.clientX-rect.left)/(rect.right-rect.left))*context.canvas.src.width);
+				var tY=Math.round(((touch.clientY-rect.top)/(rect.bottom-rect.top))*context.canvas.src.height);
+				
+				touches[i]={};
+				touches[i].x=tX;
+				touches[i].y=tY;
+				
+				touches[i].cX = (tX/camW)+camX;
+				touches[i].cY = (tY/camH)+camY;
+			}
+			
+            context.touch.touches=touches;
+			
+			if(force==0){
+				context.touch.down=false;
+				context.touch.press=false;
+			}
+			
+			context.touch.force=force;
+        });
+		
+		context.canvas.src.addEventListener("touchcancel", function(evt) {
+			evt.preventDefault();
+			
+			var rect = context.canvas.src.getBoundingClientRect();
+            
+            var camW=Math.abs(context.canvas.src.width/context.draw.cam.w)
+            var camH=Math.abs(context.canvas.src.height/context.draw.cam.h)
+            var camX=context.draw.cam.x;
+            var camY=context.draw.cam.y;
+			
+			var touches=[];
+			
+			var force=0;
+			
+			for(var i=0;i<evt.touches.length;i++){
+				var touch=evt.touches[i];
+				force++;
+				var tX=Math.round(((touch.clientX-rect.left)/(rect.right-rect.left))*context.canvas.src.width);
+				var tY=Math.round(((touch.clientY-rect.top)/(rect.bottom-rect.top))*context.canvas.src.height);
+				
+				touches[i]={};
+				touches[i].x=tX;
+				touches[i].y=tY;
+				
+				touches[i].cX = (tX/camW)+camX;
+				touches[i].cY = (tY/camH)+camY;
+			}
+			
+            context.touch.touches=touches;
+			
+			if(force==0){
+				context.touch.down=false;
+				context.touch.press=false;
+			}
+			
+			context.touch.force=force;
+		});
 
         document.addEventListener("keydown", function(){
+			event.preventDefault();
+			
             var keys = context.keyboard.keysdown;
             var found = false;
             for(var i=0; i<keys.length; i++) {
@@ -1686,6 +1914,8 @@ function JT(id,w,h,fps,setupName,updateName,objName){
         
 
         document.addEventListener("keyup", function(){
+			event.preventDefault();
+			
             var keys = context.keyboard.keysdown;
             for(var i=0; i<keys.length; i++) {
                 if(keys[i].key==event.keyCode) {context.keyboard.keysdown.splice(i,1);}
@@ -1909,6 +2139,10 @@ function JT(id,w,h,fps,setupName,updateName,objName){
     
     //draw
     
+	this.alpha=function(alpha){
+        return this.draw.alpha(alpha);
+    }
+	
     this.bg=function(color){
         return this.draw.bg(color);
     }
@@ -2175,7 +2409,44 @@ function JT(id,w,h,fps,setupName,updateName,objName){
     this.mDown=function(){
         return this.mouse.down;
     }
+	
+	//touch
+	
+	this.touches=function(){
+		return this.touch.touches;
+	}
     
+	this.touchCheck=function(x,y,w,h,cam){
+        return this.touch.check(x,y,w,h,false,cam);
+    }
+	
+	this.tCheck=function(x,y,w,h,cam){
+        return this.touch.check(x,y,w,h,false,cam);
+    }
+	
+	this.tC=function(x,y,w,h,cam){
+        return this.touch.check(x,y,w,h,false,cam);
+    }
+	
+	this.touchPress=function(x,y,w,h,cam){
+        return this.touch.check(x,y,w,h,true,cam);
+    }
+	
+	this.tPress=function(x,y,w,h,cam){
+        return this.touch.check(x,y,w,h,true,cam);
+    }
+	
+	this.tP=function(x,y,w,h,cam){
+        return this.touch.check(x,y,w,h,true,cam);
+    }
+	
+	this.touchDown=function(){
+        return this.touch.down;
+    }
+    
+    this.tDown=function(){
+        return this.touch.down;
+    }
     
     //super macro
     
@@ -2219,8 +2490,32 @@ JTv6:
 -added centered text rotation
 -fixed a lot of bugs
 
+JTv7:
+-added camelCase methods
+-added canvas resize improvements
+-added hiding cursor in canvas
+-added macros
+-added wave sin methods
+-added combo support
+-added gradient
+-added sounds repeat
+-added math methods
+-added circle collisions
+-added keyboard checks with key names
+-added a lot more
+-fixed animations
+-fixed imports
+-fixed shake
+-fixed a lot more
+-removed console logs
+
+JTv8:
+-added touch support
+-added alpha for images
+-fixed a lot
+
 TODO:
-Jt lib 7
+Jt lib 8
 general
 	!everything in camelCase
 	!enlever les console.log
@@ -2295,7 +2590,7 @@ general
     <body>
         <canvas id="can"></canvas>
     </body>
-    <script src="jt_lib7.js"></script>
+    <script src="jt_lib8.js"></script>
     <script>
         var app={
             setup:function(){
