@@ -1,7 +1,7 @@
-function JT(id,w,h,fps,setupName,updateName,objName){
+function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize){
     //constructor
     //initialize the canvas
-    this.init=function(id,w,h,fps,setupName,updateName,objName){
+    this.init=function(id,w,h,fps,setupName,updateName,objName,mobileAudioSize){
         //add attributes to the canvas object of JT
         this.version=8;
         var actualId=id;
@@ -50,8 +50,6 @@ function JT(id,w,h,fps,setupName,updateName,objName){
             this.loop.setupName="setup";
         }
         
-        
-        
         if(fps==undefined){
             fps=60;
         }
@@ -60,6 +58,53 @@ function JT(id,w,h,fps,setupName,updateName,objName){
         console.log('(JT'+this.version+')Made with jt_lib'+this.version+'.js (https://github.com/ToniestTony/jt_lib6)');
 
         this.loop.preload(this,fps);
+        
+        this.assets.musicBtn=undefined;
+        this.assets.soundBtn=undefined;
+        
+        //check if mobile
+        if(mobileAudioSize>0){
+            if(this.mobile.isAny()){
+                //Creating the mobile music button
+                this.assets.musicBtn =document.createElement("INPUT");
+                var musicBtnType=  document.createAttribute("type");
+                musicBtnType.value="button";
+                var musicBtnValue= document.createAttribute("value");
+                musicBtnValue.value="Enable music!";
+                this.assets.musicBtn.setAttributeNode(musicBtnType)
+                this.assets.musicBtn.setAttributeNode(musicBtnValue)
+            this.assets.musicBtn.addEventListener("click",this.assets.musicEvent.bind(this));
+                document.getElementById(actualId).parentNode.insertBefore(this.assets.musicBtn,document.getElementById(actualId));
+                
+                this.assets.musicBtn.style.position="absolute";
+                this.assets.musicBtn.style.left=0;
+                this.assets.musicBtn.style.top=0;
+                this.assets.musicBtn.style.fontSize=mobileAudioSize;
+                this.assets.musicBtn.style.opacity=0.5;
+                this.assets.musicBtn.style.zIndex=1;
+
+                //Creating the mobile sound button
+            this.assets.soundBtn =document.createElement("INPUT");
+                var soundBtnType=  document.createAttribute("type");
+                soundBtnType.value="button";
+                var soundBtnValue= document.createAttribute("value");
+                soundBtnValue.value="Enable sound!";
+                this.assets.soundBtn.setAttributeNode(soundBtnType)
+                this.assets.soundBtn.setAttributeNode(soundBtnValue)
+                this.assets.soundBtn.addEventListener("click",this.assets.soundEvent.bind(this));
+                document.getElementById(actualId).parentNode.insertBefore(this.assets.soundBtn,document.getElementById(actualId));
+                
+                this.assets.soundBtn.style.position="absolute";
+                this.assets.soundBtn.style.left=0;
+                this.assets.soundBtn.style.top=mobileAudioSize+10;
+                this.assets.soundBtn.style.fontSize=mobileAudioSize;
+                this.assets.soundBtn.style.opacity=0.5;
+                this.assets.soundBtn.style.zIndex=1;
+
+
+
+            }
+        }
 
         this.createEventListeners(this);
     };
@@ -635,6 +680,14 @@ function JT(id,w,h,fps,setupName,updateName,objName){
         anims:{},
         //sounds
         sounds:{},
+		
+		//audioSrc
+		soundSrc:undefined,
+		musicSrc:undefined,
+        
+        //audioBtn
+        soundBtn:undefined,
+        musicBtn:undefined,
         
         //controls
         vol:0.5,
@@ -743,32 +796,85 @@ function JT(id,w,h,fps,setupName,updateName,objName){
               return this.mut;
           }
         },
+        //sound event after button press
+        soundEvent:function(){
+            this.assets.soundBtn.style.display="none";
+            var sound=new Audio();
+            sound.src="";
+            sound.load();
+            this.changeSoundSrc(sound);
+        },
+        //music event after button press
+        musicEvent:function(){
+            this.assets.musicBtn.style.display="none";
+            var music=new Audio();
+            music.src="";
+            music.load();
+            this.changeMusicSrc(music);
+        },
+		//add the sound source for safari
+		changeSoundSrc:function(soundSrc){
+			this.soundSrc=soundSrc;
+            for(var sound in this.sounds){
+                if(this.sounds.hasOwnProperty(sound)){this.sounds[sound].pause();
+				this.sounds[sound].currentTime=0;
+                }
+            }
+		},
+		//add the music source for safari
+		changeMusicSrc:function(musicSrc){
+			this.musicSrc=musicSrc;
+            for(var sound in this.sounds){
+                if(this.sounds.hasOwnProperty(sound)){this.sounds[sound].pause();
+				this.sounds[sound].currentTime=0;
+                }
+            }
+		},
         //play a sound
-        play:function(name){
-            this.stop(name);
-            this.sounds[name].volume=this.vol;
-            if(this.mut==true){this.sounds[name].volume=0;}else{this.sounds[name].volume=this.vol;}
-            this.sounds[name].play();  
+        play:function(name,src){
+			var source=undefined;
+			if(src=="sound"){source=this.soundSrc}else if(src=="music"){source=this.musicSrc}
+			if(source!=undefined){
+                if(source.src==""){source.src=this.sounds[name].src;source.load();}
+				else if(source.src!=this.sounds[name].src){source.src=this.sounds[name].src;}
+				source.play();
+			}else{
+				this.stop(name);
+				this.sounds[name].volume=this.vol;
+				if(this.mut==true){this.sounds[name].volume=0;}else{this.sounds[name].volume=this.vol;}
+				this.sounds[name].play();
+			}
         },
         //pause a sound
-        pause:function(name){
-            this.sounds[name].pause();
-        },
-		//unpause a sound
-        unpause:function(name){
-			this.sounds[name].volume=this.vol;
-            if(this.mut==true){this.sounds[name].volume=0;}else{this.sounds[name].volume=this.vol;}
-            this.sounds[name].play();  
+        pause:function(name,src){
+			var source=undefined;
+			if(src=="sound"){source=this.soundSrc}else if(src=="music"){source=this.musicSrc}
+			if(source!=undefined){
+				if(source.src==""){source.src=this.sounds[name].src;source.load();}
+				else if(source.src!=this.sounds[name].src){source.src=this.sounds[name].src;}
+				source.pause();
+			}else{
+				this.sounds[name].pause();
+			}
         },
         //stop a sound (reset it to 0)
-        stop:function(name){
-            this.sounds[name].pause();
-            this.sounds[name].currentTime=0;
+        stop:function(name,src){
+			var source=undefined;
+			if(src=="sound"){source=this.soundSrc}else if(src=="music"){source=this.musicSrc}
+			if(source!=undefined){
+				if(source.src==""){source.src=this.sounds[name].src;source.load();}
+				else if(source.src!=this.sounds[name].src){source.src=this.sounds[name].src;}
+				source.pause();
+				source.currentTime=0;
+			}else{
+				this.sounds[name].pause();
+				this.sounds[name].currentTime=0;
+			}
         },
         //stop then play
-        stopPlay:function(name){
-            this.stop(name);
-            this.play(name);
+        stopPlay:function(name,src){
+            this.stop(name,src);
+            this.play(name,src);
         },
         //collision
         collision:function(name1,name2){
@@ -1704,7 +1810,29 @@ function JT(id,w,h,fps,setupName,updateName,objName){
         },
 	}
     
-
+    //***** MOBILE *****//
+    this.mobile={
+        isAndroid: function() {
+            return navigator.userAgent.match(/Android/i);
+        },
+        isBlackBerry: function() {
+            return navigator.userAgent.match(/BlackBerry/i);
+        },
+        isIOS: function() {
+            return navigator.userAgent.match(/iPhone|iPad|iPod/i);
+        },
+        isOpera: function() {
+            return navigator.userAgent.match(/Opera Mini/i);
+        },
+        isWindows: function() {
+            return navigator.userAgent.match(/IEMobile/i) || navigator.userAgent.match(/WPDesktop/i);
+        },
+        isAny: function() {
+            return (this.isAndroid() || this.isBlackBerry() || this.isIOS() || this.isOpera() || this.isWindows());
+        },
+    }
+    
+    //***** CREATE EVENT LISTENERs *****//
     this.createEventListeners=function(context) {
         context.canvas.src.addEventListener("mousemove", function(evt) {
 			evt.preventDefault();
@@ -1925,7 +2053,7 @@ function JT(id,w,h,fps,setupName,updateName,objName){
     
     
     //start
-    this.init(id,w,h,fps,setupName,updateName,objName)
+    this.init(id,w,h,fps,setupName,updateName,objName,mobileAudioSize)
     
     //global variable
     
@@ -2095,29 +2223,33 @@ function JT(id,w,h,fps,setupName,updateName,objName){
     this.mute=function(bool){
         return this.assets.mute(bool);
     }
+	
+	this.changeSoundSrc=function(soundSrc){
+		return this.assets.changeSoundSrc(soundSrc)
+	}
+	
+	this.changeMusicSrc=function(musicSrc){
+		return this.assets.changeMusicSrc(musicSrc)
+	}
     
-    this.play=function(name){
-        return this.assets.play(name);
+    this.play=function(name,src){
+        return this.assets.play(name,src);
     }
     
     this.sound=function(name){
         return this.assets.play(name);
     }
     
-    this.pause=function(name){
-        return this.assets.pause(name);
-    }
-	
-	this.unpause=function(name){
-        return this.assets.unpause(name);
+    this.pause=function(name,src){
+        return this.assets.pause(name,src);
     }
     
-    this.stop=function(name){
-        return this.assets.stop(name);
+    this.stop=function(name,src){
+        return this.assets.stop(name,src);
     }
     
-    this.stopPlay=function(name){
-        return this.assets.stopPlay(name);
+    this.stopPlay=function(name,src){
+        return this.assets.stopPlay(name,src);
     }
     
     this.colAssets=function(name1,name2){
