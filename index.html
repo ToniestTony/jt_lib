@@ -7,18 +7,27 @@
                 margin: 0;
             }
             
-            canvas{
-                border: 1px solid black;
-                display: block;
-				margin-left:auto;
-				margin-right:auto;
+            #can{
+		position: absolute;
+		margin-left:auto;
+		margin-right:auto;
+                top:0;
+		left:0;
             }
+	
+		#can + span{
+			display: none;	
+		}
+
+		#canContainer{
+			position:relative;	
+		}
         </style>
     </head>
     <body>
-        <div>
+        <div id="canContainer">
         <canvas id="can"></canvas>
-        <small>Made with <a href="https://github.com/ToniestTony/jt_lib">jt_lib8.js</a></small>
+        <span>Made with <a href="https://github.com/ToniestTony/jt_lib">jt_lib8.js</a></span>
             </div>
     </body>
     <script src="jt_lib8.js"></script>
@@ -45,8 +54,10 @@
 	var jt=undefined;
 
 	window.onload = function(){
-		jt=new JT("can",app.w,app.h,60,'setup','update','app');
+		jt=new JT("can",app.w,app.h,60,'setup','update','app',0);
 		
+		//jt.loadImage("image.png","name")
+		//jt.loadSound("sound.wav","name")
 		//jt.loadAnim("src.png","name",number of frames,fps);
 	}
 	
