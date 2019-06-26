@@ -70,9 +70,12 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize){
                 var musicBtnType=  document.createAttribute("type");
                 musicBtnType.value="button";
                 var musicBtnValue= document.createAttribute("value");
-                musicBtnValue.value="Enable music!";
+                musicBtnValue.value="Enable music !";
+                var musicBtnClass= document.createAttribute("class");
+                musicBtnClass.value="jtAudioBtnClass";
                 this.assets.musicBtn.setAttributeNode(musicBtnType)
                 this.assets.musicBtn.setAttributeNode(musicBtnValue)
+                this.assets.musicBtn.setAttributeNode(musicBtnClass)
             this.assets.musicBtn.addEventListener("click",this.assets.musicEvent.bind(this));
                 document.getElementById(actualId).parentNode.insertBefore(this.assets.musicBtn,document.getElementById(actualId));
                 
@@ -88,15 +91,18 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize){
                 var soundBtnType=  document.createAttribute("type");
                 soundBtnType.value="button";
                 var soundBtnValue= document.createAttribute("value");
-                soundBtnValue.value="Enable sound!";
+                soundBtnValue.value="Enable sound !";
+                var soundBtnClass= document.createAttribute("class");
+                soundBtnClass.value="jtAudioBtnClass";
                 this.assets.soundBtn.setAttributeNode(soundBtnType)
                 this.assets.soundBtn.setAttributeNode(soundBtnValue)
+                this.assets.soundBtn.setAttributeNode(soundBtnClass)
                 this.assets.soundBtn.addEventListener("click",this.assets.soundEvent.bind(this));
                 document.getElementById(actualId).parentNode.insertBefore(this.assets.soundBtn,document.getElementById(actualId));
                 
                 this.assets.soundBtn.style.position="absolute";
                 this.assets.soundBtn.style.left=0;
-                this.assets.soundBtn.style.top=mobileAudioSize+10;
+                this.assets.soundBtn.style.top=mobileAudioSize+(mobileAudioSize/2)+5;
                 this.assets.soundBtn.style.fontSize=mobileAudioSize;
                 this.assets.soundBtn.style.opacity=0.5;
                 this.assets.soundBtn.style.zIndex=1;
@@ -187,12 +193,23 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize){
             return this.bord;
         },
         fullscreen:function(){
+			var ratio = window.devicePixelRatio || 1;
             var win = window,
             d = document,
             e = d.documentElement,
             g = d.getElementsByTagName('body')[0],
-            x = win.innerWidth || e.clientWidth || g.clientWidth,
-            y = win.innerHeight || e.clientHeight|| g.clientHeight;
+            x = win.innerWidth || e.clientWidth || g.clientWidth * ratio,
+            y = win.innerHeight || e.clientHeight|| g.clientHeight * ratio;
+            this.resize(x,y);
+            return [x,y];
+        },
+        revFullscreen:function(){
+            var win = window,
+            d = document,
+            e = d.documentElement,
+            g = d.getElementsByTagName('body')[0],
+            y = win.innerWidth || e.clientWidth || g.clientWidth,
+            x = win.innerHeight || e.clientHeight|| g.clientHeight;
             this.resize(x,y);
             return [x,y];
         },
@@ -682,8 +699,8 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize){
         sounds:{},
 		
 		//audioSrc
-		soundSrc:undefined,
-		musicSrc:undefined,
+		soundSrc:"",
+		musicSrc:"",
         
         //audioBtn
         soundBtn:undefined,
@@ -728,10 +745,12 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize){
             this.sounds[name]=new Audio();
             this.sounds[name].src=src;
             var context=this;
+            this.repeat=false;
             if(repeat!=undefined){
                 if(repeat==true){
                     this.sounds[name].addEventListener('ended', this.stopPlay.bind(context,name), false);
                 }
+                this.repeat=repeat;
             }
             return this.sounds[name];
         },
@@ -800,7 +819,18 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize){
         soundEvent:function(){
             this.assets.soundBtn.style.display="none";
             var sound=new Audio();
+            
             sound.src="";
+            for(var s in this.sounds()){
+                if(this.sounds().hasOwnProperty(s)){
+                    this.sounds()[s].pause();
+				    this.sounds()[s].currentTime=0;
+                    if(s=="sound"){
+                        sound.src=this.sounds()[s].src;
+                    }
+                }
+            }
+            
             sound.load();
             this.changeSoundSrc(sound);
         },
@@ -808,37 +838,55 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize){
         musicEvent:function(){
             this.assets.musicBtn.style.display="none";
             var music=new Audio();
+            
             music.src="";
+            for(var s in this.sounds()){
+                if(this.sounds().hasOwnProperty(s)){
+                    this.sounds()[s].pause();
+				    this.sounds()[s].currentTime=0;
+                    if(s=="music"){
+                        music.src=this.sounds()[s].src;
+                    }
+                }
+            }
             music.load();
             this.changeMusicSrc(music);
         },
 		//add the sound source for safari
 		changeSoundSrc:function(soundSrc){
 			this.soundSrc=soundSrc;
-            for(var sound in this.sounds){
-                if(this.sounds.hasOwnProperty(sound)){this.sounds[sound].pause();
-				this.sounds[sound].currentTime=0;
-                }
-            }
+            
 		},
+        //change repeat sound src
+        repeatSoundSrc:function(repeat){
+            if(repeat==true && this.soundSrc!=""){
+                this.soundSrc.setAttribute("loop","loop");
+            }else if(this.soundSrc!=""){
+                this.soundSrc.removeAttribute("loop");
+            }
+        },
 		//add the music source for safari
 		changeMusicSrc:function(musicSrc){
 			this.musicSrc=musicSrc;
-            for(var sound in this.sounds){
-                if(this.sounds.hasOwnProperty(sound)){this.sounds[sound].pause();
-				this.sounds[sound].currentTime=0;
-                }
-            }
+            
 		},
+        //change repeat music src
+        repeatMusicSrc:function(repeat){
+            if(repeat==true && this.musicSrc!=""){
+                this.musicSrc.setAttribute("loop","loop");
+            }else if(this.musicSrc!=""){
+                this.musicSrc.removeAttribute("loop");
+            }
+        },
         //play a sound
         play:function(name,src){
-			var source=undefined;
+			var source="";
 			if(src=="sound"){source=this.soundSrc}else if(src=="music"){source=this.musicSrc}
-			if(source!=undefined){
+			if(source!="" && ((src=="sound" && this.soundSrc!="") || (src=="music" && this.musicSrc!=""))){
                 if(source.src==""){source.src=this.sounds[name].src;source.load();}
 				else if(source.src!=this.sounds[name].src){source.src=this.sounds[name].src;}
 				source.play();
-			}else{
+			}else if(source==""){
 				this.stop(name);
 				this.sounds[name].volume=this.vol;
 				if(this.mut==true){this.sounds[name].volume=0;}else{this.sounds[name].volume=this.vol;}
@@ -847,26 +895,26 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize){
         },
         //pause a sound
         pause:function(name,src){
-			var source=undefined;
+			var source="";
 			if(src=="sound"){source=this.soundSrc}else if(src=="music"){source=this.musicSrc}
-			if(source!=undefined){
+			if(source!="" && ((src=="sound" && this.soundSrc!="") || (src=="music" && this.musicSrc!=""))){
 				if(source.src==""){source.src=this.sounds[name].src;source.load();}
 				else if(source.src!=this.sounds[name].src){source.src=this.sounds[name].src;}
 				source.pause();
-			}else{
+			}else if(source==""){
 				this.sounds[name].pause();
 			}
         },
         //stop a sound (reset it to 0)
         stop:function(name,src){
-			var source=undefined;
+			var source="";
 			if(src=="sound"){source=this.soundSrc}else if(src=="music"){source=this.musicSrc}
-			if(source!=undefined){
+			if(source!="" && ((src=="sound" && this.soundSrc!="") || (src=="music" && this.musicSrc!=""))){
 				if(source.src==""){source.src=this.sounds[name].src;source.load();}
 				else if(source.src!=this.sounds[name].src){source.src=this.sounds[name].src;}
 				source.pause();
 				source.currentTime=0;
-			}else{
+			}else if(source==""){
 				this.sounds[name].pause();
 				this.sounds[name].currentTime=0;
 			}
@@ -968,6 +1016,40 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize){
         bg: function(color) {
             this.ctx.fillStyle = this.color(color);
             this.ctx.fillRect(0,0,this.canvas.w,this.canvas.h);
+        },
+        
+        //Check if horizontal value in percent
+        percentX:function(val,start,end){
+            var value=val;
+            if(start==undefined){
+                start=0;
+            }
+            if(end==undefined){
+                end=this.canvas.w;
+            }
+            if(typeof val=="string"){
+                value=((end-start)*(parseInt(val))/100)+start;
+            }else if(typeof val=="number"){
+                value=((end-start)*(val)/100)+start;
+            }
+            return value;
+        },
+        
+        //Check if vertical value in percent
+        percentY:function(val,start,end){
+            var value=val;
+            if(start==undefined){
+                start=0;
+            }
+            if(end==undefined){
+                end=this.canvas.h;
+            }
+            if(typeof val=="string"){
+                value=((end-start)*(parseInt(val))/100)+start;
+            }else if(typeof val=="number"){
+                value=((end-start)*(val)/100)+start;
+            }
+            return value;
         },
         
         //Quick object draw
@@ -1083,7 +1165,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize){
         },
 
         //Drawing text
-        text:function(string,x,y,color,textAlign,fontSize,rotation){
+        text:function(string,x,y,color,textAlign,fontSize,rotation,maxChars,newLineHeight){
             if(textAlign!=undefined){
                 this.ctx.textAlign=textAlign
             }
@@ -1092,7 +1174,46 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize){
             }
             this.ctx.fillStyle= this.color(color);
             this.ctx.font=this.fontSize+"px "+this.fontName;
-            this.fill("text",x,y,this.ctx.measureText(string).width,this.fontSize,rotation,string)
+            if(maxChars!=undefined){
+                if(newLineHeight==undefined){newLineHeight=this.fontSize}
+                var lineHeight=newLineHeight;
+                
+                var strings=[];
+                var lastChar=0;
+                var nextChar=0;
+                var nbrStrings=Math.ceil(string.length/maxChars);
+                for(var i=0;i<20;i++){
+                    nextChar=lastChar;
+                    lastChar+=maxChars;
+                    
+                    var done=false;
+                    if(lastChar>=string.length){
+                        lastChar=string.length;
+                        done=true;
+                    }
+                    if(string[lastChar-1]!=" " && !done){
+                        for(var j=0;j<20;j++){
+                            lastChar--;
+                            if(string[lastChar-1]==" "){
+                                break;
+                            }
+                        }
+                    }
+                    strings.push(string.substring(nextChar,lastChar));
+                    if(done){
+                        break;
+                    }
+                }
+                
+                for(var i=0;i<strings.length;i++){
+                    var s=strings[i];
+                    this.fill("text",x,y+(lineHeight*i),this.ctx.measureText(s).width,this.fontSize,rotation,s)
+                }
+                
+            }else{
+                this.fill("text",x,y,this.ctx.measureText(string).width,this.fontSize,rotation,string)
+            }
+            
         },
         
         //Get text width
@@ -1106,7 +1227,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize){
         },
         
        //Drawing text border
-        textB:function(string,x,y,color,textAlign,fontSize,rotation,lineW){
+        textB:function(string,x,y,color,textAlign,fontSize,rotation,lineW,maxChars,newLineHeight){
             if(textAlign!=undefined){
                 this.ctx.textAlign=textAlign
             }
@@ -1117,7 +1238,46 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize){
             if(lineW<=0){lineW=1}
             this.ctx.lineWidth= lineW;
             this.ctx.font=this.fontSize+"px "+this.fontName;
-            this.fill("textB",x,y,this.ctx.measureText(string).width,this.fontSize,rotation,string)
+            
+            if(maxChars!=undefined){
+                if(newLineHeight==undefined){newLineHeight=this.fontSize}
+                var lineHeight=newLineHeight;
+                
+                 var strings=[];
+                var lastChar=0;
+                var nextChar=0;
+                var nbrStrings=Math.ceil(string.length/maxChars);
+                for(var i=0;i<20;i++){
+                    nextChar=lastChar;
+                    lastChar+=maxChars;
+                    
+                    var done=false;
+                    if(lastChar>=string.length){
+                        lastChar=string.length;
+                        done=true;
+                    }
+                    if(string[lastChar-1]!=" " && !done){
+                        for(var j=0;j<20;j++){
+                            lastChar--;
+                            if(string[lastChar-1]==" "){
+                                break;
+                            }
+                        }
+                    }
+                    strings.push(string.substring(nextChar,lastChar));
+                    if(done){
+                        break;
+                    }
+                }
+                
+                for(var i=0;i<strings.length;i++){
+                    var s=strings[i];
+                    this.fill("text",x,y+(lineHeight*i),this.ctx.measureText(s).width,this.fontSize,rotation,s)
+                }
+                
+            }else{
+                this.fill("textB",x,y,this.ctx.measureText(string).width,this.fontSize,rotation,string)
+            }
         },
 
         //Setting the font
@@ -1423,6 +1583,22 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize){
             }
             this.ctx.restore();
 
+        },
+        
+        rotate:function(rotation){
+            var camW=Math.abs(this.canvas.src.width/this.cam.w)
+            var camH=Math.abs(this.canvas.src.height/this.cam.h)
+            var camX=this.cam.x;
+            var camY=this.cam.y;
+            if(this.cam.active==false){
+                camX=0;
+                camY=0;
+                camW=1;
+                camH=1;
+            }
+            this.ctx.translate(this.canvas.src.width/2,this.canvas.src.height/2);
+            this.ctx.rotate(rotation*Math.PI/180);
+            this.ctx.translate(-this.canvas.src.width/2,-this.canvas.src.height/2);
         }
     }
     
@@ -1441,12 +1617,16 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize){
         },
         class:function(className){
             return document.getElementsByClassName(className);
+        },
+        ratio:function(){
+            return window.devicePixelRatio;
         }
     }
 
 
     this.math= {
         random: function(min,max,variable) {
+            //smaller variable = more possibilites
             if(min==undefined){
                 //no params
                 return Math.floor(Math.random()*(2));
@@ -1470,9 +1650,9 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize){
         stay: function(num,min,max) {if(num<min){num=min}if(num>max){num=max}return num},
         wrap: function(num,min,max) {
             if(num<min){
-                num=this.wrap(max-(min-num)+1,min,max)
+                num=this.wrap(max-(min-num),min,max)
             }if(num>max){
-                num=this.wrap(min+(num-max)-1,min,max)
+                num=this.wrap(min+(num-max),min,max)
             }return num
         },
         choose: function(numbers) {
@@ -2099,6 +2279,10 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize){
         return this.canvas.fullscreen();
     }
     
+    this.revFullscreen=function(){
+        return this.canvas.revFullscreen();
+    }
+    
     this.autoresize=function(bool,x,y){
         return this.canvas.autofullscreen(bool,x,y);
     }
@@ -2224,12 +2408,28 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize){
         return this.assets.mute(bool);
     }
 	
-	this.changeSoundSrc=function(soundSrc){
-		return this.assets.changeSoundSrc(soundSrc)
+	this.changeSoundSrc=function(soundSrc,repeat){
+		return this.assets.changeSoundSrc(soundSrc,repeat)
+	}
+    
+    this.repeatSoundSrc=function(repeat){
+		return this.assets.repeatSoundSrc(repeat);
+	}
+    
+    this.soundSrc=function(){
+		return this.assets.soundSrc;
 	}
 	
-	this.changeMusicSrc=function(musicSrc){
-		return this.assets.changeMusicSrc(musicSrc)
+	this.changeMusicSrc=function(musicSrc,repeat){
+		return this.assets.changeMusicSrc(musicSrc,repeat)
+	}
+    
+    this.repeatMusicSrc=function(repeat){
+		return this.assets.repeatMusicSrc(repeat);
+	}
+    
+    this.musicSrc=function(){
+		return this.assets.musicSrc;
 	}
     
     this.play=function(name,src){
@@ -2279,6 +2479,22 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize){
         return this.draw.bg(color);
     }
     
+    this.percentX=function(val,start,end){
+        return this.draw.percentX(val,start,end);
+    }
+    
+    this.pX=function(val,start,end){
+        return this.draw.percentX(val,start,end);
+    }
+    
+    this.percentY=function(val,start,end){
+        return this.draw.percentY(val,start,end);
+    }
+    
+    this.pY=function(val,start,end){
+        return this.draw.percentY(val,start,end);
+    }
+    
     this.shape=function(obj){
         return this.draw.shape(obj);
     }
@@ -2303,12 +2519,12 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize){
         return this.draw.line(x1,y1,x2,y2,width,color,rotation);
     }
     
-    this.text=function(string,x,y,color,textAlign,fontSize,rotation){
-        return this.draw.text(string,x,y,color,textAlign,fontSize,rotation);
+    this.text=function(string,x,y,color,textAlign,fontSize,rotation,maxChars,newLineHeight){
+        return this.draw.text(string,x,y,color,textAlign,fontSize,rotation,maxChars,newLineHeight);
     }
     
-    this.textB=function(string,x,y,color,textAlign,fontSize,rotation,lineW){
-        return this.draw.textB(string,x,y,color,textAlign,fontSize,rotation,lineW);
+    this.textB=function(string,x,y,color,textAlign,fontSize,rotation,lineW,maxChars,newLineHeight){
+        return this.draw.textB(string,x,y,color,textAlign,fontSize,rotation,lineW,maxChars,newLineHeight);
     }
     
     this.textW=function(string){
@@ -2363,6 +2579,10 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize){
         return this.draw.fontSize;
     }
     
+    this.rotate=function(rotation){
+        return this.draw.rotate(rotation);
+    }
+    
     
     //html
     
@@ -2372,6 +2592,10 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize){
     
     this.class=function(className){
         return this.html.class(className);
+    }
+    
+    this.ratio=function(){
+        return this.html.ratio();
     }
     
     
@@ -2578,6 +2802,12 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize){
     
     this.tDown=function(){
         return this.touch.down;
+    }
+    
+    //mobile
+    
+    this.isMobile=function(){
+        return this.mobile.isAny();
     }
     
     //super macro
