@@ -3,7 +3,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize){
     //initialize the canvas
     this.init=function(id,w,h,fps,setupName,updateName,objName,mobileAudioSize){
         //add attributes to the canvas object of JT
-        this.version=8;
+        this.version=9;
         var actualId=id;
         
         if(typeof(id)=="object"){
@@ -55,7 +55,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize){
         }
         
         //trademark
-        console.log('(JT'+this.version+')Made with jt_lib'+this.version+'.js (https://github.com/ToniestTony/jt_lib6)');
+        console.log('(JT'+this.version+')Made with jt_lib'+this.version+'.js (https://github.com/ToniestTony/jt_lib)');
 
         this.loop.preload(this,fps);
         
