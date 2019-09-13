@@ -1,4 +1,4 @@
-# jt_lib (Javascript Tony Library)
+# jt_lib
 A library to make HTML5 games with the canvas much easier/faster! Made by Antoine Beaulieu Savard (ToniestTony)
 
 Here are some of the features:
@@ -18,3 +18,5 @@ Here are some of the features:
 * Download the jt_lib9.js file (and index.html if you want a template)
 * Link your jt_lib9.js file in your html file with "<script src="jt_lib9.js"></script>" after the body
 * **That's it!**
+
+The jt_lib is free to use for both commercial and non-commercial projects, just be sure to put it in the credits!
