@@ -1,0 +1,247 @@
+<html>
+    <head>
+        <title>App</title>
+        <style>
+            *{
+                padding: 0;
+                margin: 0;
+            }
+            
+            #can{
+		position: absolute;
+		margin-left:auto;
+		margin-right:auto;
+                top:0;
+		left:0;
+            }
+	
+		#can + span{
+			display: none;	
+		}
+
+		#canContainer{
+			position:relative;	
+		}
+        </style>
+    </head>
+    <body>
+        <div id="canContainer">
+        <canvas id="can"></canvas>
+        <span>Made with <a href="https://github.com/ToniestTony/jt_lib">jt_lib8.js</a></span>
+            </div>
+    </body>
+    <script src="jt_lib9.js"></script>
+    
+     <script>
+
+
+	var app={
+		w:600,
+		h:400,
+		//quand le jeu commence
+		setup:function(){
+            //CANVAS FUNCTIONS
+            //jt.resize(app.w,app.h);
+            //jt.setId(id)
+            //jt.smoothing(true);
+            //jt.border(true,5,5,"red");
+            //jt.fullscreen(true);
+            //jt.revFullscreen(true);
+            //jt.autoresize(true);
+            //jt.cursor(false);
+		},
+		update:function(){
+            //LOOP FUNCTIONS
+            if(!jt.isAlarm("shake")){
+                jt.alarm("shake",600);
+            }
+            if(jt.checkAlarm("shake",false)){
+                console.log("10 seconds has passed");
+                jt.delAlarm("shake");
+            }
+            if(jt.mPress(120,10,60,20)){
+                jt.shake(10,60,0.1);
+            }
+            if(jt.checkCombo(["a","b","c"])){
+                alert("ABC combo done!");
+            }
+            /*
+            jt.comboTimer(60);
+            jt.comboLength();
+            jt.combo();
+            jt.resetCombo();
+            jt.fps();
+            jt.frames();
+            jt.sec();
+            jt.pauseJt();
+            jt.stopJt();
+            jt.waveX();
+            jt.waveY();
+            jt.waveYPos();
+            */
+            
+            //ASSETS FUNCTIONS
+            /*
+            jt.volume(volume);
+            jt.mute(true);
+            jt.changeSoundSrc(soundSrc,repeat);
+            jt.repeatSoundSrc(repeat);
+            jt.soundSrc();
+            jt.changeMusicSrc(musicSrc,repeat);
+            jt.repeatMusicSrc(repeat);
+            jt.musicSrc();
+            jt.play(name,src);
+            jt.sound(name);
+            jt.pause(name,src);
+            jt.stop(name,src);
+            jt.stopPlay(name,src)
+            jt.colAssets(name1,name2);
+            jt.images();
+            jt.anims();
+            jt.sounds();
+            */
+            
+            //DRAW FUNCTIONS
+            /*
+            jt.alpha(alpha);
+            jt.bg(color);
+            jt.pX(val,start,end);
+            jt.pY(val,start,end);
+            jt.shape(obj);
+            jt.rect(x,y,w,h,color,rotation);
+            jt.rectB(x,y,w,h,color,rotation,lineW);
+            jt.circle(x,y,radius,color);
+            jt.circleB(x,y,radisu,color,lineW);
+            jt.text(string,x,y,color,textAlign,fontSize,rotation,maxChars,newLineHeight);
+            jt.textB(string,x,y,color,textAlign,fontSize,rotation,lineW,maxChars,newLineHeight);
+            jt.textW(string);
+            jt.textH(string);
+            jt.font(fontName,fontSize,color);
+            jt.image(name,newX,newY,w,h,sX,sY,sW,sH,rotation);
+            jt.anim(name,newX,newY,w,h,rotation);
+            jt.animF(name,frame);
+            jt.linear(name,x1,y1,x2,y2,stops);
+            jt.radial(name,x1,y1,r1,x2,y2,r2,stops);
+            jt.color(color);
+            jt.cam();
+            jt.fontName();
+            jt.fontSize();
+            jt.rotate();
+            */
+            
+            //HTML FUNCTIONS
+            /*
+            jt.id(id);
+            jt.class(className);
+            */
+            
+            //MATH FUNCTIONS
+            /*
+            jt.random(min,max,variable);
+            jt.betweem(num,min,max);
+            jt.stay(num,min,max);
+            jt.wrap(num,min,max);
+            jt.choose(numbers);
+            jt.dist(obj1,obj2);
+            jt.distP(x1,y1,x2,y2);
+            jt.angleX(angle);
+            jt.angleY(angle);
+            jt.angle(x,y,x2,y2);
+            jt.matrix(w,h,val);
+            */
+            
+            //COLLISION FUNCTIONS
+            /*
+            jt.cRect(rect1,rect2);
+            jt.cCircle(circle1,circle2);
+            jt.cRectP(rect,point);
+            jt.cCircleP(circle,point);
+            jt.cRectC(rect,circle);
+            */
+            
+            //GAMEPAD FUNCTIONS
+            /*
+            jt.pCheck(button,controller);
+            jt.pPress(button,controller);
+            jt.pValue(button,controller);
+            jt.pRelease(button,controller);
+            jt.pAxes(axes,controller);
+            jt.pConnected(controller);
+            jt.gamepads();
+            */
+            
+            //KEYBOARD FUNCTIONS
+            /*
+            jt.kCheck(keyCode);
+            jt.kPress(keyCode);
+            jt.kRelease(keyCode);
+            jt.keys();
+            */
+            
+            //MOUSE FUNCTIONS
+            /*
+            jt.mCheck(x,y,w,h,cam)
+            jt.mPress(x,y,w,h,cam)
+            jt.mX()
+            jt.mY()
+            jt.mCX()
+            jt.mCY()
+            jt.mDown()
+            */
+            
+            //TOUCH FUNCTIONS
+            /*
+            jt.touches()
+            jt.tCheck(x,y,w,h,cam)
+            jt.tPress(x,y,w,h,cam)
+            jt.tDown();
+            */
+            
+            //MOBILE FUNCTIONS
+            /*
+            jt.isMobile()
+            */
+            
+            //SUPER MACRO
+            /*
+            jt.r(min,max,val) //random
+            jt.c(keyCode) //keyboard check
+            jt.p(keyCode) //keyboard press
+            jt.m(x,y,w,h,press,cam) //mouse check
+            jt.i(name,newX,newY,w,h,sX,sY,sW,sH,rotate) //draw image
+            jt.a(name,newX,newY,x,h,rotate) //draw animation
+            jt.s(name,src) //stopPlay
+            */
+
+			jt.bg("black");
+            
+            jt.font("Consolas",12,"white");
+            jt.text("Information:",10,10,"white","left");
+            //width and height
+            jt.text("Width: "+jt.w(),10,20);
+            jt.text("Height: "+jt.h(),10,30);
+            
+            jt.rect(120,10,60,20,"green");
+            jt.text("Shake!",150,15,"white","center");
+            
+            jt.text("Press ABC for an alert!",120,40,"white","left")
+		}
+	}
+
+
+
+	var jt=undefined;
+
+	window.onload = function(){
+		jt=new JT("can",app.w,app.h,60,'setup','update','app',0);
+		
+        //ASSETS FUNCTIONS
+        /*
+        jt.newImage(src,name,x,y,visible);
+        jt.newSound(src,name,repeat);
+        jt.newAnim(src,name,frames,speed,x,y,visible);
+        */
+	}
+	
+	</script>
+</html>
