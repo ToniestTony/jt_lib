@@ -3209,34 +3209,72 @@ general
 	!ajouter array des noms de touches (ex: "a"=65)
 
 
+
+TEMPLATE:
+
+
 <html>
     <head>
         <title>App</title>
         <style>
-            canvas{
-                border: 1px solid black;
+            *{
+                padding: 0;
+                margin: 0;
             }
+            
+            #can{
+		position: absolute;
+		margin-left:auto;
+		margin-right:auto;
+                top:0;
+		left:0;
+            }
+	
+		#can + span{
+			display: none;	
+		}
+
+		#canContainer{
+			position:relative;	
+		}
         </style>
     </head>
     <body>
+        <div id="canContainer">
         <canvas id="can"></canvas>
+        <span>Made with <a href="https://github.com/ToniestTony/jt_lib">jt_lib9.js</a></span>
+            </div>
     </body>
-    <script src="jt_lib8.js"></script>
-    <script>
-        var app={
-            setup:function(){
-                
-            },
-            update:function(){
-                
-            }
-        }
-        
-        var jt=undefined;
-        
-        window.onload = function(){
-            jt=new JT("can",150,100,60,'setup','update','app');
-        }
-    </script>
+    <script src="jt_lib9.js"></script>
+    
+     <script>
+
+
+	var app={
+		w:600,
+		h:400,
+		//quand le jeu commence
+		setup:function(){
+			//jt.fullscreen(false);
+		},
+		update:function(){
+			//jt.bg("black");
+		}
+	}
+
+
+
+	var jt=undefined;
+
+	window.onload = function(){
+		jt=new JT("can",app.w,app.h,60,'setup','update','app',0);
+		
+		//jt.loadImage("image.png","name")
+		//jt.loadSound("sound.wav","name")
+		//jt.loadAnim("src.png","name",number of frames,fps);
+	}
+	
+	</script>
 </html>
+
 */
