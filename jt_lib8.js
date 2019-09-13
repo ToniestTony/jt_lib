@@ -151,7 +151,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize){
                     h=y;
                 }else{
                     w=this.autoX;
-                    h=this.autoX;
+                    h=this.autoY;
                 }
             }
             //Resize the actual HTML canvas
@@ -213,7 +213,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize){
             this.resize(x,y);
             return [x,y];
         },
-        autofullscreen:function(bool,x,y){
+        autoresize:function(bool,x,y){
             this.auto=bool;
             this.autoX=x;
             this.autoY=y;
@@ -396,7 +396,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize){
                 }
                 
                 if(this.context.canvas.auto==true){
-                    this.context.canvas.fullscreen();
+                    this.context.canvas.resize();
                 }
                 
                 //cam
@@ -408,11 +408,67 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize){
                     this.context.draw.cam.h=0.01;
                 }
                 
+                //add gamepads
+                var gamepads=navigator.getGamepads();
+                if(gamepads[0]==undefined && gamepads[1]==undefined && gamepads[2]==undefined && gamepads[3]==undefined){
+                    //no gamepads
+                }else{
+                    for(var i=0;i<4;i++){ 
+                        if(gamepads[i]!=undefined){
+                            if(this.context.gamepad.gamepads[i]==undefined){
+                                this.context.gamepad.gamepads[i]={
+                                    axes:[{},{}],
+                                    buttons:[]
+                                };
+                            }
+                                
+                            this.context.gamepad.gamepads[i].axes[0].x=gamepads[i].axes[0];
+                            this.context.gamepad.gamepads[i].axes[0].y=gamepads[i].axes[1];
+                            this.context.gamepad.gamepads[i].axes[1].x=gamepads[i].axes[2];
+                            this.context.gamepad.gamepads[i].axes[1].y=gamepads[i].axes[3];
+
+                            this.context.gamepad.gamepads[i].id=gamepads[i].id;
+                            this.context.gamepad.gamepads[i].connected=gamepads[i].connected;
+
+                            for(var j=0;j<gamepads[i].buttons.length;j++){
+                                var pressed=0;
+                               
+                                if(this.context.gamepad.gamepads[i].buttons[j]!=undefined){
+                                    
+                                    if(this.context.gamepad.gamepads[i].buttons[j].value>0){
+                                    pressed=1;
+                                    }
+                                    
+                                    if(this.context.gamepad.gamepads[i].buttons[j].pressed==1 || this.context.gamepad.gamepads[i].buttons[j].pressed==2){
+                                        pressed=2;
+                                    }
+                                    
+                                    if(this.context.gamepad.gamepads[i].buttons[j].value<=0){
+                                    pressed=0;
+                                    }
+                                    
+                                                                                
+                                }
+                                
+                                this.context.gamepad.gamepads[i].buttons[j]={
+                                    
+                                    value:gamepads[i].buttons[j].value,
+                                    pressed:pressed
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                //update fonction by user
                 if(this.obj!=undefined){
                   window[this.obj][this.updateName]();
                 }else{
                   window[this.updateName]();
                 }
+                
+                
+                
                 
                 
                 //remove key presses
@@ -1281,10 +1337,11 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize){
         },
 
         //Setting the font
-        font:function(fontName,size){
+        font:function(fontName,size,color){
             this.fontName=fontName;
             this.fontSize=size;
             this.ctx.font=this.fontSize+"px "+this.fontName;
+            this.ctx.fillStyle= this.color(color);
         },
 
         //Draw an image
@@ -1774,6 +1831,147 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize){
     
     
     
+    //***** GAMEPAD *****//
+    this.gamepad={
+        buttons:{
+            a:0,
+            b:1,
+			x:2,
+			y:3,
+			leftShoulder:4,
+			rightShoulder:5,
+			leftTrigger:6,
+			rightTrigger:7,
+            back:8,
+            start:9,
+            leftStick:10,
+            rightStick:11,
+            dpadUp:12,
+            dpadDown:13,
+            dpadLeft:14,
+            dpadRight:15,
+            home:16,
+        },
+        connected:[false,false,false,false],
+        gamepads:[],
+        checkConnected:function(controller){
+            if(controller==undefined){
+                controller=0;
+            }
+            return this.connected[controller];
+        },
+        buttonsdown:[],
+        
+        axes:function(axes,controller){
+            if(axes==undefined){
+                axes=0;
+            }
+            if(controller==undefined){
+                controller=0;
+            }
+            if(this.checkConnected(controller)){
+                var arr=[];
+                arr[0]=this.gamepads[controller].axes[axes].x;
+                arr[1]=this.gamepads[controller].axes[axes].y;
+                return arr;
+            }
+        },
+        
+        check: function(button,controller) {
+            if(controller==undefined){
+                controller=0;
+            }
+            if(this.checkConnected(controller)){
+                if(typeof(button)=="object" && button.length>0){
+                    var allFound=true;
+                    for(var i=0;i<button.length;i++){
+                        if(!this.check(button[i],controller)){
+                            allFound=false;
+                        }
+                    }
+                    if(allFound){
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }else{
+                    if(this.buttons[button]!=undefined){
+                        button=this.buttons[button];
+                    }
+                    var found = false;
+                    if(this.gamepads[controller].buttons[button].value>0){
+                        found=true;
+                    }
+                    return found;
+                }
+            }
+            
+        },
+        
+        value: function(button,controller) {
+            if(controller==undefined){
+                controller=0;
+            }
+            if(this.checkConnected(controller)){
+                if(typeof(button)=="object" && button.length>0){
+                    var allFound=true;
+                    for(var i=0;i<button.length;i++){
+                        if(!this.value(button[i],controller)){
+                            allFound=false;
+                        }
+                    }
+                    if(allFound){
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }else{
+                    if(this.buttons[button]!=undefined){
+                        button=this.buttons[button];
+                    }
+                    var value = this.gamepads[controller].buttons[button].value;
+                    return value;
+                }
+            }
+            
+        },
+        
+        press: function(button,controller) {
+            if(controller==undefined){
+                controller=0;
+            }
+            if(this.checkConnected(controller)){
+                if(this.buttons[button]!=undefined){
+                    button=this.buttons[button];
+                }
+                var found = this.gamepads[controller].buttons[button].pressed;
+                if(found==1){
+                    return true;
+                }else{
+                    return false;
+                }
+            }
+        },
+
+        release: function(button,controller) {
+            if(controller==undefined){
+                controller=0;
+            }
+            if(this.checkConnected(controller)){
+                if(button==undefined){
+                    for(var i=0;i<this.gamepads[controller].buttons.length;i++){
+                        this.gamepads[controller].buttons.value=0;
+                    }
+                }else{
+                    if(this.   buttons[button]!=undefined){
+                        button=this.buttons[button];
+                    }
+                    this.gamepads[controller].buttons[button].value=0;
+                }
+            }
+        }
+    }
+    
     //***** KEYBOARD *****//
     this.keyboard={
         keys:{
@@ -2219,8 +2417,6 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize){
             }
         });
         
-        
-
         document.addEventListener("keyup", function(){
 			event.preventDefault();
 			
@@ -2228,6 +2424,16 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize){
             for(var i=0; i<keys.length; i++) {
                 if(keys[i].key==event.keyCode) {context.keyboard.keysdown.splice(i,1);}
             }
+        });
+        
+        
+
+        window.addEventListener("gamepadconnected", function(e){
+			context.gamepad.connected[e.gamepad.index]=true;
+        });
+        
+        window.addEventListener("gamepaddisconnected", function(e){
+			context.gamepad.connected[e.gamepad.index]=false;
         });
     }
     
@@ -2284,7 +2490,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize){
     }
     
     this.autoresize=function(bool,x,y){
-        return this.canvas.autofullscreen(bool,x,y);
+        return this.canvas.autoresize(bool,x,y);
     }
     
     this.cursor=function(bool){
@@ -2535,8 +2741,8 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize){
         return this.draw.textH(string);
     }
     
-    this.font=function(fontName,fontSize){
-        return this.draw.font(fontName,fontSize)
+    this.font=function(fontName,fontSize,color){
+        return this.draw.font(fontName,fontSize,color)
     }
     
     this.image=function(name,newX,newY,w,h,sX,sY,sW,sH,rotation){
@@ -2625,7 +2831,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize){
         return this.math.dist(obj1,obj2);
     }
     
-    this.distPoint=function(x1,y1,x2,y2){
+    this.distP=function(x1,y1,x2,y2){
         return this.math.distPoint(x1,y1,x2,y2);
     }
     
@@ -2656,16 +2862,70 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize){
         return this.collision.circle(circle1,circle2);
     }
     
-    this.cRectPoint=function(rect,point){
+    this.cRectP=function(rect,point){
         return this.collision.rectPoint(rect,point);
     }
     
-    this.cCirclePoint=function(circle,point){
+    this.cCircleP=function(circle,point){
         return this.collision.circlePoint(circle,point);
     }
     
-    this.cRectCircle=function(rect,circle){
+    this.cRectC=function(rect,circle){
         return this.collision.rectCircle(rect,circle);
+    }
+    
+    //gamepad
+    
+    this.padCheck=function(button,controller){
+        return this.gamepad.check(button,controller);
+    }
+    
+    this.pCheck=function(button,controller){
+        return this.gamepad.check(button,controller);
+    }
+    
+    this.padPress=function(button,controller){
+        return this.gamepad.press(button,controller);
+    }
+    
+    this.pPress=function(button,controller){
+        return this.gamepad.press(button,controller);
+    }
+    
+    this.padValue=function(button,controller){
+        return this.gamepad.value(button,controller);
+    }
+    
+    this.pValue=function(button,controller){
+        return this.gamepad.value(button,controller);
+    }
+    
+    this.padRelease=function(button,controller){
+        return this.gamepad.release(button,controller);
+    }
+    
+    this.pRelease=function(button,controller){
+        return this.gamepad.release(button,controller);
+    }
+    
+    this.padAxes=function(axes,controller){
+        return this.gamepad.axes(axes,controller);
+    }
+    
+    this.pAxes=function(axes,controller){
+        return this.gamepad.axes(axes,controller);
+    }
+    
+    this.padConnected=function(controller){
+        return this.gamepad.checkConnected(controller);
+    }
+    
+    this.pConnected=function(controller){
+        return this.gamepad.checkConnected(controller);
+    }
+    
+    this.gamepads=function(){
+        return this.gamepad.gamepads;
     }
     
     
@@ -2687,11 +2947,11 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize){
         return this.keyboard.press(keyCode);
     }
     
-    this.keyRemove=function(keyCode){
+    this.keyRelease=function(keyCode){
         return this.keyboard.release(keyCode);
     }
     
-    this.kRemove=function(keyCode){
+    this.kRelease=function(keyCode){
         return this.keyboard.release(keyCode);
     }
     
@@ -2836,6 +3096,10 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize){
         return this.draw.anim(name,newX,newY,w,h,rotate);
     }
     
+    this.s=function(name,src){
+        return this.assets.stopPlay(name,src);
+    }
+    
     
 }
 
@@ -2875,6 +3139,11 @@ JTv8:
 -added touch support
 -added alpha for images
 -fixed a lot
+
+-JTv9:
+-added gamepad support
+-added better example file
+-fixed autoresize
 
 TODO:
 Jt lib 8
