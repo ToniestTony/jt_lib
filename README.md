@@ -15,8 +15,8 @@ Here are some of the features:
 * **A bunch of other features!**
 
 ## Getting started
-* Download the jt_lib9.js file (and index.html if you want a template)
-* Link your jt_lib9.js file in your html file with "<script src="jt_lib9.js"></script>" after the body
+* Download the jt_lib10.js file (and index.html if you want a template)
+* Link your jt_lib10.js file in your html file with "<script src="jt_lib10.js"></script>" after the body
 * **That's it!**
 
 The jt_lib is free to use for both commercial and non-commercial projects, just be sure to put it in the credits!
