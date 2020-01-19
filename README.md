@@ -19,4 +19,6 @@ Here are some of the features:
 * Link your jt_lib10.js file in your html file with "<script src="jt_lib10.js"></script>" after the body
 * **That's it!**
 
+## More tutorials coming soon
+
 The jt_lib is free to use for both commercial and non-commercial projects, just be sure to put it in the credits!
