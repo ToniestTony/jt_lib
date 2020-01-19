@@ -482,7 +482,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 					var w=(this.context.canvas.w/10)/8;
 					
 					//check if user pressed the button
-					if(this.context.mouse.check(0,0,w*8,w*8,false) || this.context.touch.check(0,0,w*8*window.devicePixelRatio,w*8*window.devicePixelRatio,false)>0){
+					if(this.context.mouse.check(0,0,w*8,w*8,true,false) || this.context.touch.check(0,0,w*8*window.devicePixelRatio,w*8*window.devicePixelRatio,true,false)>0){
 						this.context.canvas.fullScreen=!this.context.canvas.fullScreen;
 						var el = document.getElementById("jeuConteneur");
 						if(this.context.canvas.fullScreen){
