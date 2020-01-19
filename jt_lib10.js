@@ -254,6 +254,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
         loadCounterMax:0,
 		
 		fullScreenBtn:undefined,
+		focused:false,
 
         shakeObj:undefined,
         normalX:undefined,
@@ -479,57 +480,71 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
                 
                 //fullScreenBtn
 				if(this.fullScreenBtn && this.context.isMobile()){
-					var w=(this.context.canvas.w/10)/8;
-					
-					//check if user pressed the button
-					if(this.context.mouse.check(0,0,w*8,w*8,true,false) || this.context.touch.check(0,0,w*8*window.devicePixelRatio,w*8*window.devicePixelRatio,true,false)>0){
-						this.context.canvas.fullScreen=!this.context.canvas.fullScreen;
-						var el = document.getElementById("jeuConteneur");
-						if(this.context.canvas.fullScreen){
-							if (el.requestFullscreen) {
-								el.requestFullscreen();
-							} else if (el.mozRequestFullScreen) { // Firefox 
-								el.mozRequestFullScreen();
-							} else if (el.webkitRequestFullscreen) { // Chrome, Safari and Opera 
-								el.webkitRequestFullscreen();
-							} else if (el.msRequestFullscreen) { // IE/Edge 
-								el.msRequestFullscreen();
-							}
-						}else{
-							if (document.exitFullscreen) {
-								document.exitFullscreen();
-							} else if (document.mozCancelFullScreen) { // Firefox 
-								document.mozCancelFullScreen();
-							} else if (document.webkitExitFullscreen) { // Chrome, Safari and Opera 
-								document.webkitExitFullscreen();
-							} else if (document.msExitFullscreen) { // IE/Edge 
-								document.msExitFullscreen();
-							}
-						}
-					}
-					
-					this.context.draw.alpha(0.67);
-					for(var y=0;y<8;y++){
-						for(var x=0;x<8;x++){
-							if(y==0 || y==7 || x==0 || x==7 || y==3 || y==4 || x==3 || x==4){
-								this.context.draw.ctx.fillStyle="black";
-							}else{
-								this.context.draw.ctx.fillStyle="white";
-							}
+					if(this.focused){
+						var w=(this.context.canvas.w/10)/8;
+						
+						//check if user pressed the button
+						if(this.context.mouse.check(0,0,w*8,w*8,true,false) || this.context.touch.check(0,0,w*8*window.devicePixelRatio,w*8*window.devicePixelRatio,true,false)>0){
+							this.context.canvas.fullScreen=!this.context.canvas.fullScreen;
+							var el = document.getElementById("jeuConteneur");
 							if(this.context.canvas.fullScreen){
-								if((x==1 && y==1) || (x==6 && y==6) || (x==1 && y==6) || (x==6 && y==1)){
-									this.context.draw.ctx.fillStyle="black";
+								if (el.requestFullscreen) {
+									el.requestFullscreen();
+								} else if (el.mozRequestFullScreen) { // Firefox 
+									el.mozRequestFullScreen();
+								} else if (el.webkitRequestFullscreen) { // Chrome, Safari and Opera 
+									el.webkitRequestFullscreen();
+								} else if (el.msRequestFullscreen) { // IE/Edge 
+									el.msRequestFullscreen();
 								}
-							}else if(!this.context.canvas.fullScreen){
-								if((x==2 && y==2) || (x==5 && y==5) || (x==2 && y==5) || (x==5 && y==2)){
-									this.context.draw.ctx.fillStyle="black";
+							}else{
+								if (document.exitFullscreen) {
+									document.exitFullscreen();
+								} else if (document.mozCancelFullScreen) { // Firefox 
+									document.mozCancelFullScreen();
+								} else if (document.webkitExitFullscreen) { // Chrome, Safari and Opera 
+									document.webkitExitFullscreen();
+								} else if (document.msExitFullscreen) { // IE/Edge 
+									document.msExitFullscreen();
 								}
 							}
-							
-							this.context.draw.ctx.fillRect(x*w,y*w,w,w);
 						}
+						
+						this.context.draw.alpha(0.67);
+						for(var y=0;y<8;y++){
+							for(var x=0;x<8;x++){
+								if(y==0 || y==7 || x==0 || x==7 || y==3 || y==4 || x==3 || x==4){
+									this.context.draw.ctx.fillStyle="black";
+								}else{
+									this.context.draw.ctx.fillStyle="white";
+								}
+								if(this.context.canvas.fullScreen){
+									if((x==1 && y==1) || (x==6 && y==6) || (x==1 && y==6) || (x==6 && y==1)){
+										this.context.draw.ctx.fillStyle="black";
+									}
+								}else if(!this.context.canvas.fullScreen){
+									if((x==2 && y==2) || (x==5 && y==5) || (x==2 && y==5) || (x==5 && y==2)){
+										this.context.draw.ctx.fillStyle="black";
+									}
+								}
+								
+								this.context.draw.ctx.fillRect(x*w,y*w,w,w);
+							}
+						}
+						this.context.draw.alpha(1);
+					}else{
+						if(this.context.mouse.check(0,0,this.context.canvas.w,this.context.canvas.h,true,false) || this.context.touch.check(0,0,this.context.canvas.w,this.context.canvas.h,true,false)>0){
+							this.focused=true;
+						}
+						
+						this.context.draw.alpha(0.5);
+						this.context.draw.ctx.fillStyle="black";
+						this.context.draw.ctx.fillRect(0,0,this.context.canvas.w,this.context.canvas.h);
+						//this.context.draw.ctx.fillStyle="white";
+						this.context.draw.font("Consolas",20);
+						this.context.draw.alpha(1);
+						this.context.draw.text("Click anywhere to start!",this.context.canvas.w/2,this.context.canvas.h/2,"white","center");
 					}
-					this.context.draw.alpha(1);
 				}
                 
                 //remove key presses
@@ -1004,7 +1019,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 				else if(source.src!=this.sounds[name].src){source.src=this.sounds[name].src;}
 				source.play();
 			}else if(source==""){
-				this.stop(name);
+				//this.stop(name);
 				this.sounds[name].volume=this.vol;
 				if(this.mut==true){this.sounds[name].volume=0;}else{this.sounds[name].volume=this.vol;}
 				this.sounds[name].play();
