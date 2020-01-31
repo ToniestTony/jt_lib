@@ -3,7 +3,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
     //initialize the canvas
     this.init=function(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBtn){
         //add attributes to the canvas object of JT
-        this.version=10;
+        this.version=11;
         var actualId=id;
         
         if(typeof(id)=="object"){
