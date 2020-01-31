@@ -474,6 +474,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 						
 						//check if user pressed the button
 						if(this.context.mouse.check(0,0,w*8,w*8,true,false) || this.context.touch.check(0,0,w*8,w*8,true,false)>0){
+							this.context.touch.touches=[];
 							this.context.canvas.fullScreen=!this.context.canvas.fullScreen;
 							var el = document.getElementById("jeuConteneur");
 							if(this.context.canvas.fullScreen){
