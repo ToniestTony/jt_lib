@@ -255,6 +255,9 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 		
 		fullScreenBtn:undefined,
 		focused:false,
+		
+		debug:false,
+		debugs:[],
 
         shakeObj:undefined,
         normalX:undefined,
@@ -507,7 +510,6 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 					}
 				}
 				
-				
                 
                 //update fonction by user
                 if(this.obj!=undefined){
@@ -515,7 +517,6 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
                 }else{
                   window[this.updateName]();
                 }
-				
 				
                 
                 //fullScreenBtn draw
@@ -554,6 +555,23 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 						this.context.draw.font("Consolas",20);
 						this.context.draw.alpha(1);
 						this.context.draw.text("Click anywhere to start!",this.context.canvas.w/2,this.context.canvas.h/2,"white","center");
+					}
+				}
+				
+				
+				//debug
+				if(this.debug){
+					for(var i=0;i<this.debugs.length;i++){
+						var d=this.debugs[i];
+						if(d.type=="text"){
+							this.context.draw.text(d.string,d.x,d.y,d.color,d.textAlign,d.fontSize,d.rotation,d.maxChars,d.newLineHeight);
+						}else if(d.type=="shape"){
+							this.context.draw.shape(d);
+						}
+						if(d.stay==false){
+							this.debugs.splice(i,1)
+							i--;
+						}
 					}
 				}
                 
@@ -827,7 +845,28 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
             this.comboMaxLength=val;
             this.comboCurrent=this.context.math.matrix(1,this.comboMaxLength);
             return this.comboMaxLength;
-        }
+        },
+		
+		getDebug:function(){
+			return this.debugs;
+		},
+		
+		debugging:function(bool){
+			this.debug=bool;
+		},
+		
+		addDebugText:function(string,x,y,color,textAlign,fontSize,rotation,maxChars,newLineHeight,stay){
+			this.debugs.push({type:"text",string:string,x:x,y:y,color:color,textAlign:textAlign,fontSize:fontSize,rotation:rotation,maxChars:maxChars,newLineHeight:newLineHeight})
+		},
+		
+		addDebugShape:function(obj){
+			obj.type="shape";
+			this.debugs.push(obj);
+		},
+		
+		clearDebugs:function(){
+			this.debugs=[];
+		}
     }
     
     
@@ -2710,7 +2749,61 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
         if(val==undefined){return this.loop.waveYPos;}
         return this.loop.waveYPos=val;
     }
-    
+	
+	this.debug=function(bool){
+		return this.loop.debugging(bool);
+	}
+	
+	this.debugging=function(bool){
+		return this.loop.debugging(bool);
+	}
+	
+	this.debugs=function(){
+		return this.loop.debugs;
+	}
+	
+	this.getDebugs=function(){
+		return this.loop.debugs;
+	}
+	
+	this.clearDebugs=function(){
+		return this.loop.clearDebugs();
+	}
+	
+	this.delDebugs=function(){
+		return this.loop.clearDebugs();
+	}
+	
+	this.addDebugStay=function(obj,par2,par3,par4,par5,par6,par7,par8,par9){
+		if(typeof obj=="string"){
+			return this.loop.addDebugText(obj,par2,par3,par4,par5,par6,par7,par8,par9,true);
+		}else if(typeof obj=="number"){
+			return this.loop.addDebugShape({x:obj,y:par2,w:par3,h:par4,c:par5,r:par6,stay:true});
+		}else{
+			if(obj.string!=undefined){
+				return this.loop.addDebugText(obj.string,obj.x,obj.y,obj.color,obj.textAlign,obj.fontSize,obj.rotation,obj.maxChars,obj.newLineHeight,true);
+			}else{
+				obj.stay=true;
+				return this.loop.addDebugShape(obj);
+			}
+		}
+	}
+	
+	this.addDebug=function(obj,par2,par3,par4,par5,par6,par7,par8,par9){
+		if(typeof obj=="string"){
+			return this.loop.addDebugText(obj,par2,par3,par4,par5,par6,par7,par8,par9,false);
+		}else if(typeof obj=="number"){
+			return this.loop.addDebugShape({x:obj,y:par2,w:par3,h:par4,c:par5,r:par6,stay:false});
+		}else{
+			if(obj.string!=undefined){
+				return this.loop.addDebugText(obj.string,obj.x,obj.y,obj.color,obj.textAlign,obj.fontSize,obj.rotation,obj.maxChars,obj.newLineHeight,false);
+			}else{
+				obj.stay=false;
+				return this.loop.addDebugShape(obj);
+			}
+		}
+	}
+	
     
     //assets
     
