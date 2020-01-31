@@ -467,24 +467,13 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
                     }
                 }
 				
-				
-                
-                //update fonction by user
-                if(this.obj!=undefined){
-                  window[this.obj][this.updateName]();
-                }else{
-                  window[this.updateName]();
-                }
-				
-				
-                
-                //fullScreenBtn
+				 //fullScreenBtn update
 				if(this.fullScreenBtn && this.context.isMobile()){
 					if(this.focused){
-						var w=(this.context.canvas.w/10)/8;
+						var w=50/8;
 						
 						//check if user pressed the button
-						if(this.context.mouse.check(0,0,w*8,w*8,true,false) || this.context.touch.check(0,0,w*8*window.devicePixelRatio,w*8*window.devicePixelRatio,true,false)>0){
+						if(this.context.mouse.check(0,0,w*8,w*8,true,false) || this.context.touch.check(0,0,w*8,w*8,true,false)>0){
 							this.context.canvas.fullScreen=!this.context.canvas.fullScreen;
 							var el = document.getElementById("jeuConteneur");
 							if(this.context.canvas.fullScreen){
@@ -509,6 +498,29 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 								}
 							}
 						}
+					}else{
+						if(this.context.mouse.check(0,0,this.context.canvas.w,this.context.canvas.h,true,false) || this.context.touch.check(0,0,this.context.canvas.w,this.context.canvas.h,true,false)>0){
+							this.focused=true;
+							this.context.touch.touches=[];
+						}
+					}
+				}
+				
+				
+                
+                //update fonction by user
+                if(this.obj!=undefined){
+                  window[this.obj][this.updateName]();
+                }else{
+                  window[this.updateName]();
+                }
+				
+				
+                
+                //fullScreenBtn draw
+				if(this.fullScreenBtn && this.context.isMobile()){
+					if(this.focused){
+						var w=50/8;
 						
 						this.context.draw.alpha(0.67);
 						for(var y=0;y<8;y++){
@@ -533,9 +545,6 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 						}
 						this.context.draw.alpha(1);
 					}else{
-						if(this.context.mouse.check(0,0,this.context.canvas.w,this.context.canvas.h,true,false) || this.context.touch.check(0,0,this.context.canvas.w,this.context.canvas.h,true,false)>0){
-							this.focused=true;
-						}
 						
 						this.context.draw.alpha(0.5);
 						this.context.draw.ctx.fillStyle="black";
@@ -1787,13 +1796,26 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
         between: function(num,min,max) {return num>=min && num<=max;},
         stay: function(num,min,max) {if(num<min){num=min}if(num>max){num=max}return num},
         wrap: function(num,min,max) {
-            if(num<min){
-                num=this.wrap(max-(min-num),min,max)
-            }if(num>max){
-                num=this.wrap(min+(num-max),min,max)
-            }return num
+			var done=false;
+			var cpt=0;
+			while(!done){
+				if(cpt==100){
+					break;
+				}
+				if(num<min){
+					num=max-(min-num);
+				}else if(num>max){
+					num=min+(num-max)
+				}else{
+					done=true;
+				}
+				cpt++;
+			}
+            return num
         },
-        choose: function(numbers) {
+        choose: function(numbers,number2) {
+			//retro compatibility
+			if(number2!=undefined){numbers=[numbers,number2]};
             var ran=this.random(0,numbers.length-1);
             return numbers[ran];
         },
@@ -2790,6 +2812,14 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
         return this.draw.alpha(alpha);
     }
 	
+	this.camactive=function(bool){
+		return this.draw.camactive(bool);
+	}
+	
+	this.camActive=function(bool){
+		return this.draw.camactive(bool);
+	}
+	
     this.bg=function(color){
         return this.draw.bg(color);
     }
@@ -3231,6 +3261,16 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
     
     this.s=function(name,src){
         return this.assets.stopPlay(name,src);
+    }
+	
+	//retro compatibility
+	
+	this.addAlarm=function(name,time){
+        return this.loop.alarm(name,time);
+    }
+	
+	this.wrapVal=function(num,min,max){
+        return this.math.wrap(num,min,max);
     }
     
     
