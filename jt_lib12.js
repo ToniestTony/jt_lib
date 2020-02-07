@@ -1924,6 +1924,14 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
             return mat;
         },
 		
+		copyArr: function(arr){
+            var mat=[];
+            for(var i=0;i<arr.length;i++){
+                mat.push(arr[i]);
+            }
+            return mat;
+        },
+		
 		lerp:function(min,max,percent){
 			return min+(max-min)*percent;
 		}
@@ -3214,6 +3222,10 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
         return this.math.matrix(w,h,val);
     }
 	
+	this.copyArr=function(arr){
+        return this.math.copyArr(arr);
+    }
+	
 	this.lerp=function(min,max,val){
         return this.math.lerp(min,max,val);
     }
@@ -3251,7 +3263,23 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 		}
 	}
 	
+	this.addParticles=function(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,c,cRate,cMax,r){
+		if(typeof x=="object"){
+			return this.particles.addParticle(x.x,x.y,x.w,x.h,x.frames,x.wRate,x.hRate,x.alpha,x.alphaRate,x.vX,x.vY,x.aX,x.aY,x.c,x.cRate,x.cMax,x.r);
+		}else{
+			return this.particles.addParticle(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,c,cRate,cMax,r);
+		}
+	}
+	
 	this.partAdd=function(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,c,cRate,cMax,r){
+		if(typeof x=="object"){
+			return this.particles.addParticle(x.x,x.y,x.w,x.h,x.frames,x.wRate,x.hRate,x.alpha,x.alphaRate,x.vX,x.vY,x.aX,x.aY,x.c,x.cRate,x.cMax,x.r);
+		}else{
+			return this.particles.addParticle(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,c,cRate,cMax,r);
+		}
+	}
+	
+	this.addPart=function(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,c,cRate,cMax,r){
 		if(typeof x=="object"){
 			return this.particles.addParticle(x.x,x.y,x.w,x.h,x.frames,x.wRate,x.hRate,x.alpha,x.alphaRate,x.vX,x.vY,x.aX,x.aY,x.c,x.cRate,x.cMax,x.r);
 		}else{
@@ -3263,7 +3291,15 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 		return this.particles.drawParticles();
 	}
 	
+	this.drawParticles=function(){
+		return this.particles.drawParticles();
+	}
+	
 	this.partDraw=function(){
+		return this.particles.drawParticles();
+	}
+	
+	this.drawPart=function(){
 		return this.particles.drawParticles();
 	}
 	
@@ -3271,7 +3307,15 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 		return this.particles.clear();
 	}
 	
+	this.clearParticles=function(){
+		return this.particles.clear();
+	}
+	
 	this.partClear=function(){
+		return this.particles.clear();
+	}
+	
+	this.clearPart=function(){
 		return this.particles.clear();
 	}
     
