@@ -3,7 +3,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
     //initialize the canvas
     this.init=function(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBtn){
         //add attributes to the canvas object of JT
-        this.version=11;
+        this.version=12;
         var actualId=id;
         
         if(typeof(id)=="object"){
@@ -303,7 +303,9 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 			
             this.context.touch.draw=this.context.draw;
 			this.context.touch.canvas.w=this.context.canvas.src.width;
-            this.context.touch.canvas.h=this.context.canvas.src.height;
+            this.context.touch.canvas.h=this.context.canvas.src.height
+			
+			this.context.particles.draw=this.context.draw;
             
             this.context.assets.loop=this;
             this.context.assets.col=this.context.collision;
@@ -457,7 +459,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
                                     pressed=0;
                                     }
                                     
-                                                                                
+                                
                                 }
                                 
                                 this.context.gamepad.gamepads[i].buttons[j]={
@@ -517,6 +519,17 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
                 }else{
                   window[this.updateName]();
                 }
+				
+				//update particles
+				if(this.context.particles.parts.length>0){
+					for(var i=0;i<this.context.particles.parts.length;i++){
+						if(this.context.particles.updateParticle(i)){
+							this.context.particles.parts.splice(i,1);
+							i--;
+						}
+					}
+				}
+				
 				
                 
                 //fullScreenBtn draw
@@ -1887,19 +1900,33 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
             var degrees=this.wrap(angle-180,0,359)
             return degrees;
         },
+		
+		arr: function(w,val){
+            var arr=new Array(w);
+            for(var i=0;i<arr.length;i++){
+				if(val!=undefined){
+					arr[i]=val
+				}
+            }
+            return arr;
+        },
 
-        matrix: function(w,h,value){
+        matrix: function(w,h,val){
             var mat=new Array(h);
             for(var i=0;i<mat.length;i++){
                 mat[i]=new Array(w);
-                if(value!=undefined){
+                if(val!=undefined){
                     for(var j=0;j<mat[i].length;j++){
-                        mat[i][j]=value;
+                        mat[i][j]=val;
                     }
                 }
             }
             return mat;
         },
+		
+		lerp:function(min,max,percent){
+			return min+(max-min)*percent;
+		}
 
 
     },
@@ -1971,6 +1998,105 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
             return col;
         }
     }
+	
+	
+	//***** PARTICLES *****//
+	this.particles={
+		draw:undefined,
+		parts:[],
+		addParticle:function(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,c,cRate,cMax,r){
+			var part={};
+			part.x=x;
+			if(x==undefined){part.x=this.draw.canvas.width/2}
+			part.y=y;
+			if(y==undefined){part.y=this.draw.canvas.height/2}
+			part.w=w;
+			if(w==undefined){part.w=this.draw.canvas.width/100}
+			part.h=h;
+			if(h==undefined){part.h=this.draw.canvas.height/100}
+			
+			part.frame=0;
+			part.frames=frames;
+			if(frames==undefined){part.frames=59}
+			part.wRate=wRate;
+			if(wRate==undefined){part.wRate=0}
+			part.hRate=hRate;
+			if(hRate==undefined){part.hRate=0}
+			
+			part.alpha=alpha;
+			if(alpha==undefined){part.alpha=1}
+			part.alphaRate=alphaRate;
+			if(alphaRate==undefined){part.alphaRate=0}
+			
+			part.vX=vX;
+			if(vX==undefined){part.vX=0}
+			part.vY=vY;
+			if(vY==undefined){part.vY=0}
+			part.aX=aX;
+			if(aX==undefined){part.aX=0}
+			part.aY=aY;
+			if(aY==undefined){part.aY=0}
+			
+			part.c=c;
+			if(c==undefined){part.c=[0,0,0]}
+			part.cRate=cRate;
+			if(cRate==undefined){part.cRate=[0,0,0]}
+			part.cMax=cMax;
+			if(cMax==undefined){part.cMax=[0,0,0]}
+			part.rotation=0;
+			part.r=r;
+			if(r==undefined){part.r=0}
+			
+			this.parts.push(part);
+		},
+		
+		updateParticle:function(i){
+			var p=this.parts[i];
+			var dead=false;
+			
+			p.w+=p.wRate;
+			p.h+=p.hRate;
+			
+			p.alpha+=p.alphaRate;
+			
+			p.vX+=p.aX;
+			p.vY+=p.aY;
+			p.x+=p.vX;
+			p.y+=p.vY;
+			
+			p.c[0]+=p.cRate[0];
+			if(p.cRate[0]>0){if(p.c[0]>p.cMax[0]){p.c[0]=p.cMax[0]}}else if(p.cRate[0]<0){if(p.c[0]<p.cMax[0]){p.c[0]=p.cMax[0]}}
+			p.c[1]+=p.cRate[1];
+			if(p.cRate[1]>0){if(p.c[1]>p.cMax[1]){p.c[1]=p.cMax[1]}}else if(p.cRate[1]<0){if(p.c[1]<p.cMax[1]){p.c[1]=p.cMax[1]}}
+			p.c[2]+=p.cRate[2];
+			if(p.cRate[2]>0){if(p.c[2]>p.cMax[2]){p.c[2]=p.cMax[2]}}else if(p.cRate[2]<0){if(p.c[2]<p.cMax[2]){p.c[2]=p.cMax[2]}}
+			
+			p.rotation+=p.r;
+			
+			if(p.frame>=p.frames || p.alpha<=0 || p.w<=0 || p.h<=0){dead=true;}
+			p.frame++;
+			return dead;
+		},
+		drawParticles:function(){
+			for(var i=0;i<this.parts.length;i++){
+				this.drawParticle(i);
+			}
+		},
+		drawParticle:function(i){
+			var p=this.parts[i];
+			//x,y,w,h,color,rotation
+			if(p.alpha!=1){
+				this.draw.alpha(p.alpha);
+			}
+			this.draw.rect(p.x-p.w/2,p.y-p.h/2,p.w,p.h,p.c,p.rotation);
+			if(p.alpha!=1){
+				this.draw.alpha(1);
+			}
+		},
+		clear:function(){
+			this.parts=[];
+		}
+	}
     
     
     
@@ -3079,9 +3205,17 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
     this.angle=function(x,y,x2,y2){
         return this.math.angle(x,y,x2,y2);
     }
+	
+	this.arr=function(w,val){
+        return this.math.arr(w,val);
+    }
     
     this.matrix=function(w,h,val){
         return this.math.matrix(w,h,val);
+    }
+	
+	this.lerp=function(min,max,val){
+        return this.math.lerp(min,max,val);
     }
     
     
@@ -3106,6 +3240,40 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
     this.cRectC=function(rect,circle){
         return this.collision.rectCircle(rect,circle);
     }
+	
+	//particles
+	
+	this.particlesAdd=function(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,c,cRate,cMax,r){
+		if(typeof x=="object"){
+			return this.particles.addParticle(x.x,x.y,x.w,x.h,x.frames,x.wRate,x.hRate,x.alpha,x.alphaRate,x.vX,x.vY,x.aX,x.aY,x.c,x.cRate,x.cMax,x.r);
+		}else{
+			return this.particles.addParticle(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,c,cRate,cMax,r);
+		}
+	}
+	
+	this.partAdd=function(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,c,cRate,cMax,r){
+		if(typeof x=="object"){
+			return this.particles.addParticle(x.x,x.y,x.w,x.h,x.frames,x.wRate,x.hRate,x.alpha,x.alphaRate,x.vX,x.vY,x.aX,x.aY,x.c,x.cRate,x.cMax,x.r);
+		}else{
+			return this.particles.addParticle(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,c,cRate,cMax,r);
+		}
+	}
+	
+	this.particlesDraw=function(){
+		return this.particles.drawParticles();
+	}
+	
+	this.partDraw=function(){
+		return this.particles.drawParticles();
+	}
+	
+	this.particlesClear=function(){
+		return this.particles.clear();
+	}
+	
+	this.partClear=function(){
+		return this.particles.clear();
+	}
     
     //gamepad
     
@@ -3402,10 +3570,10 @@ TEMPLATE:
     <body>
         <div id="canContainer">
         <canvas id="can"></canvas>
-        <span>Made with <a href="https://github.com/ToniestTony/jt_lib">jt_lib11.js</a></span>
+        <span>Made with <a href="https://github.com/ToniestTony/jt_lib">jt_lib12.js</a></span>
             </div>
     </body>
-    <script src="jt_lib11.js"></script>
+    <script src="jt_lib12.js"></script>
     
     <script>
 
