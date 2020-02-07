@@ -12,6 +12,7 @@ Here are some of the features:
 * **Edit** and move the virtual camera to zoom or move the game, while still having elements like UI stay in place.
 * **Use** math functions that are frequently used in gamemaking like random, stay, angle, distance and many more.
 * **Juice up** your game with screen shakes, particles and other misc features like alarms and checking for key combinations.
+* **Debug** with easy to use functions to quickly crush your bugs and get back to the important stuff.
 * **A bunch of other features!**
 
 ## Getting started
