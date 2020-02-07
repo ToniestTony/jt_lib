@@ -15,8 +15,8 @@ Here are some of the features:
 * **A bunch of other features!**
 
 ## Getting started
-* Download the jt_lib12.js file (and index.html if you want a template)
-* Link your jt_lib12.js file in your html file with "<script src="jt_lib12.js"></script>" after the body
+* Download the jt_lib12.js file and index.html for a quick template.
+* Start programming your awesome game in the setup and update functions of the template.
 * **That's it!**
 
 ## More tutorials coming soon
