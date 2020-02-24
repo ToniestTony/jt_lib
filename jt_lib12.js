@@ -1339,7 +1339,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
         //Drawing circle border
         circleB: function(x,y,d,color,lineW) {
             this.ctx.beginPath();
-            this.fill("arcB",x+d,y+d,d);
+            this.fill("arcB",x+d/2,y+d/2,d/2);
             this.ctx.strokeStyle = this.color(color);
             if(lineW<=0){lineW=1}
             this.ctx.lineWidth=lineW;
