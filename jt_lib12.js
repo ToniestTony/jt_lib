@@ -625,6 +625,11 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
                         }
                     }
                 }
+				
+				//remove mouse scroll
+                if(this.context.mouse.scroll!=0){
+                    this.context.mouse.scroll=0;
+                }
                 
                 //remove mouse press
                 if(this.context.mouse.press==true){
@@ -2395,6 +2400,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
         draw:undefined,
         press:false,
         down:false,
+		scroll:0,
         canvas:{w:0,h:0},
         //check if mouse is pressing inside these coordinates, if type is true, check if mouse is pressed instead of down
         check:function(x,y,w,h,press,cam){
@@ -2537,6 +2543,14 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 				
 				context.mouse.down=false;
 				context.mouse.press=false;
+			}
+        });
+		
+		context.canvas.src.addEventListener("wheel", function(evt) {
+			if(document.activeElement.tagName!="INPUT"){
+				evt.preventDefault();
+				
+				context.mouse.scroll=evt.deltaY;
 			}
         });
 		
@@ -3456,9 +3470,17 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
     this.mP=function(x,y,w,h,cam){
         return this.mouse.check(x,y,w,h,true,cam);
     }
+	
+	this.mouseScroll=function(){
+        return this.mouse.scroll;
+    }
     
-    this.mouseX=function(){
-        return this.mouse.x;
+    this.mScroll=function(){
+        return this.mouse.scroll;
+    }
+    
+    this.mS=function(){
+        return this.mouse.scroll;
     }
     
     this.mX=function(){
