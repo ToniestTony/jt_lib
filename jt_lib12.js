@@ -632,9 +632,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
                 }
                 
                 //remove mouse press
-                if(this.context.mouse.press==true){
-                    this.context.mouse.press=false;
-                }
+				this.context.mouse.press=[false,false,false,false,false]
 				
 				//remove touch press
                 if(this.context.touch.press==true){
@@ -1486,6 +1484,11 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
             this.ctx.font=this.fontSize+"px "+this.fontName;
             this.ctx.fillStyle= this.color(color);
         },
+		
+		//Setting the baseline
+        baseline:function(baseline){
+            this.ctx.textBaseline= baseline;
+        },
 
         //Draw an image
         image:function(name,newX,newY,w,h,rotation,sX,sY,sW,sH){
@@ -2261,6 +2264,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
         keys:{
             
             backspace:8,
+            tab:9,
             enter:13,
 			shift:16,
 			control:17,
@@ -2268,14 +2272,18 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 			controlL:17,
 			ctrlL:17,
 			alt:18,
+			pause:19,
+			capsLock:20,
             escape:27,
             space:32,
+            pageUp:33,
+            pageDown:34,
             left:37,
             up:38,
             right:39,
             down:40,
             insert:45,
-            delete:46,
+            "delete":46,
             0:48,
             1:49,
             2:50,
@@ -2312,6 +2320,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
             x:88,
             y:89,
             z:90,
+			"meta":91,
             num0:96,
             num1:97,
             num2:98,
@@ -2322,8 +2331,43 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
             num7:103,
             num8:104,
             num9:105,
+            "num*":106,
+            "num+":107,
+            "num-":109,
+            "num.":110,
+            "num/":111,
+            f1:112,
+            f2:113,
+            f3:114,
+            f4:115,
+            f5:116,
+            f6:117,
+            f7:118,
+            f8:119,
+            f9:120,
+            f10:121,
+            f11:122,
+            f12:123,
+            "numLock":144,
+            "scrollLock":145,
+			";":186,
+			":":186,
+			"=":187,
+			",":188,
+			"-":189,
+			".":190,
+			"é":191,
+			"è":192,
+			"^":219,
+			"à":220,
+			"ç":221,
+			"/":222,
 			controlR:223,
-			ctrlR:223
+			ctrlR:223,
+			"ù":226,
+			"fn":255
+			
+			
         },
         keysdown:[],
 		simulate:function(evt,keyCode){
@@ -2397,23 +2441,25 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
         y:0,
         cX:0,
         cY:0,
+		preventRight:false,
         draw:undefined,
-        press:false,
-        down:false,
+        press:[false,false,false,false,false],
+        down:[false,false,false,false,false],
 		scroll:0,
         canvas:{w:0,h:0},
         //check if mouse is pressing inside these coordinates, if type is true, check if mouse is pressed instead of down
-        check:function(x,y,w,h,press,cam){
+        check:function(x,y,w,h,press,cam,btn){
             if(x==undefined){x=0;}
             if(y==undefined){y=0;}
             if(w==undefined){w=this.canvas.w;}
             if(h==undefined){h=this.canvas.h;}
-            var checking=this.down;
+			if(btn==undefined){btn=0;}
+            var checking=this.down[btn];
             var mX=this.cX;
             var mY=this.cY;
             if(press!=undefined){
                 if(press==true){
-                    checking=this.press;
+                    checking=this.press[btn];
                 }
             }
             
@@ -2532,8 +2578,9 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 				evt.preventDefault();
 				
 				
-				context.mouse.down=true;
-				context.mouse.press=true;
+				
+				context.mouse.down[evt.which-1]=true;
+				context.mouse.press[evt.which-1]=true;
 			}
         });
 
@@ -2541,8 +2588,9 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 			if(document.activeElement.tagName!="INPUT"){
 				evt.preventDefault();
 				
-				context.mouse.down=false;
-				context.mouse.press=false;
+				
+				context.mouse.down[evt.which-1]=false;
+				context.mouse.press[evt.which-1]=false;
 			}
         });
 		
@@ -2551,6 +2599,12 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 				evt.preventDefault();
 				
 				context.mouse.scroll=evt.deltaY;
+			}
+        });
+		
+		context.canvas.src.addEventListener("contextmenu", function(evt) {
+			if(document.activeElement.tagName!="INPUT"){
+				if(context.mouse.preventRight){evt.preventDefault();}
 			}
         });
 		
@@ -3127,6 +3181,10 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
     this.font=function(fontName,fontSize,color){
         return this.draw.font(fontName,fontSize,color)
     }
+	
+	this.baseline=function(baseline){
+        return this.draw.baseline(baseline)
+    }
     
     this.image=function(name,newX,newY,w,h,rotation,sX,sY,sW,sH){
         return this.draw.image(name,newX,newY,w,h,rotation,sX,sY,sW,sH)
@@ -3447,28 +3505,28 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
     
     //mouse
     
-    this.mouseCheck=function(x,y,w,h,cam){
-        return this.mouse.check(x,y,w,h,false,cam);
+    this.mouseCheck=function(x,y,w,h,cam,btn){
+        return this.mouse.check(x,y,w,h,false,cam,btn);
     }
     
-    this.mCheck=function(x,y,w,h,cam){
-        return this.mouse.check(x,y,w,h,false,cam);
+    this.mCheck=function(x,y,w,h,cam,btn){
+        return this.mouse.check(x,y,w,h,false,cam,btn);
     }
     
-    this.mC=function(x,y,w,h,cam){
-        return this.mouse.check(x,y,w,h,false,cam);
+    this.mC=function(x,y,w,h,cam,btn){
+        return this.mouse.check(x,y,w,h,false,cam,btn);
     }
     
-    this.mousePress=function(x,y,w,h,cam){
-        return this.mouse.check(x,y,w,h,true,cam);
+    this.mousePress=function(x,y,w,h,cam,btn){
+        return this.mouse.check(x,y,w,h,true,cam,btn);
     }
     
-    this.mPress=function(x,y,w,h,cam){
-        return this.mouse.check(x,y,w,h,true,cam);
+    this.mPress=function(x,y,w,h,cam,btn){
+        return this.mouse.check(x,y,w,h,true,cam,btn);
     }
     
-    this.mP=function(x,y,w,h,cam){
-        return this.mouse.check(x,y,w,h,true,cam);
+    this.mP=function(x,y,w,h,cam,btn){
+        return this.mouse.check(x,y,w,h,true,cam,btn);
     }
 	
 	this.mouseScroll=function(){
@@ -3511,13 +3569,23 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
         return this.mouse.cY;
     }
     
-    this.mouseDown=function(){
-        return this.mouse.down;
+    this.mouseDown=function(btn){
+		if(btn==undefined){btn=0;}
+        return this.mouse.down[btn];
     }
     
-    this.mDown=function(){
-        return this.mouse.down;
+    this.mDown=function(btn){
+		if(btn==undefined){btn=0;}
+        return this.mouse.down[btn];
     }
+	
+	this.mousePrevent=function(bool){
+		return this.mouse.preventRight=bool;
+	}
+	
+	this.mPrevent=function(bool){
+		return this.mouse.preventRight=bool;
+	}
 	
 	//touch
 	
