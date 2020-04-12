@@ -8,7 +8,7 @@ Here are some of the features:
 * **Includes** full support of mouse, keyboard, gamepads and touch(mobile) inputs. Including pressing, holding and releasing.
 * **Change** the size and fps of the canvas even while the game is running.
 * **Draw** and check collisions for basic shapes and borders.
-* **Show** text with fonts you choose and with many features like rotation and automatic line breaks at a chosen width,
+* **Show** text with fonts you choose and with many features like rotation and automatic line breaks at a chosen width.
 * **Edit** and move the virtual camera to zoom or move the game, while still having elements like UI stay in place.
 * **Use** math functions that are frequently used in gamemaking like random, stay, angle, distance and many more.
 * **Juice up** your game with screen shakes, particles and other misc features like alarms and checking for key combinations.
