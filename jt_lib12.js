@@ -3,7 +3,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
     //initialize the canvas
     this.init=function(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBtn){
         //add attributes to the canvas object of JT
-        this.version=12;
+        this.version=13;
         var actualId=id;
         
         if(typeof(id)=="object"){
@@ -1623,12 +1623,23 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 			var anim=this.assets.anims[name];
 			
 			var f=frame;
-			if(f!=undefined){
+			if(f==undefined){
 				f=0;
 			}
 			
 			anim.frame=f;
 			anim.distance=anim.speed*f;
+		},
+		
+		animSpeed:function(name,speed){
+			var anim=this.assets.anims[name];
+			
+			var s=speed/jt.fps();
+			if(speed==undefined){
+				s=1;
+			}
+			
+			anim.speed=s;
 		},
 
         //Gradients
@@ -3201,6 +3212,14 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 	this.animF=function(name,frame){
         return this.draw.animFrame(name,frame)
     }
+	
+	this.animSpeed=function(name,speed){
+        return this.draw.animSpeed(name,speed)
+    }
+	
+	this.animS=function(name,speed){
+        return this.draw.animSpeed(name,speed)
+    }
     
     this.linear=function(name,x1,y1,x2,y2,stops){
         return this.draw.linear(name,x1,y1,x2,y2,stops)
@@ -3706,10 +3725,10 @@ TEMPLATE:
     <body>
         <div id="canContainer">
         <canvas id="can"></canvas>
-        <span>Made with <a href="https://github.com/ToniestTony/jt_lib">jt_lib12.js</a></span>
+        <span>Made with <a href="https://github.com/ToniestTony/jt_lib">jt_lib13.js</a></span>
             </div>
     </body>
-    <script src="jt_lib12.js"></script>
+    <script src="jt_lib13.js"></script>
     
     <script>
 
