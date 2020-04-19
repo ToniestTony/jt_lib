@@ -1640,7 +1640,20 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 			
 			anim.speed=s;
 		},
-
+		
+		animFrames:function(name,frames){
+			var anim=this.assets.anims[name];
+			
+			var f=frames;
+			if(f==undefined){
+				f=1;
+			}
+			
+			anim.frames=f;
+			anim.frameW=anim.img.width/f;
+			anim.frame=0;
+			anim.distance=0;
+		},
         //Gradients
 
         //linear gradient
@@ -3214,6 +3227,10 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
     
     this.anim=function(name,newX,newY,w,h,rotation){
         return this.draw.anim(name,newX,newY,w,h,rotation)
+    }
+	
+	this.animFrames=function(name,frames){
+        return this.draw.animFrames(name,frames)
     }
 	
 	this.animFrame=function(name,frame){
