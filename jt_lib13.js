@@ -135,6 +135,9 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
         bordX:1,
         bordY:1,
         bordC:"black",
+		
+		lastW:undefined,
+		lastH:undefined,
         
         cursorVisible:true,
         
@@ -157,7 +160,10 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
                     w=this.autoX;
                     h=this.autoY;
                 }
-            }
+            }else{
+				this.lastW=w;
+				this.lastH=h;
+			}
             //Resize the actual HTML canvas
             this.src.width=w;
             this.src.height=h;
@@ -197,6 +203,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
             return this.bord;
         },
         fullscreen:function(){
+			this.fullScreen=true;
 			var ratio = window.devicePixelRatio || 1;
             var win = window,
             d = document,
@@ -473,36 +480,29 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
                 }
 				
 				 //fullScreenBtn update
-				if(this.fullScreenBtn && this.context.isMobile()){
+				if(this.fullScreenBtn && !document.fullscreen){
 					if(this.focused){
 						var w=50/8;
 						
 						//check if user pressed the button
 						if(this.context.mouse.check(0,0,w*8,w*8,true,false) || this.context.touch.check(0,0,w*8,w*8,true,false)>0){
 							this.context.touch.touches=[];
-							this.context.canvas.fullScreen=!this.context.canvas.fullScreen;
-							var el = document.getElementById("jeuConteneur");
-							if(this.context.canvas.fullScreen){
-								if (el.requestFullscreen) {
-									el.requestFullscreen();
-								} else if (el.mozRequestFullScreen) { // Firefox 
-									el.mozRequestFullScreen();
-								} else if (el.webkitRequestFullscreen) { // Chrome, Safari and Opera 
-									el.webkitRequestFullscreen();
-								} else if (el.msRequestFullscreen) { // IE/Edge 
-									el.msRequestFullscreen();
-								}
-							}else{
-								if (document.exitFullscreen) {
-									document.exitFullscreen();
-								} else if (document.mozCancelFullScreen) { // Firefox 
-									document.mozCancelFullScreen();
-								} else if (document.webkitExitFullscreen) { // Chrome, Safari and Opera 
-									document.webkitExitFullscreen();
-								} else if (document.msExitFullscreen) { // IE/Edge 
-									document.msExitFullscreen();
-								}
+							
+						/*	var el = document.createElement("DIV");
+							el.setAttribute("id","jeuConteneur");
+							document.body.append(el);*/
+							var el=document.getElementById(this.context.canvas.src.id);
+							if (el.requestFullscreen) {
+								el.requestFullscreen();
+							} else if (el.mozRequestFullScreen) { // Firefox 
+								el.mozRequestFullScreen();
+							} else if (el.webkitRequestFullscreen) { // Chrome, Safari and Opera 
+								el.webkitRequestFullscreen();
+							} else if (el.msRequestFullscreen) { // IE/Edge 
+								el.msRequestFullscreen();
 							}
+							//setTimeout(this.context.canvas.fullscreen.bind(this.context.canvas),100);
+							
 						}
 					}else{
 						if(this.context.mouse.check(0,0,this.context.canvas.w,this.context.canvas.h,true,false) || this.context.touch.check(0,0,this.context.canvas.w,this.context.canvas.h,true,false)>0){
@@ -529,11 +529,9 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 						}
 					}
 				}
-				
-				
                 
                 //fullScreenBtn draw
-				if(this.fullScreenBtn && this.context.isMobile()){
+				if(this.fullScreenBtn && !document.fullscreen){
 					if(this.focused){
 						var w=50/8;
 						
@@ -554,8 +552,9 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 										this.context.draw.ctx.fillStyle="black";
 									}
 								}
-								
+								this.context.draw.camactive(false);
 								this.context.draw.ctx.fillRect(x*w,y*w,w,w);
+								this.context.draw.camactive(true);
 							}
 						}
 						this.context.draw.alpha(1);
@@ -2808,6 +2807,18 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 				var keys = context.keyboard.keysdown;
 				for(var i=0; i<keys.length; i++) {
 					if(keys[i].key==event.keyCode) {context.keyboard.keysdown.splice(i,1);}
+				}
+			}
+        });
+		
+		document.addEventListener("fullscreenchange", function(){
+			if(document.fullscreen){
+				setTimeout(context.canvas.fullscreen.bind(context),100);
+			}else{
+				if(context.lastW!=undefined){
+					setTimeout(context.canvas.resize(context.lastW,context.lastH).bind(context),100);
+				}else{
+					setTimeout(context.canvas.fullscreen.bind(context),100);
 				}
 			}
         });
