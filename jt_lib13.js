@@ -34,7 +34,10 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
             
             w=x;
             h=y;
-        }
+        }else{
+			this.canvas.lastW=w;
+			this.canvas.lastH=h;
+		}
         
         this.canvas.context=this;
         this.canvas.setId(actualId);
@@ -160,10 +163,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
                     w=this.autoX;
                     h=this.autoY;
                 }
-            }else{
-				this.lastW=w;
-				this.lastH=h;
-			}
+            }
             //Resize the actual HTML canvas
             this.src.width=w;
             this.src.height=h;
@@ -2815,8 +2815,8 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 			if(document.fullscreen){
 				setTimeout(context.canvas.fullscreen.bind(context),100);
 			}else{
-				if(context.lastW!=undefined){
-					setTimeout(context.canvas.resize(context.lastW,context.lastH).bind(context),100);
+				if(context.canvas.lastW!=undefined){
+					setTimeout(context.canvas.resize.call(context.canvas,context.canvas.lastW,context.canvas.lastH),100);
 				}else{
 					setTimeout(context.canvas.fullscreen.bind(context),100);
 				}
