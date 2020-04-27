@@ -1622,23 +1622,25 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 			var anim=this.assets.anims[name];
 			
 			var f=frame;
-			if(f==undefined){
-				f=0;
+			if(f!=undefined){
+				anim.frame=f;
+				anim.distance=anim.speed*f;
 			}
 			
-			anim.frame=f;
-			anim.distance=anim.speed*f;
+			
+			
+			return anim.frame;
 		},
 		
 		animSpeed:function(name,speed){
 			var anim=this.assets.anims[name];
 			
 			var s=speed/jt.fps();
-			if(speed==undefined){
-				s=1;
+			if(speed!=undefined){
+				anim.speed=s;
 			}
 			
-			anim.speed=s;
+			return anim.speed;
 		},
 		
 		animFrames:function(name,frames){
