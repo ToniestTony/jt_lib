@@ -1780,7 +1780,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
                     this.ctx.rotate(rotation*Math.PI/180);
                     this.ctx.translate((((x-w)/2)*camW+camX*camW)-x*camW,(((y-h)/2)*camH+camY*camH)-y*camH);
                 }else{
-                   this.ctx.translate(((w/2)*camW-camX*camW)+x*camW,((h/2)*camH-camY*camH)+y*camH);
+                    this.ctx.translate(((w/2)*camW-camX*camW)+x*camW,((h/2)*camH-camY*camH)+y*camH);
                     this.ctx.rotate(rotation*Math.PI/180);
                     this.ctx.translate(((-w/2)*camW+camX*camW)-x*camW,((-h/2)*camH+camY*camH)-y*camH); 
                 }
@@ -1814,7 +1814,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 
         },
         
-        rotate:function(rotation,x,y){
+        rotate:function(rotation,x,y,w,h){
             var camW=Math.abs(this.canvas.src.width/this.cam.w)
             var camH=Math.abs(this.canvas.src.height/this.cam.h)
             var camX=this.cam.x;
@@ -1825,14 +1825,28 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
                 camW=1;
                 camH=1;
             }
-			var xx=this.canvas.src.width/2;
-			var yy=this.canvas.src.height/2;
-			if(x!=undefined){xx=x;}
-			if(y!=undefined){yy=y;}
 			
-            this.ctx.translate(xx,yy);
+			var xx=0;
+			var yy=0;
+			var ww=this.canvas.w;
+			var hh=this.canvas.h;
+			if(typeof x=="object"){
+				xx=x.x;
+				yy=x.y;
+				ww=x.w;
+				hh=x.h;
+			}else{
+				if(x!=undefined){xx=x;}
+				if(y!=undefined){yy=y;}
+				if(w!=undefined){ww=w;}
+				if(h!=undefined){hh=h;}
+			}
+			
+			var moveX=((ww/2)*camW-camX*camW)+xx*camW;
+			var moveY=((hh/2)*camH-camY*camH)+yy*camH;
+            this.ctx.translate(moveX,moveY);
             this.ctx.rotate(rotation*Math.PI/180);
-            this.ctx.translate(-xx,-yy);
+			this.ctx.translate(-moveX,-moveY);
         }
     }
     
@@ -3310,8 +3324,8 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
         return this.draw.fontSize;
     }
     
-    this.rotate=function(rotation,x,y){
-        return this.draw.rotate(rotation,x,y);
+    this.rotate=function(rotation,x,y,w,h){
+        return this.draw.rotate(rotation,x,y,w,h);
     }
     
     
