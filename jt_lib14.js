@@ -3,7 +3,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
     //initialize the canvas
     this.init=function(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBtn){
         //add attributes to the canvas object of JT
-        this.version=13;
+        this.version=14;
         var actualId=id;
         
         if(typeof(id)=="object"){
@@ -129,6 +129,8 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
         h:undefined,
 		
 		fullScreen:false,
+		
+		pixelRate:1,
         
         auto:false,
         autoX:undefined,
@@ -1480,6 +1482,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
         font:function(fontName,size,color){
             this.fontName=fontName;
             this.fontSize=size;
+			if(this.cam.active){this.fontSize=size*this.canvas.pixelRate;}
             this.ctx.font=this.fontSize+"px "+this.fontName;
             this.ctx.fillStyle= this.color(color);
         },
@@ -1622,25 +1625,23 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 			var anim=this.assets.anims[name];
 			
 			var f=frame;
-			if(f!=undefined){
-				anim.frame=f;
-				anim.distance=anim.speed*f;
+			if(f==undefined){
+				f=0;
 			}
 			
-			
-			
-			return anim.frame;
+			anim.frame=f;
+			anim.distance=anim.speed*f;
 		},
 		
 		animSpeed:function(name,speed){
 			var anim=this.assets.anims[name];
 			
 			var s=speed/jt.fps();
-			if(speed!=undefined){
-				anim.speed=s;
+			if(speed==undefined){
+				s=1;
 			}
 			
-			return anim.speed;
+			anim.speed=s;
 		},
 		
 		animFrames:function(name,frames){
@@ -2479,12 +2480,22 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
             if(w==undefined){w=this.canvas.w;}
             if(h==undefined){h=this.canvas.h;}
 			if(btn==undefined){btn=0;}
-            var checking=this.down[btn];
+			 var checking=false;
+			if(btn==-1){
+				checking=true;
+			}else{
+				checking=this.down[btn];
+			}
+           
             var mX=this.cX;
             var mY=this.cY;
             if(press!=undefined){
                 if(press==true){
-                    checking=this.press[btn];
+					if(btn==-1){
+						checking=true;
+					}else{
+						checking=this.press[btn];
+					}
                 }
             }
             
@@ -2515,11 +2526,12 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 		draw:undefined,
 		canvas:{w:0,h:0},
 		//check if touch is pressing inside these coordinates, if type is true, check if touch is pressed instead of down
-		check:function(x,y,w,h,press,cam){
+		check:function(x,y,w,h,press,cam,num){
             if(x==undefined){x=0;}
             if(y==undefined){y=0;}
             if(w==undefined){w=this.canvas.w;}
             if(h==undefined){h=this.canvas.h;}
+			if(num==undefined){num=-1;}
             var checking=this.down;
             if(press!=undefined){
                 if(press==true){
@@ -2547,8 +2559,21 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 					}
 				}
 			}
+			if(num==-1){
+				if(force>=1){
+					return true;
+				}else{
+					return false;
+				}
+			}else{
+				if(force==num){
+					return true;
+				}else{
+					return false;
+				}
+			}
 			
-			return force;
+			
         },
 	}
     
@@ -2587,8 +2612,8 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 				var camX=context.draw.cam.x;
 				var camY=context.draw.cam.y;
 				
-				var mX=Math.round(((evt.clientX-rect.left)/(rect.right-rect.left))*context.canvas.src.width);
-				var mY=Math.round(((evt.clientY-rect.top)/(rect.bottom-rect.top))*context.canvas.src.height);
+				var mX=Math.round(((evt.clientX-rect.left)/(rect.right-rect.left))*context.canvas.src.width)/context.canvas.pixelRate;
+				var mY=Math.round(((evt.clientY-rect.top)/(rect.bottom-rect.top))*context.canvas.src.height)/context.canvas.pixelRate;
 				
 				context.mouse.x=mX;
 				context.mouse.y=mY;
@@ -2908,6 +2933,16 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
     this.cursor=function(bool){
         return this.canvas.cursor(bool);
     }
+	
+	this.pixelRate=function(rate){
+		if(rate!=undefined){this.canvas.pixelRate=rate;}
+		return this.canvas.pixelRate;
+	}
+	
+	this.pR=function(rate){
+		if(rate!=undefined){this.canvas.pixelRate=rate;}
+		return this.canvas.pixelRate;
+	}
     
     
     //loop
@@ -3555,27 +3590,52 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
     //mouse
     
     this.mouseCheck=function(x,y,w,h,cam,btn){
-        return this.mouse.check(x,y,w,h,false,cam,btn);
+		if(typeof x=="object"){
+			return this.mouse.check(x.x,x.y,x.w,x.h,false,x.cam,x.btn);
+		}else{
+			return this.mouse.check(x,y,w,h,false,cam,btn);
+		}
+       
     }
     
     this.mCheck=function(x,y,w,h,cam,btn){
-        return this.mouse.check(x,y,w,h,false,cam,btn);
+        if(typeof x=="object"){
+			return this.mouse.check(x.x,x.y,x.w,x.h,false,x.cam,x.btn);
+		}else{
+			return this.mouse.check(x,y,w,h,false,cam,btn);
+		}
     }
     
     this.mC=function(x,y,w,h,cam,btn){
-        return this.mouse.check(x,y,w,h,false,cam,btn);
+		if(typeof x=="object"){
+			return this.mouse.check(x.x,x.y,x.w,x.h,false,x.cam,x.btn);
+		}else{
+			return this.mouse.check(x,y,w,h,false,cam,btn);
+		}
     }
     
     this.mousePress=function(x,y,w,h,cam,btn){
-        return this.mouse.check(x,y,w,h,true,cam,btn);
+		if(typeof x=="object"){
+			return this.mouse.check(x.x,x.y,x.w,x.h,true,x.cam,x.btn);
+		}else{
+			return this.mouse.check(x,y,w,h,true,cam,btn);
+		}
     }
     
     this.mPress=function(x,y,w,h,cam,btn){
-        return this.mouse.check(x,y,w,h,true,cam,btn);
+        if(typeof x=="object"){
+			return this.mouse.check(x.x,x.y,x.w,x.h,true,x.cam,x.btn);
+		}else{
+			return this.mouse.check(x,y,w,h,true,cam,btn);
+		}
     }
     
     this.mP=function(x,y,w,h,cam,btn){
-        return this.mouse.check(x,y,w,h,true,cam,btn);
+        if(typeof x=="object"){
+			return this.mouse.check(x.x,x.y,x.w,x.h,true,x.cam,x.btn);
+		}else{
+			return this.mouse.check(x,y,w,h,true,cam,btn);
+		}
     }
 	
 	this.mouseScroll=function(){
@@ -3636,34 +3696,74 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 		return this.mouse.preventRight=bool;
 	}
 	
+	this.mouseIn=function(x,y,w,h,cam){
+		if(typeof x=="object"){
+			return this.mouse.check(x.x,x.y,x.w,x.h,false,x.cam,-1);
+		}else{
+			return this.mouse.check(x,y,w,h,false,cam,-1);
+		}
+	}
+	
+	this.mIn=function(x,y,w,h,cam){
+		if(typeof x=="object"){
+			return this.mouse.check(x.x,x.y,x.w,x.h,false,x.cam,-1);
+		}else{
+			return this.mouse.check(x,y,w,h,false,cam,-1);
+		}
+	}
+	
 	//touch
 	
 	this.touches=function(){
 		return this.touch.touches;
 	}
     
-	this.touchCheck=function(x,y,w,h,cam){
-        return this.touch.check(x,y,w,h,false,cam);
+	this.touchCheck=function(x,y,w,h,cam,num){
+		if(typeof x=="object"){
+			return this.touch.check(x.x,x.y,x.w,x.h,false,x.cam,x.num);
+		}else{
+			return this.touch.check(x,y,w,h,false,cam,num);
+		}
     }
 	
-	this.tCheck=function(x,y,w,h,cam){
-        return this.touch.check(x,y,w,h,false,cam);
+	this.tCheck=function(x,y,w,h,cam,num){
+        if(typeof x=="object"){
+			return this.touch.check(x.x,x.y,x.w,x.h,false,x.cam,x.num);
+		}else{
+			return this.touch.check(x,y,w,h,false,cam,num);
+		}
     }
 	
-	this.tC=function(x,y,w,h,cam){
-        return this.touch.check(x,y,w,h,false,cam);
+	this.tC=function(x,y,w,h,cam,num){
+        if(typeof x=="object"){
+			return this.touch.check(x.x,x.y,x.w,x.h,false,x.cam,x.num);
+		}else{
+			return this.touch.check(x,y,w,h,false,cam,num);
+		}
     }
 	
-	this.touchPress=function(x,y,w,h,cam){
-        return this.touch.check(x,y,w,h,true,cam);
+	this.touchPress=function(x,y,w,h,cam,num){
+        if(typeof x=="object"){
+			return this.touch.check(x.x,x.y,x.w,x.h,true,x.cam,x.num);
+		}else{
+			return this.touch.check(x,y,w,h,true,cam,num);
+		}
     }
 	
-	this.tPress=function(x,y,w,h,cam){
-        return this.touch.check(x,y,w,h,true,cam);
+	this.tPress=function(x,y,w,h,cam,num){
+        if(typeof x=="object"){
+			return this.touch.check(x.x,x.y,x.w,x.h,true,x.cam,x.num);
+		}else{
+			return this.touch.check(x,y,w,h,true,cam,num);
+		}
     }
 	
-	this.tP=function(x,y,w,h,cam){
-        return this.touch.check(x,y,w,h,true,cam);
+	this.tP=function(x,y,w,h,cam,num){
+        if(typeof x=="object"){
+			return this.touch.check(x.x,x.y,x.w,x.h,true,x.cam,x.num);
+		}else{
+			return this.touch.check(x,y,w,h,true,cam,num);
+		}
     }
 	
 	this.touchDown=function(){
@@ -3755,10 +3855,10 @@ TEMPLATE:
     <body>
         <div id="canContainer">
         <canvas id="can"></canvas>
-        <span>Made with <a href="https://github.com/ToniestTony/jt_lib">jt_lib13.js</a></span>
+        <span>Made with <a href="https://github.com/ToniestTony/jt_lib">jt_lib14.js</a></span>
             </div>
     </body>
-    <script src="jt_lib13.js"></script>
+    <script src="jt_lib14.js"></script>
     
     <script>
 
