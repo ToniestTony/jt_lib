@@ -1625,12 +1625,12 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 			var anim=this.assets.anims[name];
 			
 			var f=frame;
-			if(f==undefined){
-				f=0;
+			if(frame==undefined){
+				return anim.frame;
+			}else{
+				anim.frame=f;
+				anim.distance=anim.speed*f;
 			}
-			
-			anim.frame=f;
-			anim.distance=anim.speed*f;
 		},
 		
 		animSpeed:function(name,speed){
@@ -1638,24 +1638,24 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 			
 			var s=speed/jt.fps();
 			if(speed==undefined){
-				s=1;
+				return anim.speed;
+			}else{
+				anim.speed=s;
 			}
-			
-			anim.speed=s;
 		},
 		
 		animFrames:function(name,frames){
 			var anim=this.assets.anims[name];
 			
 			var f=frames;
-			if(f==undefined){
-				f=1;
+			if(frame==undefined){
+				anim.frames;
+			}else{
+				anim.frames=f;
+				anim.frameW=anim.img.width/f;
+				anim.frame=0;
+				anim.distance=0;
 			}
-			
-			anim.frames=f;
-			anim.frameW=anim.img.width/f;
-			anim.frame=0;
-			anim.distance=0;
 		},
         //Gradients
 
@@ -2865,7 +2865,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 			}
         });
 		
-		document.addEventListener("fullscreenchange", function(){
+		/*document.addEventListener("fullscreenchange", function(){
 			if(document.fullscreen){
 				setTimeout(context.canvas.fullscreen.bind(context),100);
 			}else{
@@ -2875,7 +2875,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 					setTimeout(context.canvas.fullscreen.bind(context),100);
 				}
 			}
-        });
+        });*/
         
         
 
