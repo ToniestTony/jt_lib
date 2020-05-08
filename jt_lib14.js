@@ -487,7 +487,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 						var w=50/8;
 						
 						//check if user pressed the button
-						if(this.context.mouse.check(0,0,w*8,w*8,true,false) || this.context.touch.check(0,0,w*8,w*8,true,false)>0){
+						if(this.context.mouse.check(0,0,w*8,w*8,true,false) || this.context.touch.check(0,0,w*8,w*8,true,false)){
 							this.context.touch.touches=[];
 							
 						/*	var el = document.createElement("DIV");
@@ -507,7 +507,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 							
 						}
 					}else{
-						if(this.context.mouse.check(0,0,this.context.canvas.w,this.context.canvas.h,true,false) || this.context.touch.check(0,0,this.context.canvas.w,this.context.canvas.h,true,false)>0){
+						if(this.context.mouse.check(0,0,this.context.canvas.w,this.context.canvas.h,true,false) || this.context.touch.check(0,0,this.context.canvas.w,this.context.canvas.h,true,false)){
 							this.focused=true;
 							this.context.touch.touches=[];
 						}
