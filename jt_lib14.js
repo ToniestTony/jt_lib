@@ -334,6 +334,12 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
             context=this;
             this.interval=self.setInterval(function(){context.mainLoop()},1000/this.fps,context)
         },
+		//change the main loop
+        changeLoop: function(){
+            context=this;
+            clearInterval(this.interval)
+            this.interval=self.setInterval(function(){context.mainLoop()},1000/this.fps,context)
+        },
         mainLoop:function(){
             
             //if jt.stop==true, remove the setInterval
@@ -507,7 +513,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 							
 						}
 					}else{
-						if(this.context.mouse.check(0,0,this.context.canvas.w,this.context.canvas.h,true,false) || this.context.touch.check(0,0,this.context.canvas.w,this.context.canvas.h,true,false)){
+						if(this.context.mouse.check(0,0,this.context.canvas.w,this.context.canvas.h,true,false) || this.context.touch.check()){
 							this.focused=true;
 							this.context.touch.touches=[];
 						}
@@ -1368,7 +1374,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
                 this.ctx.textAlign=textAlign
             }
             if(fontSize!=undefined){
-                this.fontSize=fontSize
+				this.font(this.fontName,fontSize);
             }
             this.ctx.fillStyle= this.color(color);
             this.ctx.font=this.fontSize+"px "+this.fontName;
@@ -1430,7 +1436,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
                 this.ctx.textAlign=textAlign
             }
             if(fontSize!=undefined){
-                this.fontSize=fontSize
+                this.font(this.fontName,fontSize);
             }
             this.ctx.strokeStyle= this.color(color);
             if(lineW<=0){lineW=1}
@@ -1482,7 +1488,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
         font:function(fontName,size,color){
             this.fontName=fontName;
             this.fontSize=size;
-			if(this.cam.active){this.fontSize=size*this.canvas.pixelRate;}
+			if(this.cam.active){this.fontSize=size;}
             this.ctx.font=this.fontSize+"px "+this.fontName;
             this.ctx.fillStyle= this.color(color);
         },
@@ -2691,8 +2697,8 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 				for(var i=0;i<evt.touches.length;i++){
 					var touch=evt.touches[i];
 					force++;
-					var tX=Math.round(((touch.clientX-rect.left)/(rect.right-rect.left))*context.canvas.src.width);
-					var tY=Math.round(((touch.clientY-rect.top)/(rect.bottom-rect.top))*context.canvas.src.height);
+					var tX=Math.round(((touch.clientX-rect.left)/(rect.right-rect.left))*context.canvas.src.width)/context.canvas.pixelRate;
+					var tY=Math.round(((touch.clientY-rect.top)/(rect.bottom-rect.top))*context.canvas.src.height)/context.canvas.pixelRate;
 					
 					touches[i]={};
 					touches[i].x=tX;
@@ -2733,8 +2739,8 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 				for(var i=0;i<evt.touches.length;i++){
 					var touch=evt.touches[i];
 					force++;
-					var tX=Math.round(((touch.clientX-rect.left)/(rect.right-rect.left))*context.canvas.src.width);
-					var tY=Math.round(((touch.clientY-rect.top)/(rect.bottom-rect.top))*context.canvas.src.height);
+					var tX=Math.round(((touch.clientX-rect.left)/(rect.right-rect.left))*context.canvas.src.width)/context.canvas.pixelRate;
+					var tY=Math.round(((touch.clientY-rect.top)/(rect.bottom-rect.top))*context.canvas.src.height)/context.canvas.pixelRate;
 					
 					touches[i]={};
 					touches[i].x=tX;
@@ -2774,8 +2780,8 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 				for(var i=0;i<evt.touches.length;i++){
 					var touch=evt.touches[i];
 					force++;
-					var tX=Math.round(((touch.clientX-rect.left)/(rect.right-rect.left))*context.canvas.src.width);
-					var tY=Math.round(((touch.clientY-rect.top)/(rect.bottom-rect.top))*context.canvas.src.height);
+					var tX=Math.round(((touch.clientX-rect.left)/(rect.right-rect.left))*context.canvas.src.width)/context.canvas.pixelRate;
+					var tY=Math.round(((touch.clientY-rect.top)/(rect.bottom-rect.top))*context.canvas.src.height)/context.canvas.pixelRate;
 					
 					touches[i]={};
 					touches[i].x=tX;
@@ -2814,8 +2820,8 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 				for(var i=0;i<evt.touches.length;i++){
 					var touch=evt.touches[i];
 					force++;
-					var tX=Math.round(((touch.clientX-rect.left)/(rect.right-rect.left))*context.canvas.src.width);
-					var tY=Math.round(((touch.clientY-rect.top)/(rect.bottom-rect.top))*context.canvas.src.height);
+					var tX=Math.round(((touch.clientX-rect.left)/(rect.right-rect.left))*context.canvas.src.width)/context.canvas.pixelRate;
+					var tY=Math.round(((touch.clientY-rect.top)/(rect.bottom-rect.top))*context.canvas.src.height)/context.canvas.pixelRate;
 					
 					touches[i]={};
 					touches[i].x=tX;
