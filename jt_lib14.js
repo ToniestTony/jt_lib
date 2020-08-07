@@ -340,6 +340,17 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
             clearInterval(this.interval)
             this.interval=self.setInterval(function(){context.mainLoop()},1000/this.fps,context)
         },
+		//loading screen
+		loadingScreen:function(){
+			var ctx=this.context.canvas.ctx;
+			ctx.fillStyle="white";
+			ctx.fillRect(0,0,this.context.canvas.w,this.context.canvas.h)
+			ctx.fillStyle="black";
+			ctx.font="20px Consolas";
+			ctx.textAlign="center";
+			ctx.fillText("Loading game...",this.context.canvas.w/2,this.context.canvas.h/2-20)
+			ctx.fillText("(Made in JT Library)",this.context.canvas.w/2,this.context.canvas.h/2+20)
+		},
         mainLoop:function(){
             
             //if jt.stop==true, remove the setInterval
@@ -413,7 +424,8 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
                     }
 
                 console.log("(JT"+this.context.version+")loop.mainLoop","Load progress: "+this.loadCounter+" / "+this.loadCounterMax)
-                if(load){this.loaded=true;}
+				this.loadingScreen();
+				if(load){this.loaded=true;}
 
             }else
             if(!this.pause){
@@ -583,11 +595,14 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 				if(this.debug){
 					for(var i=0;i<this.debugs.length;i++){
 						var d=this.debugs[i];
+						var cam=this.context.draw.cam.active;
+						this.context.draw.cam.active=false;
 						if(d.type=="text"){
 							this.context.draw.text(d.string,d.x,d.y,d.color,d.textAlign,d.fontSize,d.rotation,d.maxChars,d.newLineHeight);
 						}else if(d.type=="shape"){
 							this.context.draw.shape(d);
 						}
+						this.context.draw.cam.active=cam;
 						if(d.stay==false){
 							this.debugs.splice(i,1)
 							i--;
