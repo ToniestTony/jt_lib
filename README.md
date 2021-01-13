@@ -1,5 +1,5 @@
 # jt_lib
-A library to make HTML5 2D games with the canvas much easier/faster! Made by Antoine Beaulieu Savard (ToniestTony)
+A library to make HTML5 2D games with the canvas much easier/faster! Made by Antoine (ToniestTony)
 
 Here are some of the features:
 
