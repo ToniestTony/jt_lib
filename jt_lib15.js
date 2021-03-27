@@ -182,6 +182,8 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 			
 			this.context.touch.canvas.w=w;
             this.context.touch.canvas.h=h;
+			
+			this.smoothing(false);
         },
         setId(id){
             this.id=id;
@@ -266,6 +268,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 		
 		fullScreenBtn:undefined,
 		focused:false,
+		soundsPlayed:false,
 		
 		debug:false,
 		debugs:[],
@@ -337,16 +340,21 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 			this.context.assets.mute(true);
 			for(var soun in this.context.assets.sounds){
 				if(this.context.assets.sounds.hasOwnProperty(soun)){
-					this.context.assets.play(soun)
+					if(soun!="title"){
+						this.context.assets.play(soun)
+					}
 				}
 			}
 			
 			for(var soun in this.context.assets.sounds){
 				if(this.context.assets.sounds.hasOwnProperty(soun)){
-					this.context.assets.stop(soun)
+					if(soun!="title"){
+						this.context.assets.stop(soun)
+					}
 				}
 			}
 			this.context.assets.mute(false);
+			this.soundsPlayed=true;
 		},
         //start the main loop
         startLoop: function(){
@@ -357,6 +365,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
         changeLoop: function(){
             context=this;
             clearInterval(this.interval)
+			this.waveIterations=Math.PI*2/this.fps;
             this.interval=self.setInterval(function(){context.mainLoop()},1000/this.fps,context)
         },
 		//loading screen
@@ -366,10 +375,10 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 			ctx.fillRect(0,0,this.context.canvas.w,this.context.canvas.h)
 			ctx.fillStyle="black";
 			
-			ctx.font="48px Consolas";
+			ctx.font="40px Consolas";
 			ctx.textAlign="center";
 			ctx.textBaseline="top";
-			ctx.fillText("JT Library v"+this.context.version,this.context.canvas.w/2,20)
+			ctx.fillText("JT Library "+this.context.version,this.context.canvas.w/2,20)
 			
 			var percent=Math.floor(this.loadCounter/this.loadCounterMax*100);
 			
@@ -532,14 +541,14 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 						var w=50/8;
 						
 						//check if user pressed the button
-						if(this.context.mouse.check(0,0,w*8,w*8,true,false) || this.context.touch.check(0,0,w*8,w*8,true,false)){
+						if(this.context.mouse.check(0,0,w*8,w*8,true,false) || this.context.touch.check(0,0,w*8,w*8,true,false) || jt.kPress("f11")){
 							this.context.touch.touches=[];
 							
 						/*	var el = document.createElement("DIV");
 							el.setAttribute("id","jeuConteneur");
 							document.body.append(el);*/
 							var el=document.getElementById(this.context.canvas.src.id);
-							if (el.requestFullscreen) {
+							/*if (el.requestFullscreen) {
 								el.requestFullscreen();
 							} else if (el.mozRequestFullScreen) { // Firefox 
 								el.mozRequestFullScreen();
@@ -547,7 +556,12 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 								el.webkitRequestFullscreen();
 							} else if (el.msRequestFullscreen) { // IE/Edge 
 								el.msRequestFullscreen();
-							}
+							}*/
+							el.requestFullscreen();
+							el.mozRequestFullScreen();
+							el.webkitRequestFullscreen();
+							el.msRequestFullscreen();
+
 							//setTimeout(this.context.canvas.fullscreen.bind(this.context.canvas),100);
 							
 						}
@@ -560,6 +574,14 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 							}
 							this.context.touch.touches=[];
 						}
+					}
+				}
+				
+				//fullscreenBtn remove inputs until clicked
+				if(this.fullScreenBtn && !document.fullscreen){
+					if(!this.focused){
+						this.context.keyboard.release();
+						this.context.gamepad.release();
 					}
 				}
 				
@@ -694,7 +716,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
                 
                 //wave
                 this.waveX+=this.waveIterations;
-                if(this.waveX>this.waveIterations*60){
+                if(this.waveX>this.waveIterations*this.fps){
                     this.waveX=this.waveIterations;
                 }
                 this.waveY=Math.sin(this.waveX)
@@ -1416,6 +1438,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 
         //Drawing text
         text:function(string,x,y,color,textAlign,fontSize,rotation,maxChars,newLineHeight){
+			string=string.toString();
             if(textAlign!=undefined){
                 this.ctx.textAlign=textAlign
             }
@@ -1992,7 +2015,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
             return Math.sin(angle*Math.PI/180)
         },
 
-       //Get the angle from a direction or 2 points
+       //Get the angle from a direction or 2 points, 0 is the north and goes clockwise
         angle:function(x,y,x2,y2){
             var deltaX=-x;
             var deltaY=y;
@@ -2344,10 +2367,10 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
             if(this.checkConnected(controller)){
                 if(button==undefined){
                     for(var i=0;i<this.gamepads[controller].buttons.length;i++){
-                        this.gamepads[controller].buttons.value=0;
+                        this.gamepads[controller].buttons[i].value=0;
                     }
                 }else{
-                    if(this.   buttons[button]!=undefined){
+                    if(this.buttons[button]!=undefined){
                         button=this.buttons[button];
                     }
                     this.gamepads[controller].buttons[button].value=0;
@@ -2473,7 +2496,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 			}
 			//keydown,keyup
 			var evt = new KeyboardEvent(evt, {'keyCode':keyCode});
-			document.dispatchEvent (evt);
+			document.dispatchEvent(evt);
 		},
         check: function(keyCode) {
             if(typeof(keyCode)=="object" && keyCode.length>0){
@@ -2520,6 +2543,9 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
             if(keyCode==undefined){
                 this.keysdown.splice(0,this.keysdown.length)
             }else{
+				if(this.keys[keyCode]!=undefined){
+					keyCode=this.keys[keyCode];
+				}
                 var found = undefined;
                 for(var i=0; i<this.keysdown.length; i++) {
                     if(this.keysdown[i].key == keyCode) {found=i;}
@@ -2706,6 +2732,16 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
         });
 
         context.canvas.src.addEventListener("mouseup", function(evt) {
+			if(document.activeElement.tagName!="INPUT"){
+				evt.preventDefault();
+				
+				
+				context.mouse.down[evt.which-1]=false;
+				context.mouse.press[evt.which-1]=false;
+			}
+        });
+		
+		context.canvas.src.addEventListener("mouseout", function(evt) {
 			if(document.activeElement.tagName!="INPUT"){
 				evt.preventDefault();
 				
@@ -3793,51 +3829,51 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 		return this.touch.touches;
 	}
     
-	this.touchCheck=function(x,y,w,h,cam,num){
+	this.touchCheck=function(x,y,w,h,cam,fingers){
 		if(typeof x=="object"){
-			return this.touch.check(x.x,x.y,x.w,x.h,false,x.cam,x.num);
+			return this.touch.check(x.x,x.y,x.w,x.h,false,x.cam,x.fingers);
 		}else{
-			return this.touch.check(x,y,w,h,false,cam,num);
+			return this.touch.check(x,y,w,h,false,cam,fingers);
 		}
     }
 	
-	this.tCheck=function(x,y,w,h,cam,num){
+	this.tCheck=function(x,y,w,h,cam,fingers){
         if(typeof x=="object"){
-			return this.touch.check(x.x,x.y,x.w,x.h,false,x.cam,x.num);
+			return this.touch.check(x.x,x.y,x.w,x.h,false,x.cam,x.fingers);
 		}else{
-			return this.touch.check(x,y,w,h,false,cam,num);
+			return this.touch.check(x,y,w,h,false,cam,fingers);
 		}
     }
 	
-	this.tC=function(x,y,w,h,cam,num){
+	this.tC=function(x,y,w,h,cam,fingers){
         if(typeof x=="object"){
-			return this.touch.check(x.x,x.y,x.w,x.h,false,x.cam,x.num);
+			return this.touch.check(x.x,x.y,x.w,x.h,false,x.cam,x.fingers);
 		}else{
-			return this.touch.check(x,y,w,h,false,cam,num);
+			return this.touch.check(x,y,w,h,false,cam,fingers);
 		}
     }
 	
-	this.touchPress=function(x,y,w,h,cam,num){
+	this.touchPress=function(x,y,w,h,cam,fingers){
         if(typeof x=="object"){
-			return this.touch.check(x.x,x.y,x.w,x.h,true,x.cam,x.num);
+			return this.touch.check(x.x,x.y,x.w,x.h,true,x.cam,x.fingers);
 		}else{
-			return this.touch.check(x,y,w,h,true,cam,num);
+			return this.touch.check(x,y,w,h,true,cam,fingers);
 		}
     }
 	
-	this.tPress=function(x,y,w,h,cam,num){
+	this.tPress=function(x,y,w,h,cam,fingers){
         if(typeof x=="object"){
-			return this.touch.check(x.x,x.y,x.w,x.h,true,x.cam,x.num);
+			return this.touch.check(x.x,x.y,x.w,x.h,true,x.cam,x.fingers);
 		}else{
-			return this.touch.check(x,y,w,h,true,cam,num);
+			return this.touch.check(x,y,w,h,true,cam,fingers);
 		}
     }
 	
-	this.tP=function(x,y,w,h,cam,num){
+	this.tP=function(x,y,w,h,cam,fingers){
         if(typeof x=="object"){
-			return this.touch.check(x.x,x.y,x.w,x.h,true,x.cam,x.num);
+			return this.touch.check(x.x,x.y,x.w,x.h,true,x.cam,x.fingers);
 		}else{
-			return this.touch.check(x,y,w,h,true,cam,num);
+			return this.touch.check(x,y,w,h,true,cam,fingers);
 		}
     }
 	
