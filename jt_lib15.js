@@ -632,14 +632,15 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 						}
 						this.context.draw.alpha(1);
 					}else{
-						
+						var before=this.context.draw.cam.active;
+						this.context.draw.cam.active=false;
 						this.context.draw.alpha(0.5);
 						this.context.draw.ctx.fillStyle="black";
 						this.context.draw.ctx.fillRect(0,0,this.context.canvas.w,this.context.canvas.h);
-						//this.context.draw.ctx.fillStyle="white";
 						this.context.draw.font("Consolas",20);
 						this.context.draw.alpha(1);
 						this.context.draw.text("Click anywhere to start!",this.context.canvas.w/2,this.context.canvas.h/2,"white","center");
+						this.context.draw.cam.active=before;
 					}
 				}
 				
