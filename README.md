@@ -3,20 +3,19 @@ A library to make HTML5 2D games with the canvas much easier/faster! Made by Ant
 
 Here are some of the features:
 
-* **Load** and draw images and animations, even rotate and draw parts of them.
-* **Play**, repeat and stop sounds (even in safari!).
+* **Load** and draw images and animations, even rotate, scale and clip parts of them.
+* **Play**, repeat and stop sounds
 * **Includes** full support of mouse, keyboard, gamepads and touch(mobile) inputs. Including pressing, holding and releasing.
 * **Change** the size and fps of the canvas even while the game is running.
-* **Draw** and rotate basic shapes.
-* **Show** text with fonts you choose and with many features like rotation and automatic line breaks at a chosen width.
-* **Edit** and move the virtual camera to zoom or move the game, while still having elements like UI stay in place.
+* **Draw** basic shapes and texts, even rotate, scale and clip parts of them.
+* **Transform** and move the virtual camera to zoom or move the game, you can have multiple cameras to simulate split screen while still having elements like UI stay in place.
 * **Use** math functions that are used in gamemaking like random, stay, angle, distance, checking collisions and many more.
 * **Juice up** your game with screen shakes, particles and other misc features like alarms and checking for key combinations.
-* **Debug** with easy to use functions to quickly crush your bugs and get back to the important stuff.
+* **Debug** with easy to use functions to quickly crush your bugs, check performance and get back to the important stuff.
 * **A bunch of other features!**
 
 ## Getting started
-* Download the jt_lib15.js file and index.html for a quick template.
+* Download the jt_lib17.js file and index.html for a quick template.
 * Start programming your awesome game in the setup and update functions of the template.
 * **That's it!**
 
