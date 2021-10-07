@@ -759,7 +759,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 					var alpha=this.context.draw.alpha();
 					var before=this.context.draw.camActive();
 					this.context.draw.camActive(false);
-					this.context.draw.alpha(0.75);
+					this.context.draw.alpha(0.67);
 					this.context.draw.rect(0,0,this.context.canvas.w,this.context.canvas.h,"black");
 					this.context.draw.font("Consolas",20);
 					var string="Click here to play!";
