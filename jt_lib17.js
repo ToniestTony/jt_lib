@@ -759,9 +759,8 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 					var alpha=this.context.draw.alpha();
 					var before=this.context.draw.camActive();
 					this.context.draw.camActive(false);
-					this.context.draw.alpha(0.67);
-					this.context.draw.ctx.fillStyle="black";
-					this.context.draw.ctx.fillRect(0,0,this.context.canvas.w,this.context.canvas.h);
+					this.context.draw.alpha(0.75);
+					this.context.draw.rect(0,0,this.context.canvas.w,this.context.canvas.h,"black");
 					this.context.draw.font("Consolas",20);
 					var string="Click here to play!";
 					//change font size
@@ -5021,48 +5020,52 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 				if(showFps==undefined){showFps=true;}
 				if(showDrawn==undefined){showDrawn=true;}
 				if(showSeparate==undefined){showSeparate=true;}
-				var delay=this.round(this.loop.delay/1000,3);
-				var fps=this.round((this.loop.fps/delay)/this.loop.fps,2);
-				if(fps.toString().split(".").length==2){
-					if(fps.toString().split(".")[1].length==1){
-						fps=fps+"0";
-					}
-				}else{
-					fps=fps+".00";
-				}
-				var fpsText="Fps: "+fps;
 				
-				var calledAll=this.draw.calledI+this.draw.calledA+this.draw.calledT+this.draw.calledS;
-				var clippedAll=this.draw.clippedI+this.draw.clippedA+this.draw.clippedT+this.draw.clippedS;
-				var drawnAll=calledAll-clippedAll;
-				
-				var drawnText="Drawn: "+drawnAll+"/"+calledAll;
-				
-				var drawnI="Images: "+(this.draw.calledI-this.draw.clippedI)+"/"+this.draw.calledI;
-				if(this.draw.calledI==0){drawnI="Images: 0";}
-				
-				var drawnA="Anims: "+(this.draw.calledA-this.draw.clippedA)+"/"+this.draw.calledA;
-				if(this.draw.calledA==0){drawnA="Anims: 0";}
-				
-				var drawnT="Texts: "+(this.draw.calledT-this.draw.clippedT)+"/"+this.draw.calledT;
-				if(this.draw.calledT==0){drawnT="Texts: 0";}
-				
-				var drawnS="Shapes: "+(this.draw.calledS-this.draw.clippedS)+"/"+this.draw.calledS;
-				if(this.draw.calledS==0){drawnS="Shapes: 0";}
-				
-				var separateText=drawnI+" | "+drawnA+" | "+drawnT+" | "+drawnS;
-				var fS=10;
-				var y=0;
 				var h=0;
-				if(showFps){h+=10;}
-				if(showDrawn){h+=10;}
-				if(showSeparate){h+=40;}
+				if(showFps){h+=10;this.draw.calledT--;}
+				if(showDrawn){h+=10;this.draw.calledT--;}
+				if(showSeparate){h+=40;this.draw.calledT-=4;}
+				
 				if(h>0){
+					this.draw.calledS--;
+				
+					var delay=this.round(this.loop.delay/1000,3);
+					var fps=this.round((this.loop.fps/delay)/this.loop.fps,2);
+					if(fps.toString().split(".").length==2){
+						if(fps.toString().split(".")[1].length==1){
+							fps=fps+"0";
+						}
+					}else{
+						fps=fps+".00";
+					}
+					var fpsText="Fps: "+fps;
+					
+					var calledAll=this.draw.calledI+this.draw.calledA+this.draw.calledT+this.draw.calledS;
+					var clippedAll=this.draw.clippedI+this.draw.clippedA+this.draw.clippedT+this.draw.clippedS;
+					var drawnAll=calledAll-clippedAll;
+					
+					var drawnText="Drawn: "+drawnAll+"/"+calledAll;
+					
+					var drawnI="Images: "+(this.draw.calledI-this.draw.clippedI)+"/"+this.draw.calledI;
+					if(this.draw.calledI==0){drawnI="Images: 0";}
+					
+					var drawnA="Anims: "+(this.draw.calledA-this.draw.clippedA)+"/"+this.draw.calledA;
+					if(this.draw.calledA==0){drawnA="Anims: 0";}
+					
+					var drawnT="Texts: "+(this.draw.calledT-this.draw.clippedT)+"/"+this.draw.calledT;
+					if(this.draw.calledT==0){drawnT="Texts: 0";}
+					
+					var drawnS="Shapes: "+(this.draw.calledS-this.draw.clippedS)+"/"+this.draw.calledS;
+					if(this.draw.calledS==0){drawnS="Shapes: 0";}
+					
+					var separateText=drawnI+" | "+drawnA+" | "+drawnT+" | "+drawnS;
+					var fS=10;
+					var y=0;
 		
 					this.loop.addDebugShape({x:0,y:0,w:85,h:h,c:[0,0,0,0.5],r:0,stay:false})
 					
-					if(showFps){this.loop.addDebugText(fpsText,0,0,[0,255,0],"left",fS,0,50,fS,false);y++}
-					if(showDrawn){this.loop.addDebugText(drawnText,00,fS*y,[0,255,0],"left",fS,0,50,fS,false);y++}
+					if(showFps){this.loop.addDebugText(fpsText,0,0,[0,255,0],"left",fS,0,50,fS,false);y++;}
+					if(showDrawn){this.loop.addDebugText(drawnText,00,fS*y,[0,255,0],"left",fS,0,50,fS,false);y++;}
 					if(showSeparate){
 						this.loop.addDebugText(drawnI,0,fS*y,[0,255,0],"left",fS,0,50,fS,false);y++;
 						this.loop.addDebugText(drawnA,0,fS*y,[0,255,0],"left",fS,0,50,fS,false);y++;
