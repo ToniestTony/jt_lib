@@ -4,6 +4,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
     this.init=function(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBtn){
         //add attributes to the canvas object of JT
         this.version=17;
+		this.loop.version=this.version;
         var actualId=id;
 
         if(typeof(id)=="object"){
@@ -288,11 +289,15 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
         setupName:"setup",
         updateName:"update",
         obj:undefined,
+		
+		version:undefined,
 
         frames:0,
         fps:60,
         sec:0,
         interval:undefined,
+		then:0,
+		delay:0,
 
         pause:false,
         stop:false,
@@ -362,6 +367,9 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
             this.context.touch.draw=this.context.draw;
 			this.context.touch.canvas.w=this.context.canvas.src.width;
             this.context.touch.canvas.h=this.context.canvas.src.height
+			
+            this.context.stats.loop=this.context.loop;
+            this.context.stats.draw=this.context.draw;
 
 			this.context.particles.draw=this.context.draw;
 
@@ -403,6 +411,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
         //start the main loop
         startLoop: function(){
             var context=this;
+			this.then=new Date().getTime();
 			this.interval=setInterval(context.doLoop,1000/this.fps,context)
         },
 		//do the loop
@@ -436,7 +445,9 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 
 		},
         mainLoop:function(){
-
+			var now=new Date().getTime();
+			this.delay=now-this.then;
+			this.then=now;
             //if jt.stop==true, remove the setInterval
             if(this.stop){
                 window.clearInterval(this.interval);
@@ -666,6 +677,15 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 						}
 					}
 				}
+				
+				this.context.draw.calledI=0;
+				this.context.draw.calledA=0;
+				this.context.draw.calledT=0;
+				this.context.draw.calledS=0;
+				this.context.draw.clippedI=0;
+				this.context.draw.clippedA=0;
+				this.context.draw.clippedT=0;
+				this.context.draw.clippedS=0;
 
 				//update mouse and touch coordinates relative to the camera
 				if(this.context.draw.cam[this.context.draw.currCam].active){
@@ -1099,6 +1119,10 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 
 		clearDebugs:function(){
 			this.debugs=[];
+		},
+		
+		frameDelay:function(){
+			return this.delay;
 		}
     }
 
@@ -1426,10 +1450,19 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 		filterSaturate:100,
 		filterSepia:0,
 
-		//loop
+		//loop and assets
 		loop:undefined,
-
         assets:undefined,
+		
+		//stats
+		clippedI:0,
+		clippedA:0,
+		clippedT:0,
+		clippedS:0,
+		calledI:0,
+		calledA:0,
+		calledT:0,
+		calledS:0,
 
         //public functions
 
@@ -2166,9 +2199,8 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
                 if(image.visible==false){
                     //invisible
                 }else{
+					this.calledI++;
                     //visible
-
-
                     if(newX!=undefined){
                         image.x=newX;
                     }
@@ -2182,6 +2214,8 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
                         image.img.width=w;
                         image.img.height=h;
                     }
+					
+					if(rotation==undefined){rotation=0;}
 
                     var tempW=image.img.width;
                     var tempH=image.img.height;
@@ -2213,9 +2247,19 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 
 					this.ctx.save();
 					if(this.cam[this.currCam].active){
-						if(!this.inCamera(x,y,w,h)){
-							this.ctx.restore();
-							return;
+						if(rotation!=0){
+							var max=this.maxRotated(x,y,w,h);
+							if(!this.inCamera(max[0],max[1],max[2],max[3])){
+								this.ctx.restore();
+								this.clippedI++;
+								return;
+							}
+						}else{
+							if(!this.inCamera(x,y,w,h)){
+								this.ctx.restore();
+								this.clippedI++;
+								return;
+							}
 						}
 
 						camX=this.cam[this.currCam].x;
@@ -2224,7 +2268,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 						camH=Math.abs(this.canvas.src.height/this.cam[this.currCam].h)
 
 						var pos=this.cam[this.currCam].pos;
-						if(pos.x!=0 || pos.y!=0 || pos.w!=this.canvas.src.width || pos.h!=this.canvas.src.height){
+						if(pos.x!=0 || pos.y!=0 || pos.w!=this.canvas.src.width || pos.h!=this.canvas.src.height){
 							posX=this.cam[this.currCam].pos.x;
 							posY=this.cam[this.currCam].pos.y;
 
@@ -2253,13 +2297,23 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 							this.ctx.translate(-transX,-transY);
 						}
 					}else{
-						if(!this.inCanvas(x,y,w,h)){
-							this.ctx.restore();
-							return;
+						if(rotation!=0){
+							var max=this.maxRotated(x,y,w,h);
+							if(!this.inCanvas(max[0],max[1],max[2],max[3])){
+								this.ctx.restore();
+								this.clippedI++;
+								return;
+							}
+						}else{
+							if(!this.inCanvas(x,y,w,h)){
+								this.ctx.restore();
+								this.clippedI++;
+								return;
+							}
 						}
 					}
 
-                    if(rotation!=undefined){
+                    if(rotation!=0){
 						var transX=((tempW/2)*camW-camX*camW)+x*camW
 						var transY=((tempH/2)*camH-camY*camH)+y*camH
 
@@ -2296,6 +2350,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
                 if(anim.visible==false){
                     //invisible
                 }else{
+					this.calledA++;
                     //visible
                     if(newX!=undefined){
                         anim.x=newX;
@@ -2303,6 +2358,8 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
                     if(newY!=undefined){
                         anim.y=newY;
                     }
+					
+					if(rotation==undefined){rotation=0;}
 
 					var x=anim.x;
                     var y=anim.y;
@@ -2331,9 +2388,19 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 
 					this.ctx.save();
 					if(this.cam[this.currCam].active){
-						if(!this.inCamera(x,y,w,h)){
-							this.ctx.restore();
-							return;
+						if(rotation!=0){
+							var max=this.maxRotated(x,y,w,h);
+							if(!this.inCamera(max[0],max[1],max[2],max[3])){
+								this.ctx.restore();
+								this.clippedA++;
+								return;
+							}
+						}else{
+							if(!this.inCamera(x,y,w,h)){
+								this.ctx.restore();
+								this.clippedA++;
+								return;
+							}
 						}
 
 						camX=this.cam[this.currCam].x;
@@ -2342,7 +2409,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 						camH=Math.abs(this.canvas.src.height/this.cam[this.currCam].h)
 
 						var pos=this.cam[this.currCam].pos;
-						if(pos.x!=0 || pos.y!=0 || pos.w!=this.canvas.src.width || pos.h!=this.canvas.src.height){
+						if(pos.x!=0 || pos.y!=0 || pos.w!=this.canvas.src.width || pos.h!=this.canvas.src.height){
 							posX=this.cam[this.currCam].pos.x;
 							posY=this.cam[this.currCam].pos.y;
 
@@ -2371,13 +2438,23 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 							this.ctx.translate(-transX,-transY);
 						}
 					}else{
-						if(!this.inCanvas(x,y,w,h)){
-							this.ctx.restore();
-							return;
+						if(rotation!=0){
+							var max=this.maxRotated(x,y,w,h);
+							if(!this.inCanvas(max[0],max[1],max[2],max[3])){
+								this.ctx.restore();
+								this.clippedA++;
+								return;
+							}
+						}else{
+							if(!this.inCanvas(x,y,w,h)){
+								this.ctx.restore();
+								this.clippedA++;
+								return;
+							}
 						}
 					}
 
-                    if(rotation!=undefined){
+                    if(rotation!=0){
 						var transX=((tempW/2)*camW-camX*camW)+x*camW
 						var transY=((tempH/2)*camH-camY*camH)+y*camH
 
@@ -2562,6 +2639,8 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 
         //Drawing
         fill:function(type,x,y,w,h,rotation,string){
+			if(type=="text"){this.calledT++;}else{this.calledS++;}
+			
             var camX=0;
 			var camY=0;
 			var camW=1;
@@ -2571,28 +2650,41 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 			var posY=0;
 			var posW=1;
 			var posH=1;
+			
+			if(rotation==undefined){rotation=0;}
 
 			var fS=this.fontSize;
 			this.ctx.save();
             if(this.cam[this.currCam].active){
 				if(type=="text"){
 					var align=this.align()
-					if(align=="left"){
-						if(!this.inCamera(x,y,this.textW(string),this.textH(string))){
-							this.ctx.restore();
-							return;
-						}
-					}else if(align=="right"){
-						if(!this.inCamera(x-this.textW(string),y,this.textW(string),this.textH(string))){
-							this.ctx.restore();
-							return;
-						}
+					var newX=x;
+					var newY=y;
+					var newW=this.textW(string);
+					var newH=this.textH(string);
+					if(align=="right"){
+						newX=x-newW;
 					}else if(align=="center"){
-						if(!this.inCamera(x-this.textW(string)/2,y,this.textW(string),this.textH(string))){
+						newX=x-newW/2;
+					}
+					
+					
+					if(rotation!=0){
+						var max=this.maxRotated(newX,newY,newW,newH);
+						if(!this.inCamera(max[0],max[1],max[2],max[3])){
 							this.ctx.restore();
+							this.clippedT++;
+							return;
+						}
+					}else{
+						if(!this.inCamera(newX,newY,newW,newH)){
+							this.ctx.restore();
+							this.clippedT++;
 							return;
 						}
 					}
+					
+					
 					var ratioCam=((camW+camH)/2);
 					if(ratioCam!=1){
 						if(camW==1){
@@ -2606,9 +2698,21 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 					}
 
 					fS*=ratioCam;
-				}else if(!this.inCamera(x,y,w,h)){
-					this.ctx.restore();
-					return;
+				}else{
+					if(rotation!=0){
+						var max=this.maxRotated(x,y,w,h);
+						if(!this.inCamera(max[0],max[1],max[2],max[3])){
+							this.ctx.restore();
+							this.clippedS++;
+							return;
+						}
+					}else{
+						if(!this.inCamera(x,y,w,h)){
+							this.ctx.restore();
+							this.clippedS++;
+							return;
+						}
+					}
 				}
 
 				camX=this.cam[this.currCam].x;
@@ -2617,7 +2721,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 				camH=Math.abs(this.canvas.src.height/this.cam[this.currCam].h)
 
 				var pos=this.cam[this.currCam].pos;
-				if(pos.x!=0 || pos.y!=0 || pos.w!=this.canvas.src.width || pos.h!=this.canvas.src.height){
+				if(pos.x!=0 || pos.y!=0 || pos.w!=this.canvas.src.width || pos.h!=this.canvas.src.height){
 					posX=this.cam[this.currCam].pos.x;
 					posY=this.cam[this.currCam].pos.y;
 
@@ -2665,13 +2769,52 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
                     this.ctx.translate(-transX,-transY);
 				}
 			}else{
-				if(!this.inCanvas(x,y,w,h)){
-					this.ctx.restore();
-					return;
+				if(type=="text"){
+					var align=this.align()
+					var newX=x;
+					var newY=y;
+					var newW=this.textW(string);
+					var newH=this.textH(string);
+					if(align=="right"){
+						newX=x-newW;
+					}else if(align=="center"){
+						newX=x-newW/2;
+					}
+					
+					
+					if(rotation!=0){
+						var max=this.maxRotated(newX,newY,newW,newH);
+						if(!this.inCanvas(max[0],max[1],max[2],max[3])){
+							this.ctx.restore();
+							this.clippedT++;
+							return;
+						}
+					}else{
+						if(!this.inCanvas(newX,newY,newW,newH)){
+							this.ctx.restore();
+							this.clippedT++;
+							return;
+						}
+					}
+				}else{
+					if(rotation!=0){
+						var max=this.maxRotated(x,y,w,h);
+						if(!this.inCanvas(max[0],max[1],max[2],max[3])){
+							this.ctx.restore();
+							this.clippedS++;
+							return;
+						}
+					}else{
+						if(!this.inCanvas(x,y,w,h)){
+							this.ctx.restore();
+							this.clippedS++;
+							return;
+						}
+					}
 				}
 			}
 
-            if(rotation!=undefined){
+            if(rotation!=0){
                 if(type=="line"){
 					var transX=(((w-x)/2)*camW-camX*camW)+x*camW;
 					var transY=(((h-y)/2)*camH-camY*camH)+y*camH;
@@ -2745,7 +2888,28 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
             this.ctx.restore();
 
         },
-
+		
+		maxRotated:function(x,y,w,h){
+			var newW=w*1.5;
+			var newH=h*1.5;
+			if(w>h){
+				newW=w+(h*0.5);
+				newH=newW;
+			}else if(w<h){
+				newH=h+(w*0.5);
+				newW=newH;
+			}
+			
+			var newX=(x+w/2)-(newW/2);
+			var newY=(y+h/2)-(newH/2);
+			
+			var coords=[newX,newY,newW,newH];
+			
+			return coords;
+		},
+		
+		
+		//Clipping shapes
 		clip:function(type,x,y,w,h,rotation,lineW){
 			var camX=0;
 			var camY=0;
@@ -2767,7 +2931,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 				camH=Math.abs(this.canvas.src.height/this.cam[this.currCam].h)
 
 				var pos=this.cam[this.currCam].pos;
-				if(pos.x!=0 || pos.y!=0 || pos.w!=this.canvas.src.width || pos.h!=this.canvas.src.height){
+				if(pos.x!=0 || pos.y!=0 || pos.w!=this.canvas.src.width || pos.h!=this.canvas.src.height){
 					posX=this.cam[this.currCam].pos.x;
 					posY=this.cam[this.currCam].pos.y;
 
@@ -3213,7 +3377,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 		},
 
 		round:function(num,digits){
-      if(digits==undefined){digits=0;}
+			if(digits==undefined){digits=0;}
 			var mult=10**digits;
 			return Math.round((num+Number.EPSILON) * mult) / mult;
 		}
@@ -4838,6 +5002,120 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
             return (this.isAndroid() || this.isBlackBerry() || this.isIOS() || this.isOpera() || this.isWindows());
         },
     }
+	
+	
+	
+	//***** STATS *****//
+	this.stats={
+		draw:undefined,
+		loop:undefined,
+		//round numbers
+		round:function(num,digits){
+			if(digits==undefined){digits=0;}
+			var mult=10**digits;
+			return Math.round((num+Number.EPSILON) * mult) / mult;
+		},
+		//Draw all stats
+		drawStats:function(showFps,showDrawn,showSeparate){
+			if(this.loop.debug){
+				if(showFps==undefined){showFps=true;}
+				if(showDrawn==undefined){showDrawn=true;}
+				if(showSeparate==undefined){showSeparate=true;}
+				var delay=this.round(this.loop.delay/1000,3);
+				var fps=this.round((this.loop.fps/delay)/this.loop.fps,2);
+				if(fps.toString().split(".").length==2){
+					if(fps.toString().split(".")[1].length==1){
+						fps=fps+"0";
+					}
+				}else{
+					fps=fps+".00";
+				}
+				var fpsText="Fps: "+fps;
+				
+				var calledAll=this.draw.calledI+this.draw.calledA+this.draw.calledT+this.draw.calledS;
+				var clippedAll=this.draw.clippedI+this.draw.clippedA+this.draw.clippedT+this.draw.clippedS;
+				var drawnAll=calledAll-clippedAll;
+				
+				var drawnText="Drawn: "+drawnAll+"/"+calledAll;
+				
+				var drawnI="Images: "+(this.draw.calledI-this.draw.clippedI)+"/"+this.draw.calledI;
+				if(this.draw.calledI==0){drawnI="Images: 0";}
+				
+				var drawnA="Anims: "+(this.draw.calledA-this.draw.clippedA)+"/"+this.draw.calledA;
+				if(this.draw.calledA==0){drawnA="Anims: 0";}
+				
+				var drawnT="Texts: "+(this.draw.calledT-this.draw.clippedT)+"/"+this.draw.calledT;
+				if(this.draw.calledT==0){drawnT="Texts: 0";}
+				
+				var drawnS="Shapes: "+(this.draw.calledS-this.draw.clippedS)+"/"+this.draw.calledS;
+				if(this.draw.calledS==0){drawnS="Shapes: 0";}
+				
+				var separateText=drawnI+" | "+drawnA+" | "+drawnT+" | "+drawnS;
+				var fS=10;
+				var y=0;
+				var h=0;
+				if(showFps){h+=10;}
+				if(showDrawn){h+=10;}
+				if(showSeparate){h+=40;}
+				if(h>0){
+		
+					this.loop.addDebugShape({x:0,y:0,w:85,h:h,c:[0,0,0,0.5],r:0,stay:false})
+					
+					if(showFps){this.loop.addDebugText(fpsText,0,0,[0,255,0],"left",fS,0,50,fS,false);y++}
+					if(showDrawn){this.loop.addDebugText(drawnText,00,fS*y,[0,255,0],"left",fS,0,50,fS,false);y++}
+					if(showSeparate){
+						this.loop.addDebugText(drawnI,0,fS*y,[0,255,0],"left",fS,0,50,fS,false);y++;
+						this.loop.addDebugText(drawnA,0,fS*y,[0,255,0],"left",fS,0,50,fS,false);y++;
+						this.loop.addDebugText(drawnT,0,fS*y,[0,255,0],"left",fS,0,50,fS,false);y++;
+						this.loop.addDebugText(drawnS,0,fS*y,[0,255,0],"left",fS,0,50,fS,false);
+					}
+				}
+			}
+        },
+		//Log all stats
+		log:function(showFps,showDrawn,showSeparate){
+			if(this.loop.debug){
+				if(showFps==undefined){showFps=true;}
+				if(showDrawn==undefined){showDrawn=true;}
+				if(showSeparate==undefined){showSeparate=true;}
+				var delay=this.round(this.loop.delay/1000,3);
+				var fps=this.round((this.loop.fps/delay)/this.loop.fps,2);
+				if(fps.toString().split(".").length==2){
+					if(fps.toString().split(".")[1].length==1){
+						fps=fps+"0";
+					}
+				}else{
+					fps=fps+".00";
+				}
+				var fpsText="Fps: "+fps;
+				if(!showFps){fpsText="";}
+				
+				var calledAll=this.draw.calledI+this.draw.calledA+this.draw.calledT+this.draw.calledS;
+				var clippedAll=this.draw.clippedI+this.draw.clippedA+this.draw.clippedT+this.draw.clippedS;
+				var drawnAll=calledAll-clippedAll;
+				
+				var drawnText="Drawn: "+drawnAll+"/"+calledAll;
+				if(!showDrawn){drawnText="";}
+				
+				var drawnI="Images: "+(this.draw.calledI-this.draw.clippedI)+"/"+this.draw.calledI;
+				if(this.draw.calledI==0){drawnI="Images: 0";}
+				
+				var drawnA="Anims: "+(this.draw.calledA-this.draw.clippedA)+"/"+this.draw.calledA;
+				if(this.draw.calledA==0){drawnA="Anims: 0";}
+				
+				var drawnT="Texts: "+(this.draw.calledT-this.draw.clippedT)+"/"+this.draw.calledT;
+				if(this.draw.calledT==0){drawnT="Texts: 0";}
+				
+				var drawnS="Shapes: "+(this.draw.calledS-this.draw.clippedS)+"/"+this.draw.calledS;
+				if(this.draw.calledS==0){drawnS="Shapes: 0";}
+				
+				var separateText=drawnI+" | "+drawnA+" | "+drawnT+" | "+drawnS;
+				if(!showSeparate){separateText="";}
+			
+				console.log("(JT"+this.loop.version+") Stats: "+fpsText+" | "+drawnText+" | "+separateText );
+			}
+		},
+	}
 
     //***** CREATE EVENT LISTENERs *****//
     this.createEventListeners=function(context) {
@@ -7000,6 +7278,15 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 
     this.mS=function(){
         return this.mouse.scroll;
+    }
+	
+	//stats
+	this.drawStats=function(showFps,showDrawn,showAll){
+        return this.stats.drawStats(showFps,showDrawn,showAll);
+    }
+	
+	this.logStats=function(showFps,showDrawn,showAll){
+        return this.stats.log(showFps,showDrawn,showAll);
     }
 
     //super macro
