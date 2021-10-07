@@ -7352,7 +7352,7 @@ TEMPLATE:
     <body>
         <div id="canContainer">
         <canvas id="can"></canvas>
-        <span>Made with <a href="https://github.com/ToniestTony/jt_lib">jt_lib16.js</a></span>
+        <span>Made with <a href="https://github.com/ToniestTony/jt_lib">jt_lib17.js</a></span>
             </div>
     </body>
     <script src="jt_lib17.js"></script>
