@@ -4955,7 +4955,29 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
         },
 		release:function(){
 			this.touches=[];
-		}
+		},
+        x:function(cam,touch){
+            if(cam==undefined){cam=true;}
+            if(touch==undefined){touch=0;}
+            if(this.touches.length-1>=touch){
+                if(cam){
+                    return this.touches[touch].cX;
+                }else{
+                    return this.touches[touch].x;
+                }
+            }
+        },
+        y:function(cam,touch){
+            if(cam==undefined){cam=true;}
+            if(touch==undefined){touch=0;}
+            if(this.touches.length-1>=touch){
+                if(cam){
+                    return this.touches[touch].cY;
+                }else{
+                    return this.touches[touch].y;
+                }
+            }
+        }
 	}
 
     //***** MOBILE *****//
@@ -7047,6 +7069,38 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 	this.tRelease=function(){
 		this.touch.release();
 	}
+    
+    this.touchX=function(touch){
+        return this.touch.x(false,touch);
+    }
+    
+    this.tX=function(touch){
+        return this.touch.x(false,touch);
+    }
+    
+    this.touchY=function(touch){
+        return this.touch.y(false,touch);
+    }
+    
+    this.tY=function(touch){
+        return this.touch.y(false,touch);
+    }
+    
+    this.touchCamX=function(touch){
+        return this.touch.x(true,touch);
+    }
+    
+    this.tCX=function(touch){
+        return this.touch.x(true,touch);
+    }
+    
+    this.touchCamY=function(touch){
+        return this.touch.y(true,touch);
+    }
+    
+    this.tCY=function(touch){
+        return this.touch.y(true,touch);
+    }
 
     //mobile
 
