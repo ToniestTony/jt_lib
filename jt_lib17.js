@@ -1729,9 +1729,9 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 			var anim=this.assets.anims[color];
 
             if(this.assets.anims[color]!=undefined){
-				this.context.image(color,0,0,this.canvas.w,this.canvas.h)
+				this.anim(color,0,0,this.canvas.w,this.canvas.h)
             }else if(this.assets.images[color]!=undefined){
-				this.context.anim(color,0,0,this.canvas.w,this.canvas.h)
+				this.image(color,0,0,this.canvas.w,this.canvas.h)
 			}else if(color!=undefined){
 				this.color(color,"fill");
 				this.ctx.fillRect(0,0,this.canvas.w,this.canvas.h);
