@@ -1473,7 +1473,13 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 			if(override){
 				this.filters=css;
 			}else{
-				this.filters+=css;
+                
+                if(this.filters=="none"){
+                    this.filters=css;
+                }else{
+                    this.filters+=css+" ";
+                }
+				
 			}
 			this.ctx.filter=this.filters;
 			this.filtered=true;
@@ -1494,75 +1500,87 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 			this.filterOpacity=100;
 			this.filterSaturate=100;
 			this.filterSepia=0;
-			this.compileFilters();
 			this.filtered=false;
 		},
 
 		changeBlur:function(num){
-			if(num==undefined){num=100}
+			if(num==undefined){num=0}
 			this.filterBlur=num;
-			this.compileFilters();
+            this.filter("blur("+this.filterBlur+"px)",false);
+			return this.filterBlur;
 		},
 
 		changeBrightness:function(num){
 			if(num==undefined){num=100}
 			this.filterBrightness=num;
-			this.compileFilters();
+            this.filter("brightness("+this.filterBrightness+"%)",false);
+			return this.filterBrightness;
 		},
 
 		changeContrast:function(num){
 			if(num==undefined){num=100}
 			this.filterContrast=num;
-			this.compileFilters();
+            this.filter("contrast("+this.filterContrast+"%)",false);
+			return this.filterContrast;
 		},
 
 		changeDropShadow:function(offsetX,offsetY,blurRadius,color){
+			if(offsetX==undefined){offsetX="0"}
+			if(offsetY==undefined){offsetY="0"}
+			if(blurRadius==undefined){blurRadius="#0"}
 			if(color==undefined){color="#000"}
 			this.filterShadowX=offsetX;
 			this.filterShadowY=offsetY;
 			this.filterShadowRadius=blurRadius;
 			this.filterShadowColor=this.color(color);
-			this.compileFilters();
+            this.filter("drop-shadow("+this.filterShadowX+"px "+this.filterShadowY+"px "+this.filterShadowRadius+"px "+this.filterShadowColor+")",false);
+            return [this.filterShadowX,this.filterShadowY,this.filterShadowRadius,this.filterShadowColor];
 		},
 
 		changeGrayscale:function(num){
 			if(num==undefined){num=0}
 			this.filterGray=num;
-			this.compileFilters();
+            this.filter("grayscale("+this.filterGray+"%)",false);
+            return this.filterGray;
 		},
 
 		changeHueRotate:function(num){
 			if(num==undefined){num=0}
 			this.filterHue=num;
-			this.compileFilters();
+            this.filter("hue-rotate("+this.filterHue+"deg)",false);
+            return this.filterHue;
 		},
 
 		changeInvert:function(num){
 			if(num==undefined){num=0}
 			this.filterInvert=num;
-			this.compileFilters();
+            this.filter("invert("+this.filterInvert+"%)",false);
+            return this.filterInvert;
 		},
 
 		changeOpacity:function(num){
 			if(num==undefined){num=100}
 			this.filterOpacity=num;
-			this.compileFilters();
+            this.filter("opacity("+this.filterOpacity+"%)",false);
+            return this.filterOpacity;
 		},
 
 		changeSaturate:function(num){
 			if(num==undefined){num=100}
 			this.filterSaturate=num;
-			this.compileFilters();
+            this.filter("saturate("+this.filterSaturate+"%)",false);
+            return this.filterSaturate;
 		},
 
 		changeSepia:function(num){
 			if(num==undefined){num=0}
 			this.filterSepia=num;
-			this.compileFilters();
+            this.filter("sepia("+this.filterSepia+"%)",false);
+            return this.filterSepia;
 		},
 
 		compileFilters:function(){
-			this.filtered=true;
+			/*this.filtered=true;
 			this.ctx.filter="blur("+this.filterBlur+"px) \
 							brightness("+this.filterBrightness+"%) \
 							contrast("+this.filterContrast+"%) \
@@ -1573,7 +1591,8 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 							opacity("+this.filterOpacity+"%) \
 							saturate("+this.filterSaturate+"%) \
 							sepia("+this.filterSepia+"%)";
-		},
+		      */
+        },
 
 		resetFilter:function(){
 			this.filters="none";
@@ -1729,9 +1748,9 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 			var anim=this.assets.anims[color];
 
             if(this.assets.anims[color]!=undefined){
-				this.anim(color,0,0,this.canvas.w,this.canvas.h)
+				this.context.image(color,0,0,this.canvas.w,this.canvas.h)
             }else if(this.assets.images[color]!=undefined){
-				this.image(color,0,0,this.canvas.w,this.canvas.h)
+				this.context.anim(color,0,0,this.canvas.w,this.canvas.h)
 			}else if(color!=undefined){
 				this.color(color,"fill");
 				this.ctx.fillRect(0,0,this.canvas.w,this.canvas.h);
@@ -4955,29 +4974,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
         },
 		release:function(){
 			this.touches=[];
-		},
-        x:function(cam,touch){
-            if(cam==undefined){cam=true;}
-            if(touch==undefined){touch=0;}
-            if(this.touches.length-1>=touch){
-                if(cam){
-                    return this.touches[touch].cX;
-                }else{
-                    return this.touches[touch].x;
-                }
-            }
-        },
-        y:function(cam,touch){
-            if(cam==undefined){cam=true;}
-            if(touch==undefined){touch=0;}
-            if(this.touches.length-1>=touch){
-                if(cam){
-                    return this.touches[touch].cY;
-                }else{
-                    return this.touches[touch].y;
-                }
-            }
-        }
+		}
 	}
 
     //***** MOBILE *****//
@@ -5923,59 +5920,87 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 		return this.draw.filter(css,override);
 	}
 
-	this.blur=function(pixels){
+	this.blur=function(pixels,override){
+        if(override==undefined){override=true}
+        if(override){this.draw.resetFilter();}
 		return this.draw.changeBlur(pixels);
 	}
 
-	this.brightness=function(percent){
+	this.brightness=function(percent,override){
+        if(override==undefined){override=true}
+        if(override){this.draw.resetFilter();}
 		return this.draw.changeBrightness(percent);
 	}
 
-	this.contrast=function(percent){
+	this.contrast=function(percent,override){
+        if(override==undefined){override=true}
+        if(override){this.draw.resetFilter();}
 		return this.draw.changeContrast(percent);
 	}
 
-	this.dropShadow=function(offsetX,offsetY,blurRadius,color){
+	this.dropShadow=function(offsetX,offsetY,blurRadius,color,override){
+        if(override==undefined){override=true}
+        if(override){this.draw.resetFilter();}
 		return this.draw.changeDropShadow(offsetX,offsetY,blurRadius,color);
 	}
 
-	this.shadow=function(offsetX,offsetY,blurRadius,color){
+	this.shadow=function(offsetX,offsetY,blurRadius,color,override){
+        if(override==undefined){override=true}
+        if(override){this.draw.resetFilter();}
 		return this.draw.changeDropShadow(offsetX,offsetY,blurRadius,color);
 	}
 
-	this.grayScale=function(percent){
+	this.grayScale=function(percent,override){
+        if(override==undefined){override=true}
+        if(override){this.draw.resetFilter();}
 		return this.draw.changeGrayscale(percent);
 	}
 
-	this.gray=function(percent){
+	this.gray=function(percent,override){
+        if(override==undefined){override=true}
+        if(override){this.draw.resetFilter();}
 		return this.draw.changeGrayscale(percent);
 	}
 
-	this.grayscale=function(percent){
+	this.grayscale=function(percent,override){
+        if(override==undefined){override=true}
+        if(override){this.draw.resetFilter();}
 		return this.draw.changeGrayscale(percent);
 	}
 
-	this.hueRotate=function(angle){
+	this.hueRotate=function(angle,override){
+        if(override==undefined){override=true}
+        if(override){this.draw.resetFilter();}
 		return this.draw.changeHueRotate(angle);
 	}
 
-	this.hue=function(angle){
+	this.hue=function(angle,override){
+        if(override==undefined){override=true}
+        if(override){this.draw.resetFilter();}
 		return this.draw.changeHueRotate(angle);
 	}
 
-	this.invert=function(percent){
+	this.invert=function(percent,override){
+        if(override==undefined){override=true}
+        if(override){this.draw.resetFilter();}
 		return this.draw.changeInvert(percent);
 	}
 
-	this.opacity=function(percent){
+	this.opacity=function(percent,override){
+        if(override==undefined){override=true}
+        if(override){this.draw.resetFilter();}
 		return this.draw.changeOpacity(percent);
 	}
 
-	this.saturate=function(percent){
+	this.saturate=function(percent,override){
+        if(override==undefined){override=true}
+        if(override){this.draw.resetFilter();}
 		return this.draw.changeSaturate(percent);
 	}
 
-	this.sepia=function(percent){
+	this.sepia=function(percent,override){
+        if(override==undefined){override=true}
+        if(override){this.draw.resetFilter();}
 		return this.draw.changeSepia(percent);
 	}
 
@@ -7069,38 +7094,6 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 	this.tRelease=function(){
 		this.touch.release();
 	}
-    
-    this.touchX=function(touch){
-        return this.touch.x(false,touch);
-    }
-    
-    this.tX=function(touch){
-        return this.touch.x(false,touch);
-    }
-    
-    this.touchY=function(touch){
-        return this.touch.y(false,touch);
-    }
-    
-    this.tY=function(touch){
-        return this.touch.y(false,touch);
-    }
-    
-    this.touchCamX=function(touch){
-        return this.touch.x(true,touch);
-    }
-    
-    this.tCX=function(touch){
-        return this.touch.x(true,touch);
-    }
-    
-    this.touchCamY=function(touch){
-        return this.touch.y(true,touch);
-    }
-    
-    this.tCY=function(touch){
-        return this.touch.y(true,touch);
-    }
 
     //mobile
 
