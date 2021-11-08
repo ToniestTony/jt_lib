@@ -3,7 +3,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
     //initialize the canvas
     this.init=function(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBtn){
         //add attributes to the canvas object of JT
-        this.version=17;
+        this.version=18;
 		this.loop.version=this.version;
         var actualId=id;
 
@@ -1452,6 +1452,11 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 		//loop and assets
 		loop:undefined,
         assets:undefined,
+        
+        //Rotated
+        rotated:false,
+        rotatedMod:0,
+        rotatedCpt:0,
 		
 		//stats
 		clippedI:0,
@@ -1814,12 +1819,23 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 
 		save:function(){
 			this.saveCpt++;
+            if(this.rotated){
+                this.rotatedCpt++;
+            }
 			this.ctx.save();
 		},
 
 		restore:function(){
 			this.saveCpt--;
 			if(this.saveCpt<0){this.saveCpt=0;}
+            if(this.rotated){
+                this.rotatedCpt--;
+                if(this.rotatedCpt<=0){
+                    this.rotated=false;
+                    this.rotatedMod=0;
+                    this.rotatedCpt=0;
+                }
+            }
 			this.ctx.restore();
 		},
 
@@ -2265,7 +2281,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 
 					this.ctx.save();
 					if(this.cam[this.currCam].active){
-						if(rotation!=0){
+						if(rotation!=0 || this.rotated){
 							var max=this.maxRotated(x,y,w,h);
 							if(!this.inCamera(max[0],max[1],max[2],max[3])){
 								this.ctx.restore();
@@ -2315,7 +2331,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 							this.ctx.translate(-transX,-transY);
 						}
 					}else{
-						if(rotation!=0){
+						if(rotation!=0 || this.rotated){
 							var max=this.maxRotated(x,y,w,h);
 							if(!this.inCanvas(max[0],max[1],max[2],max[3])){
 								this.ctx.restore();
@@ -2406,7 +2422,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 
 					this.ctx.save();
 					if(this.cam[this.currCam].active){
-						if(rotation!=0){
+						if(rotation!=0 || this.rotated){
 							var max=this.maxRotated(x,y,w,h);
 							if(!this.inCamera(max[0],max[1],max[2],max[3])){
 								this.ctx.restore();
@@ -2456,7 +2472,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 							this.ctx.translate(-transX,-transY);
 						}
 					}else{
-						if(rotation!=0){
+						if(rotation!=0 || this.rotated){
 							var max=this.maxRotated(x,y,w,h);
 							if(!this.inCanvas(max[0],max[1],max[2],max[3])){
 								this.ctx.restore();
@@ -2687,7 +2703,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 					}
 					
 					
-					if(rotation!=0){
+					if(rotation!=0 || this.rotated){
 						var max=this.maxRotated(newX,newY,newW,newH);
 						if(!this.inCamera(max[0],max[1],max[2],max[3])){
 							this.ctx.restore();
@@ -2717,15 +2733,25 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 
 					fS*=ratioCam;
 				}else{
-					if(rotation!=0){
-						var max=this.maxRotated(x,y,w,h);
+                    var newX=x;
+                    var newY=y;
+                    var newW=w;
+                    var newH=h;
+                    if(type=="circle" || type=="ellipse"){
+                        newX=x-w;
+                        newY=y-h;
+                        newW=w*2;
+                        newH=h*2;
+                    }
+					if(rotation!=0 && type!="circle" || this.rotated){
+						var max=this.maxRotated(newX,newY,newW,newH);
 						if(!this.inCamera(max[0],max[1],max[2],max[3])){
 							this.ctx.restore();
 							this.clippedS++;
 							return;
 						}
 					}else{
-						if(!this.inCamera(x,y,w,h)){
+						if(!this.inCamera(newX,newY,newW,newH)){
 							this.ctx.restore();
 							this.clippedS++;
 							return;
@@ -2800,7 +2826,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 					}
 					
 					
-					if(rotation!=0){
+					if(rotation!=0 || this.rotated){
 						var max=this.maxRotated(newX,newY,newW,newH);
 						if(!this.inCanvas(max[0],max[1],max[2],max[3])){
 							this.ctx.restore();
@@ -2815,15 +2841,25 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 						}
 					}
 				}else{
-					if(rotation!=0){
-						var max=this.maxRotated(x,y,w,h);
+                    var newX=x;
+                    var newY=y;
+                    var newW=w;
+                    var newH=h;
+                    if(type=="circle" || type=="ellipse"){
+                        newX=x-w;
+                        newY=y-h;
+                        newW=w*2;
+                        newH=h*2;
+                    }
+					if(rotation!=0 && type!="circle" || this.rotated){
+						var max=this.maxRotated(newX,newY,newW,newH);
 						if(!this.inCanvas(max[0],max[1],max[2],max[3])){
 							this.ctx.restore();
 							this.clippedS++;
 							return;
 						}
 					}else{
-						if(!this.inCanvas(x,y,w,h)){
+						if(!this.inCanvas(newX,newY,newW,newH)){
 							this.ctx.restore();
 							this.clippedS++;
 							return;
@@ -2911,18 +2947,25 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 			var newW=w*1.5;
 			var newH=h*1.5;
 			if(w>h){
-				newW=w+(h*0.5);
+				newW=newW+(newH*0.5);
 				newH=newW;
 			}else if(w<h){
-				newH=h+(w*0.5);
+				newH=newH+(newW*0.5);
 				newW=newH;
 			}
 			
 			var newX=(x+w/2)-(newW/2);
 			var newY=(y+h/2)-(newH/2);
+            
+            if(this.rotatedMod>0){
+                newX-=this.rotatedMod;
+                newY-=this.rotatedMod;
+                newW+=this.rotatedMod*2;
+                newH+=this.rotatedMod*2;
+            }
 			
 			var coords=[newX,newY,newW,newH];
-			
+            
 			return coords;
 		},
 		
@@ -3171,6 +3214,13 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
             this.ctx.translate(moveX,moveY);
             this.ctx.rotate(rotation*Math.PI/180);
 			this.ctx.translate(-moveX,-moveY);
+            
+            if(rotation!=0){
+                this.rotated=true;
+                var mod=ww;
+                if(hh>ww){mod=hh;}
+                this.rotatedMod=mod;
+            }
         },
 
         //Gradients
@@ -3339,7 +3389,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
             }
             var angle=Math.atan2(deltaX,deltaY)*180/Math.PI;
 
-            var degrees=this.wrap(angle-180,0,359)
+            var degrees=this.wrap(angle-180,0,360)
             return degrees;
         },
 
@@ -3398,7 +3448,37 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 			if(digits==undefined){digits=0;}
 			var mult=10**digits;
 			return Math.round((num+Number.EPSILON) * mult) / mult;
-		}
+		},
+        
+        digits:function(num,digits){
+            if(digits==undefined){digits=0;}
+            num=num.toString();
+            var split=num.split(".");
+            if(split.length>1){
+                var dot=split[1];
+                if(dot.length>digits){
+                    var diff=dot.length-digits;
+                    num=num.slice(0,-diff);
+                    if(digits==0){
+                        num=num.slice(0,-1);
+                    }
+                }else{
+                    var diff=digits-dot.length;
+                    for(var i=0;i<diff;i++){
+                        num+="0";
+                    }
+                }
+            }else{
+                if(digits>0){
+                    num+=".";
+                    for(var i=0;i<digits;i++){
+                        num+="0";
+                    }
+                }
+            }
+            return num;
+            
+        },
 
 
     },
@@ -4869,7 +4949,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
         canvas:{w:0,h:0},
         //check if mouse is pressing inside these coordinates, if type is true, check if mouse is pressed instead of down
         check:function(x,y,w,h,press,cam,btn){
-            if(x==undefined){x=0;}
+            if(x==undefined){x=0;cam=false;}
             if(y==undefined){y=0;}
             if(w==undefined){w=this.canvas.w;}
             if(h==undefined){h=this.canvas.h;}
@@ -4926,7 +5006,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 		canvas:{w:0,h:0},
 		//check if touch is pressing inside these coordinates, if type is true, check if touch is pressed instead of down
 		check:function(x,y,w,h,press,cam,num){
-            if(x==undefined){x=0;}
+            if(x==undefined){x=0;cam=false;}
             if(y==undefined){y=0;}
             if(w==undefined){w=this.canvas.w;}
             if(h==undefined){h=this.canvas.h;}
@@ -4974,7 +5054,29 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
         },
 		release:function(){
 			this.touches=[];
-		}
+		},
+        x:function(cam,touch){
+            if(cam==undefined){cam=true;}
+            if(touch==undefined){touch=0;}
+            if(this.touches.length-1>=touch){
+                if(cam){
+                    return this.touches[touch].cX;
+                }else{
+                    return this.touches[touch].x;
+                }
+            }
+        },
+        y:function(cam,touch){
+            if(cam==undefined){cam=true;}
+            if(touch==undefined){touch=0;}
+            if(this.touches.length-1>=touch){
+                if(cam){
+                    return this.touches[touch].cY;
+                }else{
+                    return this.touches[touch].y;
+                }
+            }
+        }
 	}
 
     //***** MOBILE *****//
@@ -5660,6 +5762,22 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 
     this.isAlarm=function(name){
         return this.loop.isAlarm(name);
+    }
+    
+    this.getAlarm=function(name){
+        if(this.loop.alarms[name]==undefined){
+            return undefined;
+        }else{
+            return this.loop.alarms[name].time;
+        }
+    }
+    
+    this.getTime=function(name){
+        if(this.loop.alarms[name]==undefined){
+            return undefined;
+        }else{
+            return this.loop.alarms[name].time;
+        }
     }
 
 	this.alarms=function(alarms){
@@ -6504,6 +6622,14 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 	this.sign=function(num){
 		return this.math.sign(num);
 	}
+        
+    this.digits=function(num,digits){
+		return this.math.digits(num,digits);
+	}
+    
+    this.decimals=function(num,digits){
+		return this.math.digits(num,digits);
+	}
 
 	this.lerp=function(val,min,max){
         return this.draw.percent(val*100,min,max);
@@ -7094,6 +7220,38 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 	this.tRelease=function(){
 		this.touch.release();
 	}
+    
+    this.touchX=function(touch){
+        return this.touch.x(false,touch);
+    }
+    
+    this.tX=function(touch){
+        return this.touch.x(false,touch);
+    }
+    
+    this.touchY=function(touch){
+        return this.touch.y(false,touch);
+    }
+    
+    this.tY=function(touch){
+        return this.touch.y(false,touch);
+    }
+    
+    this.touchCamX=function(touch){
+        return this.touch.x(true,touch);
+    }
+    
+    this.tCX=function(touch){
+        return this.touch.x(true,touch);
+    }
+    
+    this.touchCamY=function(touch){
+        return this.touch.y(true,touch);
+    }
+    
+    this.tCY=function(touch){
+        return this.touch.y(true,touch);
+    }
 
     //mobile
 
@@ -7402,10 +7560,10 @@ TEMPLATE:
     <body>
         <div id="canContainer">
         <canvas id="can"></canvas>
-        <span>Made with <a href="https://github.com/ToniestTony/jt_lib">jt_lib17.js</a></span>
+        <span>Made with <a href="https://github.com/ToniestTony/jt_lib">jt_lib18.js</a></span>
             </div>
     </body>
-    <script src="jt_lib17.js"></script>
+    <script src="jt_lib18.js"></script>
 
     <script>
 
