@@ -15,7 +15,7 @@ Here are some of the features:
 * **A bunch of other features!**
 
 ## Getting started
-* Download the jt_lib17.js file and index.html for a quick template.
+* Download the jt_lib18.js file and index.html for a quick template.
 * Start programming your awesome game in the setup and update functions of the template.
 * **That's it!**
 
