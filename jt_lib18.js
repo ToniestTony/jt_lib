@@ -272,16 +272,23 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
             this.autoX=x;
             this.autoY=y;
         },
-        cursor:function(bool){
-            if(bool==undefined){bool=true;}
-            this.cursorVisible=bool;
-            if(this.cursorVisible==true){
-                this.src.style.cursor="auto";
-            }else{
-                this.src.style.cursor="none";
+        cursor:function(style){
+            if(style!=undefined){
+                if(style==true){
+                    this.src.style.cursor="auto";
+                }else if(style==false){
+                    this.src.style.cursor="none";
+                }else{
+                    this.src.style.cursor=style;
+                }
             }
-            return this.cursorVisible;
-        }
+            if(this.src.style.cursor=="none"){
+                return false;
+            }else{
+                return this.src.style.cursor;
+            }
+            
+        },
     },
 
 
@@ -5741,8 +5748,8 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
         return this.canvas.autoresize(bool,x,y);
     }
 
-    this.cursor=function(bool){
-        return this.canvas.cursor(bool);
+    this.cursor=function(style){
+        return this.canvas.cursor(style);
     }
 
 
@@ -5765,14 +5772,6 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
     }
     
     this.getAlarm=function(name){
-        if(this.loop.alarms[name]==undefined){
-            return undefined;
-        }else{
-            return this.loop.alarms[name].time;
-        }
-    }
-    
-    this.getTime=function(name){
         if(this.loop.alarms[name]==undefined){
             return undefined;
         }else{
@@ -7560,10 +7559,10 @@ TEMPLATE:
     <body>
         <div id="canContainer">
         <canvas id="can"></canvas>
-        <span>Made with <a href="https://github.com/ToniestTony/jt_lib">jt_lib18.js</a></span>
+        <span>Made with <a href="https://github.com/ToniestTony/jt_lib">jt_lib17.js</a></span>
             </div>
     </body>
-    <script src="jt_lib18.js"></script>
+    <script src="jt_lib17.js"></script>
 
     <script>
 
