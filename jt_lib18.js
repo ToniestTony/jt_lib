@@ -1931,6 +1931,49 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
             if(lineW!=undefined){
               o=lineW;
             }
+            
+            if(obj.attr!=undefined){
+                if(obj.attr.shape!=undefined){
+                    if(obj.attr.shape=="circle"){
+                        if(d==undefined){
+                            d=obj.w;
+                        }
+                    }else if(obj.attr.shape=="ellipse"){
+                        if(dX==undefined){
+                            dX=obj.w;
+                        }
+                        if(dY==undefined){
+                            dY=obj.h;
+                        }
+                    }else if(obj.attr.shape=="line"){
+                        if(x1==undefined){
+                            var xx1=obj.x;
+                            var yy1=obj.y;
+                            var xx2=obj.x+obj.w;
+                            var yy2=obj.y+obj.h;
+                            
+                            if(obj.attr.dirX==-1){
+                                xx1=obj.x+obj.w;
+                                xx2=obj.x;
+                            }
+
+                            if(obj.attr.dirY==-1){
+                                yy1=obj.y+obj.h;
+                                yy2=obj.y;
+                            }
+                            
+                            x1=xx1;
+                            y1=yy1;
+                            x2=xx2;
+                            y2=yy2;
+                            w=obj.attr.lineW;
+                            if(obj.attr.lineW==undefined){
+                                w=1;
+                            }
+                        }
+                    }
+                }
+            }
 
             if(x1!=undefined){
                 //line
@@ -3497,6 +3540,125 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
         angleY:function(angle){return -Math.cos(angle*Math.PI/180)},
         angle:function(x,y,x2,y2){var deltaX=-x;var deltaY=y;if(x2!=undefined){deltaX=(x2-x)*-1;deltaY=y2-y;}var angle=Math.atan2(deltaX,deltaY)*180/Math.PI;var degrees=this.wrap(angle-180,0,359);return degrees;},
 		lerp:function(percent,min,max){return min+(max-min)*(percent);},
+        
+        automatic:function(obj1,obj2){
+            var col=false;
+            
+            var shape1="point";
+            var shape2="point";
+            if(obj1.w!=undefined){
+                shape1="rect";
+            }
+            if(obj1.x1!=undefined){
+                shape1="line";
+            }
+            if(obj1.d!=undefined){
+                shape1="circle";
+            }
+            if(obj1.dX!=undefined){
+                shape1="ellipse";
+            }
+            if(shape1=="rect"){
+                if(obj1.attr!=undefined){
+                    if(obj1.attr.shape=="circle"){
+                        shape1="circle";
+                    }else if(obj1.attr.shape=="ellipse"){
+                        shape1="ellipse";
+                    }else if(obj1.attr.shape=="line"){
+                        shape1="line";
+                    }
+                }
+            }
+            
+            if(obj2.w!=undefined){
+                shape2="rect";
+            }
+            if(obj2.x1!=undefined){
+                shape2="line";
+            }
+            if(obj2.d!=undefined){
+                shape2="circle";
+            }
+            if(obj2.dX!=undefined){
+                shape2="ellipse";
+            }
+            if(shape2=="rect"){
+                if(obj2.attr!=undefined){
+                    if(obj2.attr.shape=="circle"){
+                        shape2="circle";
+                    }else if(obj2.attr.shape=="ellipse"){
+                        shape2="ellipse";
+                    }else if(obj2.attr.shape=="line"){
+                        shape2="line";
+                    }
+                }
+            }
+            
+            if(shape1=="rect"){
+                if(shape2=="point"){
+                    col=this.rectPoint(obj1,obj2);
+                }else if(shape2=="rect"){
+                    col=this.rect(obj1,obj2);
+                }else if(shape2=="circle"){
+                    col=this.rectCircle(obj1,obj2);
+                }else if(shape2=="ellipse"){
+                    col=this.rectEllipse(obj1,obj2);
+                }else if(shape2=="line"){
+                    col=this.lineRect(obj2,obj1);
+                }
+            }else if(shape1=="circle"){
+                if(shape2=="point"){
+                    col=this.circlePoint(obj1,obj2);
+                }else if(shape2=="rect"){
+                    col=this.rectCircle(obj2,obj1);
+                }else if(shape2=="circle"){
+                    col=this.circle(obj1,obj2);
+                }else if(shape2=="ellipse"){
+                    col=this.circleEllipse(obj1,obj2);
+                }else if(shape2=="line"){
+                    col=this.lineCircle(obj2,obj1);
+                }
+            }else if(shape1=="ellipse"){
+                if(shape2=="point"){
+                    col=this.ellipsePoint(obj1,obj2);
+                }else if(shape2=="rect"){
+                    col=this.rectEllipse(obj2,obj1);
+                }else if(shape2=="circle"){
+                    col=this.circleEllipse(obj2,obj1);
+                }else if(shape2=="ellipse"){
+                    col=this.ellipse(obj1,obj2);
+                }else if(shape2=="line"){
+                    col=this.lineEllipse(obj2,obj1);
+                }
+            }else if(shape1=="line"){
+                if(shape2=="point"){
+                    col=this.linePoint(obj1,obj2);
+                }else if(shape2=="rect"){
+                    col=this.lineRect(obj1,obj2);
+                }else if(shape2=="circle"){
+                    col=this.lineCircle(obj1,obj2);
+                }else if(shape2=="ellipse"){
+                    col=this.lineEllipse(obj1,obj2);
+                }else if(shape2=="line"){
+                    col=this.line(obj1,obj2);
+                }
+            }else if(shape1=="point"){
+                if(shape2=="point"){
+                    col=this.pointPoint(obj1,obj2);
+                }else if(shape2=="rect"){
+                    col=this.rectPoint(obj2,obj1);
+                }else if(shape2=="circle"){
+                    col=this.circlePoint(obj2,obj1);
+                }else if(shape2=="ellipse"){
+                    col=this.ellipsePoint(obj2,obj1);
+                }else if(shape2=="line"){
+                    col=this.linePoint(obj2,obj1);
+                }
+            }
+            
+            return col;
+        },
+        
 		//between 2 objects with their x,y,width and height
         rect: function(rect1,rect2) {
             // **** should check if the width/height vars are 'h' form or 'height' form
@@ -3509,11 +3671,28 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
             }
             return col;
         },
-        circle: function(circle1,circle2) {
+        circle: function(c1,c2) {
             // **** should check if the width/height vars are 'h' form or 'height' form
             var col=false;
+            var circle1={x:c1.x,y:c1.y,d:c1.d};
+            var circle2={x:c2.x,y:c2.y,d:c2.d};
             if(circle1.d==undefined){circle1.d=circle1.diameter}
+            if(circle1.d==undefined){
+                if(c1.attr!=undefined){
+                    if(c1.attr.shape=="circle"){
+                        circle1.d=c1.w;
+                    }
+                }
+            }
             if(circle2.d==undefined){circle2.d=circle2.diameter}
+            if(circle2.d==undefined){
+                if(c2.attr!=undefined){
+                    if(c2.attr.shape=="circle"){
+                        circle2.d=c2.w;
+                    }
+                }
+            }
+            
             var temp1={x:circle1.x+circle1.d/2,y:circle1.y+circle1.d/2}
             var temp2={x:circle2.x+circle2.d/2,y:circle2.y+circle2.d/2}
             if(this.dist(temp1,temp2)<(circle1.d/2+circle2.d/2)){
@@ -3531,9 +3710,17 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
             }
             return col;
         },
-        circlePoint:function(circle,point){
+        circlePoint:function(c,point){
             var col=false;
+            var circle={x:c.x,y:c.y,d:c.d};
             if(circle.d==undefined){circle.d=circle.diameter}
+            if(circle.d==undefined){
+                if(c.attr!=undefined){
+                    if(c.attr.shape=="circle"){
+                        circle.d=c.w;
+                    }
+                }
+            }
             var temp={
                 x:circle.x+circle.d/2,
                 y:circle.y+circle.d/2
@@ -3543,10 +3730,19 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
             }
             return col;
         },
-        rectCircle: function(rect,circle) {
+        rectCircle: function(rect,c) {
             // **** should check if the width/height vars are 'h' form or 'height' form
             var col=false;
+            
+            var circle={x:c.x,y:c.y,d:c.d};
             if(circle.d==undefined){circle.d=circle.diameter}
+            if(circle.d==undefined){
+                if(c.attr!=undefined){
+                    if(c.attr.shape=="circle"){
+                        circle.d=c.w;
+                    }
+                }
+            }
 			//Check if col with bounding box
 			var bounding={x:circle.x,y:circle.y,w:circle.d,h:circle.d};
 			if(!this.rect(rect,bounding)){
@@ -3610,9 +3806,26 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 
             return col;
         },
-		rectEllipse: function(rect,ellipse) {
+		rectEllipse: function(rect,e) {
             // **** should check if the width/height vars are 'h' form or 'height' form
             var col=false;
+            var ellipse={x:e.x,y:e.y,dX:e.dX,dY:e.dY};
+            if(ellipse.dX==undefined){ellipse.dX=ellipse.diameterX}
+            if(ellipse.dX==undefined){
+                if(e.attr!=undefined){
+                    if(e.attr.shape=="ellipse"){
+                        ellipse.dX=e.w;
+                    }
+                }
+            }
+            if(ellipse.dY==undefined){ellipse.dY=ellipse.diameterY}
+            if(ellipse.dY==undefined){
+                if(e.attr!=undefined){
+                    if(e.attr.shape=="ellipse"){
+                        ellipse.dY=e.h;
+                    }
+                }
+            }
 			//Check if col with bounding box
 			var bounding={x:ellipse.x,y:ellipse.y,w:ellipse.dX,h:ellipse.dY};
 			if(!this.rect(rect,bounding)){
@@ -3690,9 +3903,37 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 
             return col;
         },
-		circleEllipse: function(circle,ellipse) {
+		circleEllipse: function(c,e) {
             // **** should check if the width/height vars are 'h' form or 'height' form
             var col=false;
+            
+            var circle={x:c.x,y:c.y,d:c.d};
+            if(circle.d==undefined){circle.d=circle.diameter}
+            if(circle.d==undefined){
+                if(c.attr!=undefined){
+                    if(c.attr.shape=="circle"){
+                        circle.d=c.w;
+                    }
+                }
+            }
+            
+            var ellipse={x:e.x,y:e.y,dX:e.dX,dY:e.dY};
+            if(ellipse.dX==undefined){ellipse.dX=ellipse.diameterX}
+            if(ellipse.dX==undefined){
+                if(e.attr!=undefined){
+                    if(e.attr.shape=="ellipse"){
+                        ellipse.dX=e.w;
+                    }
+                }
+            }
+            if(ellipse.dY==undefined){ellipse.dY=ellipse.diameterY}
+            if(ellipse.dY==undefined){
+                if(e.attr!=undefined){
+                    if(e.attr.shape=="ellipse"){
+                        ellipse.dY=e.h;
+                    }
+                }
+            }
 			//Check if col with bounding box
 			var bounding={x:ellipse.x,y:ellipse.y,w:ellipse.dX,h:ellipse.dY};
 			if(!this.rectCircle(bounding,circle)){
@@ -3803,9 +4044,45 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 
             return col;
         },
-		ellipse:function(ellipse,ellipse2){
+		ellipse:function(e,e2){
 			//Check col with bounding
 			var col=false;
+            
+            var ellipse={x:e.x,y:e.y,dX:e.dX,dY:e.dY};
+            if(ellipse.dX==undefined){ellipse.dX=ellipse.diameterX}
+            if(ellipse.dX==undefined){
+                if(e.attr!=undefined){
+                    if(e.attr.shape=="ellipse"){
+                        ellipse.dX=e.w;
+                    }
+                }
+            }
+            if(ellipse.dY==undefined){ellipse.dY=ellipse.diameterY}
+            if(ellipse.dY==undefined){
+                if(e.attr!=undefined){
+                    if(e.attr.shape=="ellipse"){
+                        ellipse.dY=e.h;
+                    }
+                }
+            }
+            
+            var ellipse2={x:e2.x,y:e2.y,dX:e2.dX,dY:e2.dY};
+            if(ellipse2.dX==undefined){ellipse2.dX=ellipse2.diameterX}
+            if(ellipse2.dX==undefined){
+                if(e2.attr!=undefined){
+                    if(e2.attr.shape=="ellipse"){
+                        ellipse2.dX=e2.w;
+                    }
+                }
+            }
+            if(ellipse2.dY==undefined){ellipse2.dY=ellipse2.diameterY}
+            if(ellipse2.dY==undefined){
+                if(e2.attr!=undefined){
+                    if(e2.attr.shape=="ellipse"){
+                        ellipse2.dY=e2.h;
+                    }
+                }
+            }
 
 			var bounding={x:ellipse.x,y:ellipse.y,w:ellipse.dX,h:ellipse.dY}
 			var bounding2={x:ellipse2.x,y:ellipse2.y,w:ellipse2.dX,h:ellipse2.dY}
@@ -3989,7 +4266,24 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 
 			return col;
 		},
-		ellipsePoint: function(ellipse,point) {
+		ellipsePoint: function(e,point) {
+            var ellipse={x:e.x,y:e.y,dX:e.dX,dY:e.dY};
+            if(ellipse.dX==undefined){ellipse.dX=ellipse.diameterX}
+            if(ellipse.dX==undefined){
+                if(e.attr!=undefined){
+                    if(e.attr.shape=="ellipse"){
+                        ellipse.dX=e.w;
+                    }
+                }
+            }
+            if(ellipse.dY==undefined){ellipse.dY=ellipse.diameterY}
+            if(ellipse.dY==undefined){
+                if(e.attr!=undefined){
+                    if(e.attr.shape=="ellipse"){
+                        ellipse.dY=e.h;
+                    }
+                }
+            }
 			var halfW=ellipse.dX/2;
 			var halfH=ellipse.dY/2;
             var middle={x:ellipse.x+halfW,y:ellipse.y+halfH};
@@ -4002,8 +4296,62 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 			}
             return col;
         },
-		line:function(line1,line2){
+		line:function(l1,l2){
 			var col=false;
+            
+            var line1={x1:l1.x1,y1:l1.y1,x2:l1.x2,y2:l1.y2};
+            if(line1.x1==undefined){
+                if(l1.attr!=undefined){
+                    if(l1.attr.shape=="line"){
+                        var x1=l1.x;
+                        var y1=l1.y;
+                        var x2=l1.x+l1.w;
+                        var y2=l1.y+l1.h;
+                        
+                        if(l1.attr.dirX==-1){
+                            x1=l1.x+l1.w;
+                            x2=l1.x;
+                        }
+                        
+                        if(l1.attr.dirY==-1){
+                            y1=l1.y+l1.h;
+                            y2=l1.y;
+                        }
+                        
+                        line1.x1=x1;
+                        line1.y1=y1;
+                        line1.x2=x2;
+                        line1.y2=y2;
+                    }
+                }
+            }
+            
+            var line2={x1:l2.x1,y1:l2.y1,x2:l2.x2,y2:l2.y2};
+            if(line2.x1==undefined){
+                if(l2.attr!=undefined){
+                    if(l2.attr.shape=="line"){
+                        var x1=l2.x;
+                        var y1=l2.y;
+                        var x2=l2.x+l2.w;
+                        var y2=l2.y+l2.h;
+                        
+                        if(l2.attr.dirX==-1){
+                            x1=l2.x+l2.w;
+                            x2=l2.x;
+                        }
+                        
+                        if(l2.attr.dirY==-1){
+                            y1=l2.y+l2.h;
+                            y2=l2.y;
+                        }
+                        
+                        line2.x1=x1;
+                        line2.y1=y1;
+                        line2.x2=x2;
+                        line2.y2=y2;
+                    }
+                }
+            }
 
 			//Get distance to intersection point
 			var dist1 = ((line2.x2-line2.x1)*(line1.y1-line2.y1) - (line2.y2-line2.y1)*(line1.x1-line2.x1)) / ((line2.y2-line2.y1)*(line1.x2-line1.x1) - (line2.x2-line2.x1)*(line1.y2-line1.y1));
@@ -4018,9 +4366,36 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 			}
 			return col;
 		},
-		linePoint:function(line,point){
+        
+		linePoint:function(l,point){
 			var col=false;
 
+            var line={x1:l.x1,y1:l.y1,x2:l.x2,y2:l.y2};
+            if(line.x1==undefined){
+                if(l.attr!=undefined){
+                    if(l.attr.shape=="line"){
+                        var x1=l.x;
+                        var y1=l.y;
+                        var x2=l.x+l.w;
+                        var y2=l.y+l.h;
+                        
+                        if(l.attr.dirX==-1){
+                            x1=l.x+l.w;
+                            x2=l.x;
+                        }
+                        
+                        if(l.attr.dirY==-1){
+                            y1=l.y+l.h;
+                            y2=l.y;
+                        }
+                        
+                        line.x1=x1;
+                        line.y1=y1;
+                        line.x2=x2;
+                        line.y2=y2;
+                    }
+                }
+            }
 			//Get distance from the point to the ends of the line
 			var d1 = this.dist(point, {x:line.x1,y:line.y1});
 			var d2 = this.dist(point, {x:line.x2,y:line.y2});
@@ -4035,9 +4410,36 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 			}
 			return col;
 		},
-		lineRect:function(line,rect,steps){
+		lineRect:function(l,rect,steps){
 			var col=false;
 
+            var line={x1:l.x1,y1:l.y1,x2:l.x2,y2:l.y2};
+            if(line.x1==undefined){
+                if(l.attr!=undefined){
+                    if(l.attr.shape=="line"){
+                        var x1=l.x;
+                        var y1=l.y;
+                        var x2=l.x+l.w;
+                        var y2=l.y+l.h;
+                        
+                        if(l.attr.dirX==-1){
+                            x1=l.x+l.w;
+                            x2=l.x;
+                        }
+                        
+                        if(l.attr.dirY==-1){
+                            y1=l.y+l.h;
+                            y2=l.y;
+                        }
+                        
+                        line.x1=x1;
+                        line.y1=y1;
+                        line.x2=x2;
+                        line.y2=y2;
+                    }
+                }
+            }
+            
 			//Check if the bounding boxes are colliding
 			var lineRect={x:line.x1,y:line.y1,w:line.x2-line.x1,h:line.y2-line.y1}
 			if(line.x2<line.x1){
@@ -4084,8 +4486,45 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 
 			return col;
 		},
-		lineCircle:function(line,circle,steps){
+		lineCircle:function(l,c,steps){
 			var col=false;
+            
+            var line={x1:l.x1,y1:l.y1,x2:l.x2,y2:l.y2};
+            if(line.x1==undefined){
+                if(l.attr!=undefined){
+                    if(l.attr.shape=="line"){
+                        var x1=l.x;
+                        var y1=l.y;
+                        var x2=l.x+l.w;
+                        var y2=l.y+l.h;
+                        
+                        if(l.attr.dirX==-1){
+                            x1=l.x+l.w;
+                            x2=l.x;
+                        }
+                        
+                        if(l.attr.dirY==-1){
+                            y1=l.y+l.h;
+                            y2=l.y;
+                        }
+                        
+                        line.x1=x1;
+                        line.y1=y1;
+                        line.x2=x2;
+                        line.y2=y2;
+                    }
+                }
+            }
+            
+            var circle={x:c.x,y:c.y,d:c.d};
+            if(circle.d==undefined){circle.d=circle.diameter}
+            if(circle.d==undefined){
+                if(c.attr!=undefined){
+                    if(c.attr.shape=="circle"){
+                        circle.d=c.w;
+                    }
+                }
+            }
 
 			//Check if the bounding boxes are colliding
 			var lineRect={x:line.x1,y:line.y1,w:line.x2-line.x1,h:line.y2-line.y1}
@@ -4133,8 +4572,53 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 
 			return col;
 		},
-		lineEllipse:function(line,ellipse,steps){
+		lineEllipse:function(l,e,steps){
 			var col=false;
+            
+            var line={x1:l.x1,y1:l.y1,x2:l.x2,y2:l.y2};
+            if(line.x1==undefined){
+                if(l.attr!=undefined){
+                    if(l.attr.shape=="line"){
+                        var x1=l.x;
+                        var y1=l.y;
+                        var x2=l.x+l.w;
+                        var y2=l.y+l.h;
+                        
+                        if(l.attr.dirX==-1){
+                            x1=l.x+l.w;
+                            x2=l.x;
+                        }
+                        
+                        if(l.attr.dirY==-1){
+                            y1=l.y+l.h;
+                            y2=l.y;
+                        }
+                        
+                        line.x1=x1;
+                        line.y1=y1;
+                        line.x2=x2;
+                        line.y2=y2;
+                    }
+                }
+            }
+            
+            var ellipse={x:e.x,y:e.y,dX:e.dX,dY:e.dY};
+            if(ellipse.dX==undefined){ellipse.dX=ellipse.diameterX}
+            if(ellipse.dX==undefined){
+                if(e.attr!=undefined){
+                    if(e.attr.shape=="ellipse"){
+                        ellipse.dX=e.w;
+                    }
+                }
+            }
+            if(ellipse.dY==undefined){ellipse.dY=ellipse.diameterY}
+            if(ellipse.dY==undefined){
+                if(e.attr!=undefined){
+                    if(e.attr.shape=="ellipse"){
+                        ellipse.dY=e.h;
+                    }
+                }
+            }
 
 			//Check if the bounding boxes are colliding
 			var lineRect={x:line.x1,y:line.y1,w:line.x2-line.x1,h:line.y2-line.y1}
@@ -4185,7 +4669,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 		pointPoint:function(point1,point2){
 			var col=false;
 
-			var buffer=1;
+			var buffer=0.1;
 			//Check if there is a collision
 			if(point1.x+buffer>point2.x &&
 			point1.y+buffer>point2.y &&
@@ -6541,6 +7025,10 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
     this.wrapIndex=function(num,min,max){
         return this.math.wrapIndex(num,min,max);
     }
+    
+    this.wrapId=function(num,min,max){
+        return this.math.wrapIndex(num,min,max);
+    }
 
 	this.index=function(num,min,max){
         return this.math.wrapIndex(num,min,max);
@@ -6660,6 +7148,14 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 
 
     //collision
+    
+    this.col=function(obj1,obj2){
+        return this.collision.automatic(obj1,obj2)
+    }
+    
+    this.c=function(obj1,obj2){
+        return this.collision.automatic(obj1,obj2)
+    }
 
 	this.cPoint=function(point1,point2){
 		return this.collision.pointPoint(point1,point2)
