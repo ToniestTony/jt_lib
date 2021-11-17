@@ -1180,14 +1180,17 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
             return this.images[name];
         },
         //create a sound
-        sound:function(src,name,repeat){
+        sound:function(src,name,repeat,volume){
             this.loop.loaded=false;
             if(name==undefined){
                 name=src;
             }
+			if(volume==undefined){
+                volume=0.5;
+            }
             this.sounds[name]=new Audio();
             this.sounds[name].src=src;
-            this.sounds[name].vol=1;
+            this.sounds[name].vol=volume;
             var context=this;
             if(repeat!=undefined){
                 if(repeat==true){
@@ -4785,7 +4788,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 			p.frame++;
 			return dead;
 		},
-		drawParticles:function(){
+		drawingParticles:function(){
 			for(var i=0;i<this.parts.length;i++){
 				this.drawingParticle(i);
 			}
@@ -6464,12 +6467,12 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
         return this.assets.image(src,name,x,y,visible);
     }
 
-    this.newSound=function(src,name,repeat){
-        return this.assets.sound(src,name,repeat);
+    this.newSound=function(src,name,repeat,volume){
+        return this.assets.sound(src,name,repeat,volume);
     }
 
-    this.loadSound=function(src,name,repeat){
-        return this.assets.sound(src,name,repeat);
+    this.loadSound=function(src,name,repeat,volume){
+        return this.assets.sound(src,name,repeat,volume);
     }
 
     this.newAnim=function(src,name,frames,speed,x,y,visible){
