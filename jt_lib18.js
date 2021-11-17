@@ -1231,22 +1231,32 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
         //change volume
         volume:function(vol,sound){
             if(vol!=undefined){
-				var v=vol;
-				if(v<0){v=0;}
-                if(v>1){v=1;}
+				if(typeof vol == "number"){
+					var v=vol;
+					if(v<0){v=0;}
+					if(v>1){v=1;}
 
-				if(sound!==undefined){
-					this.sounds[sound].vol=v;
-				}else{
-					this.vol=v;
+					if(sound!==undefined){
+						this.sounds[sound].vol=v;
+					}else{
+						this.vol=v;
+					}
+					return v;
+				}else if(typeof vol == "string"){
+					return this.sounds[vol].vol;
 				}
+				
 				/*for(var sound in this.sounds){
 					if(this.sounds.hasOwnProperty(sound)){
 						this.sounds[sound].volume=this.vol;
 					}
 				}*/
             }else{
-                return this.vol;
+				if(sound==undefined){
+					return this.vol;
+				}else{
+					return this.sounds[vol].vol;
+				}
             }
 
         },
