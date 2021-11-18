@@ -2298,7 +2298,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
         image:function(name,newX,newY,w,h,rotation,sX,sY,sW,sH){
 
 			if(typeof name=="object"){
-				name=name.image;
+				name=name.img;
 				newX=name.x;
 				newY=name.y;
 				w=name.w;
@@ -2460,7 +2460,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
         //Draw an animation
         anim:function(name,newX,newY,w,h,rotation){
 			if(typeof name=="object"){
-				name=name.image;
+				name=name.anim;
 				newX=name.x;
 				newY=name.y;
 				w=name.w;
