@@ -2298,7 +2298,6 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
         image:function(name,newX,newY,w,h,rotation,sX,sY,sW,sH){
 
 			if(typeof name=="object"){
-				name=name.img;
 				newX=name.x;
 				newY=name.y;
 				w=name.w;
@@ -2308,6 +2307,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 				sY=name.sY;
 				sW=name.sW;
 				sH=name.sH;
+				name=name.img;
 			}
             var image=this.assets.images[name];
 
@@ -2460,12 +2460,12 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
         //Draw an animation
         anim:function(name,newX,newY,w,h,rotation){
 			if(typeof name=="object"){
-				name=name.anim;
 				newX=name.x;
 				newY=name.y;
 				w=name.w;
 				h=name.h;
 				r=name.r;
+				name=name.anim;
 			}
             var anim=this.assets.anims[name];
 
