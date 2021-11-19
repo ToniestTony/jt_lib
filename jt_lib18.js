@@ -2297,7 +2297,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
         //Draw an image
         image:function(name,newX,newY,w,h,rotation,sX,sY,sW,sH){
 
-			if(typeof name=="object"){
+			if(typeof name==="object"){
 				newX=name.x;
 				newY=name.y;
 				w=name.w;
@@ -2350,6 +2350,8 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 
                     var x=image.x;
                     var y=image.y;
+					var w=tempW;
+					var h=tempH;
 
                     var camX=0;
 					var camY=0;
@@ -2459,7 +2461,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 
         //Draw an animation
         anim:function(name,newX,newY,w,h,rotation){
-			if(typeof name=="object"){
+			if(typeof name==="object"){
 				newX=name.x;
 				newY=name.y;
 				w=name.w;
@@ -2494,6 +2496,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
                         if(h=="h"){h=anim.img.height};
                         anim.w=w;
                         anim.h=h;
+						console.log(w+" "+h)
                     }
 
                     var tempW=anim.w;
@@ -6473,6 +6476,10 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 
 	this.debugs=function(){
 		return this.loop.debugs;
+	}
+	
+	this.loaded=function(){
+		return this.loop.loaded;
 	}
 
 
