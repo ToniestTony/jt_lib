@@ -2496,7 +2496,6 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
                         if(h=="h"){h=anim.img.height};
                         anim.w=w;
                         anim.h=h;
-						console.log(w+" "+h)
                     }
 
                     var tempW=anim.w;
@@ -7374,6 +7373,10 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 	this.drawParts=function(){
 		return this.particles.drawingParticles();
 	}
+	
+	this.drawPart=function(i){
+		return this.particles.drawingParticle(i);
+	}
 
 	this.delParts=function(){
 		return this.particles.clear();
@@ -7963,9 +7966,9 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 		}
 	}
 
-	this.drawPart=function(){
+	/*this.drawPart=function(){
 		return this.particles.drawingParticles();
-	}
+	}*/
 
 	this.delPart=function(){
 		return this.particles.clear();
