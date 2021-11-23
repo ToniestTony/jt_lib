@@ -3310,6 +3310,14 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
                 this.rotated=true;
                 var mod=ww;
                 if(hh>ww){mod=hh;}
+				if(mod==1){
+					if(this.canvas.w>this.canvas.h){
+						mod=this.canvas.w-this.canvas.h;
+					}else if(this.canvas.h>this.canvas.h){
+						mod=this.canvas.h-this.canvas.w;
+					}
+					mod=mod*1.5;
+				}
                 this.rotatedMod=mod;
             }
         },
