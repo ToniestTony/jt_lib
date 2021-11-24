@@ -7383,7 +7383,11 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 	}
 	
 	this.drawPart=function(i){
-		return this.particles.drawingParticle(i);
+		if(i==undefined){
+			return this.particles.drawingParticles();
+		}else{
+			return this.particles.drawingParticle(i);
+		}
 	}
 
 	this.delParts=function(){
