@@ -8107,6 +8107,7 @@ TEMPLATE:
 				left:0;
 				right:0;
 				bottom:0;
+				border:1px solid black;
 			}
 	
 		#can + span{
@@ -8140,7 +8141,7 @@ TEMPLATE:
 		},
 		//update is called every frame
 		update:function(){
-			jt.bg("black");
+			jt.bg("white");
 		}
 	}
 
