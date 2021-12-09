@@ -8099,32 +8099,36 @@ TEMPLATE:
                 padding: 0;
                 margin: 0;
             }
-
+            
             #can{
-		position: absolute;
-		margin-left:auto;
-		margin-right:auto;
-                top:0;
-		left:0;
-            }
-
+				position: absolute;
+				margin:auto;
+				top:0;
+				left:0;
+				right:0;
+				bottom:0;
+			}
+	
 		#can + span{
-			display: none;
+			display: none;	
 		}
 
 		#canContainer{
-			position:relative;
+			text-align:center;
+			width:100%;
+			height:100%;
+			position:relative;	
 		}
         </style>
     </head>
     <body>
         <div id="canContainer">
         <canvas id="can"></canvas>
-        <span>Made with <a href="https://github.com/ToniestTony/jt_lib">jt_lib17.js</a></span>
+        <span>Made with <a href="https://github.com/ToniestTony/jt_lib">jt_lib18.js</a></span>
             </div>
     </body>
-    <script src="jt_lib17.js"></script>
-
+    <script src="jt_lib18.js"></script>
+    
     <script>
 
 	var app={
@@ -8136,13 +8140,13 @@ TEMPLATE:
 		},
 		//update is called every frame
 		update:function(){
-			//jt.bg("black");
+			jt.bg("black");
 		}
 	}
 
 	//define the jt object on a global scale
 	var jt=undefined;
-
+	
 	//you can also use $(document).ready(function(){}); with jQuery
 	window.onload = function(){
 		//parameters of the JT object:
@@ -8156,13 +8160,12 @@ TEMPLATE:
 		//mobile audio button size (0 for none)
 		//fullScreen button on mobile
 		jt=new JT("can",app.w,app.h,60,'setup','update','app',0,false);
-
+		
 		//jt.loadImage("image.png","name")
-		//jt.loadSound("sound.wav","name")
+		//jt.loadSound("sound.mp3","name")
 		//jt.loadAnim("src.png","name",number of frames,fps);
 	}
-
+	
 	</script>
 </html>
-
 */
