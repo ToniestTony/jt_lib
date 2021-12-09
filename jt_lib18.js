@@ -2150,6 +2150,17 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 				this.ctx.stroke();*/
 			}
         },
+		
+		//clear react
+		clear:function(x,y,w,h){
+			if(x==undefined){
+				x=0;
+				y=0;
+				w=this.canvas.w;
+				h=this.canvas.h;
+			}
+			this.ctx.clearRect(x,y,w,h);
+		},
 
         //Setting the font
         font:function(fontName,size,color){
@@ -6828,6 +6839,14 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
     this.line=function(x1,y1,x2,y2,width,color,rotation){
         return this.drawing.line(x1,y1,x2,y2,width,color,rotation);
     }
+	
+	this.clear=function(x,y,w,h){
+        return this.drawing.clear(x,y,w,h);
+    }
+		
+	this.erase=function(x,y,w,h){
+        return this.drawing.clear(x,y,w,h);
+    }
 
 	this.save=function(){
 		return this.drawing.save();
@@ -7363,7 +7382,9 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 
 	this.addPart=function(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,c,cRate,cMax,r,rRate,o,oRate,image,anim,id){
 		if(typeof x=="object"){
-			return this.particles.addParticle(x.x,x.y,x.w,x.h,x.frames,x.wRate,x.hRate,x.alpha,x.alphaRate,x.vX,x.vY,x.aX,x.aY,x.c,x.cRate,x.cMax,x.r,x.rRate,x.o,x.oRate,x.image,x.anim,x.id);
+			var img=x.image;
+			if(img==undefined){img=x.img;}
+			return this.particles.addParticle(x.x,x.y,x.w,x.h,x.frames,x.wRate,x.hRate,x.alpha,x.alphaRate,x.vX,x.vY,x.aX,x.aY,x.c,x.cRate,x.cMax,x.r,x.rRate,x.o,x.oRate,img,x.anim,x.id);
 		}else{
 			return this.particles.addParticle(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,c,cRate,cMax,r,rRate,o,oRate,image,anim,id);
 		}
