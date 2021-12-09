@@ -8140,7 +8140,7 @@ TEMPLATE:
 		},
 		//update is called every frame
 		update:function(){
-			jt.bg("white");
+			jt.bg("black");
 		}
 	}
 
