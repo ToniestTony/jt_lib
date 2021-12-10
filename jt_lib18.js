@@ -1170,6 +1170,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
             this.images[name].img.src=src;
             this.images[name].x=0;
             this.images[name].y=0;
+            this.images[name].edited=undefined;
 
             if(x!=undefined){this.images[name].x=x}
             if(y!=undefined){this.images[name].y=y}
@@ -1455,6 +1456,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
         canvas:undefined,
         ctx:undefined,
 		saveCpt:0,
+		edit:false,
 
 		//filters
 		filtered:false,
@@ -2306,8 +2308,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
         },
 
         //Draw an image
-        image:function(name,newX,newY,w,h,rotation,sX,sY,sW,sH){
-
+        image:function(name,newX,newY,w,h,rotation,sX,sY,sW,sH,edited){
 			if(typeof name==="object"){
 				newX=name.x;
 				newY=name.y;
@@ -2318,6 +2319,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 				sY=name.sY;
 				sW=name.sW;
 				sH=name.sH;
+				edited=name.edited;
 				name=name.img;
 			}
             var image=this.assets.images[name];
@@ -2460,15 +2462,88 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 
                         if(sW=="w"){sW=image.w}
                         if(sH=="h"){sH=image.h}
-                        this.ctx.drawImage(image.img,sX,sY,sW,sH,(x*camW)-(camX*camW)+posX,(y*camH)-(camY*camH)+posY,tempW*camW,tempH*camH);
+						/*if((this.edit || edited) && image.edited!=undefined){
+							this.ctx.putImageData(image.edited,(x*camW)-(camX*camW)+posX,(y*camH)-(camY*camH)+posY,sX,sY,sW,sH);
+						}else{
+							this.ctx.drawImage(image.img,sX,sY,sW,sH,(x*camW)-(camX*camW)+posX,(y*camH)-(camY*camH)+posY,tempW*camW,tempH*camH);
+						}*/
+						var img=image.img;
+						if((this.edit || edited) && image.edited!=undefined){
+							img=image.edited;
+							var ww=img.naturalWidth/image.img.naturalWidth;
+							var hh=img.naturalHeight/image.img.naturalHeight;
+							sX=sX*ww;
+							sY=sY*hh;
+							sW=sW*ww;
+							sH=sH*hh;
+						}
+						this.ctx.drawImage(img,sX,sY,sW,sH,(x*camW)-(camX*camW)+posX,(y*camH)-(camY*camH)+posY,tempW*camW,tempH*camH);
                     }else{
                         //this.ctx.drawingImage(image.img,camW-camX,camH-camY,tempW*camW,tempH*camH);
-                        this.ctx.drawImage(image.img,(x*camW)-(camX*camW)+posX,(y*camH)-(camY*camH)+posY,tempW*camW,tempH*camH);
+						/*if((this.edit || edited) && image.edited!=undefined){
+							this.ctx.putImageData(image.edited,(x*camW)-(camX*camW)+posX,(y*camH)-(camY*camH)+posY);
+						}else{
+							this.ctx.drawImage(image.img,(x*camW)-(camX*camW)+posX,(y*camH)-(camY*camH)+posY,tempW*camW,tempH*camH);
+						}*/
+						var img=image.img;
+						if((this.edit || edited) && image.edited!=undefined){
+							img=image.edited;
+						}
+						this.ctx.drawImage(img,(x*camW)-(camX*camW)+posX,(y*camH)-(camY*camH)+posY,tempW*camW,tempH*camH);
                     }
                     this.ctx.restore();
                 }
             }
-          },
+        },
+		  
+		imageEdit:function(name,w,h){
+			this.imageReset(name);
+			var image=this.assets.images[name];
+			var cam=this.cam[this.currCam].active;
+			this.cam[this.currCam].active=false;
+			
+			if(w==undefined){w=image.w;}
+			if(h==undefined){h=image.h;}
+			if(cam){
+				w=this.xCam(w);
+				h=this.yCam(h);
+			}
+			
+			//image.edited=this.ctx.getImageData(0,0,w,h)
+			var tempCanvas = document.createElement('canvas');
+			tempCanvas.width=w;
+			tempCanvas.height=h;
+			//tempCanvas.style.display="none";
+			var tempContext = tempCanvas.getContext('2d');
+			tempContext.imageSmoothingEnabled=this.ctx.imageSmoothingEnabled;
+			tempContext.filter=this.ctx.filter;
+			tempContext.clearRect(0, 0, w, h);
+			tempContext.drawImage(image.img, 0, 0, w, h);
+			var dataURL=tempCanvas.toDataURL("image/png");
+			tempContext.filter="none";
+			
+			var img=new Image();
+			img.src=dataURL;
+			
+			image.edited=img;
+			
+			this.cam[this.currCam].active=cam;
+		},
+		
+		imageReset:function(name){
+			this.assets.images[name].edited=undefined;
+		},
+		
+		imageEdited:function(name,x,y,sX,sY,sW,sH){
+			this.image(name,x,y,undefined,undefined,undefined,sX,sY,sW,sH,true);
+		},
+		
+		editPriority:function(bool){
+			if(bool!=undefined){
+				this.edit=bool;
+			}
+			return this.edit;
+		},
 
         //Draw an animation
         anim:function(name,newX,newY,w,h,rotation){
@@ -7017,6 +7092,22 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
     this.image=function(name,newX,newY,w,h,rotation,sX,sY,sW,sH){
         return this.drawing.image(name,newX,newY,w,h,rotation,sX,sY,sW,sH)
     }
+	
+	this.imageEdit=function(name,w,h){
+		return this.drawing.imageEdit(name,w,h);
+	}
+	
+	this.imageEdited=function(name,x,y,sX,sY,sW,sH){
+		return this.drawing.imageEdited(name,x,y,sX,sY,sW,sH);
+	}
+	
+	this.imageReset=function(name){
+		return this.drawing.imageReset(name);
+	}
+	
+	this.editPriority=function(bool){
+		return this.drawing.editPriority(bool);
+	}
 
     this.anim=function(name,newX,newY,w,h,rotation){
         return this.drawing.anim(name,newX,newY,w,h,rotation)
