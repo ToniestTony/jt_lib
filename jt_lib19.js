@@ -3,7 +3,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
     //initialize the canvas
     this.init=function(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBtn){
         //add attributes to the canvas object of JT
-        this.version=18;
+        this.version=19;
 		this.loop.version=this.version;
         var actualId=id;
 
@@ -128,6 +128,15 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
         ctx:null,
         w:undefined,
         h:undefined,
+		
+		iosW:undefined,
+		iosH:undefined,
+		iosFullscreen:false,
+		
+		lastRatioW:undefined,
+		lastRatioH:undefined,
+		ratioFullscreen:false,
+		keepRatio:true,
 
 		fullScreen:false,
 
@@ -200,6 +209,10 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 						this.context.drawing.camsReset();
 					}
 				}
+			}else if(camsReset!=undefined){
+				if(camsReset){
+					this.context.drawing.camsReset();
+				}
 			}
 
 			this.smoothing(false);
@@ -239,23 +252,90 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
             this.bordC=c;
             return this.bord;
         },
-        fullscreen:function(bool){
+        fullscreen:function(bool,ratio){
+			if(ratio==undefined){ratio=this.keepRatio;}
 			if(bool!=undefined){
-				var el=document.getElementById(this.context.canvas.src.id)
-				if(bool){
-					el.requestFullscreen();
-					try{el.mozRequestFullScreen();}catch(error){}
-					try{el.webkitRequestFullscreen();}catch(error){}
-					try{el.msRequestFullscreen();}catch(error){}
-				}else{
-					document.exitFullscreen();
+				if(ratio){
+					var el=document.getElementById(this.context.canvas.src.id)
+					if(bool){
+						if(this.context.mobile.isIOS()){
+							this.iosW=this.w;
+							this.iosH=this.h;
+							
+							var ratioWindow=window.innerWidth/window.innerHeight;
+							var ratioGame=this.w/this.h;
+							
+							var actualW=0;
+							var actualH=0;
+
+							if(ratioWindow>ratioGame){
+								var actualH=window.innerHeight;
+								var actualW=window.innerHeight*ratioGame;
+							}else{
+								var actualW=window.innerWidth;
+								var actualH=window.innerWidth/ratioGame;
+							}
+							
+							this.resize(actualW,actualH,true);
+							this.iosFullscreen=true;
+							this.context.drawing.cam[0].x=0;
+							this.context.drawing.cam[0].y=0;
+							this.context.drawing.cam[0].w=this.iosW;
+							this.context.drawing.cam[0].h=this.iosH;
+							this.context.drawing.cam[0].active=true;
+						}else{
+							try{el.requestFullscreen();}catch(error){}
+							try{el.webkitRequestFullscreen();}catch(error){}
+							try{el.mozRequestFullScreen();}catch(error){}
+							try{el.msRequestFullScreen();}catch(error){}
+						}
+					}else{
+						if(this.context.mobile.isIOS()){
+							this.resize(this.iosW,this.iosH,true);
+							this.iosFullscreen=false;
+						}else{
+							try{document.exitFullscreen();}catch(error){}
+							try{document.cancelFullScreen();}catch(error){}
+							try{document.webkitCancelFullScreen();}catch(error){}
+							try{document.mozCancelFullScreen();}catch(error){}
+							try{document.msExitFullScreen();}catch(error){}
+						}
+					}
+				}else if(!ratio){
+					if(bool){
+						this.lastRatioW=this.src.width;
+						this.lastRatioH=this.src.height;
+						
+						this.resize(window.innerWidth,window.innerHeight,true)
+						this.ratioFullscreen=true;
+						this.context.drawing.cam[0].x=0;
+						this.context.drawing.cam[0].y=0;
+						this.context.drawing.cam[0].w=this.lastRatioW;
+						this.context.drawing.cam[0].h=this.lastRatioH;
+						this.context.drawing.cam[0].active=true;
+					}else{
+						this.resize(this.lastRatioW,this.lastRatioH,true)
+						this.ratioFullscreen=false;
+					}
 				}
 			}
-			if(document.fullscreenElement===null){
-				return false;
-			}else{
-				return true;
+			if(!ratio){
+				return this.ratioFullscreen;
 			}
+			if(this.context.mobile.isIOS()){
+				return this.iosFullscreen;
+			}else{
+				if(this.ratioFullscreen || this.iosFullscreen){
+					return true;
+				}else{
+					if(document.fullscreenElement===null || !document.fullscreen){
+						return false;
+					}else{
+						return true;
+					}
+				}
+			}
+			
         },
         revFullscreen:function(){
             var win = window,
@@ -533,6 +613,12 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
                 if(!this.setupDone){
                     this.setup();
                 }
+				
+				if(this.context.canvas.ratioFullscreen || this.context.canvas.iosFullscreen){
+					if(this.context.keyboard.press(27)){
+						this.context.canvas.fullscreen(false,!this.context.canvas.ratioFullscreen)
+					}
+				}
 
                 if(this.context.canvas.auto==true){
                     this.context.canvas.resize();
@@ -612,7 +698,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
                 }
 
 				 //fullScreenBtn update
-				if(this.fullScreenBtn && !document.fullscreen){
+				if(this.fullScreenBtn && !this.context.canvas.fullscreen()){
 					if(this.focused){
 						var w=50/8;
 
@@ -620,25 +706,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 						if(this.context.mouse.check(0,0,w*8,w*8,true,false) || this.context.touch.check(0,0,w*8,w*8,true,false) || this.context.keyboard.press("f11")){
 							this.context.touch.touches=[];
 
-						/*	var el = document.createElement("DIV");
-							el.setAttribute("id","jeuConteneur");
-							document.body.append(el);*/
-							var el=document.getElementById(this.context.canvas.src.id);
-							/*if (el.requestFullscreen) {
-								el.requestFullscreen();
-							} else if (el.mozRequestFullScreen) { // Firefox
-								el.mozRequestFullScreen();
-							} else if (el.webkitRequestFullscreen) { // Chrome, Safari and Opera
-								el.webkitRequestFullscreen();
-							} else if (el.msRequestFullscreen) { // IE/Edge
-								el.msRequestFullscreen();
-							}*/
-							el.requestFullscreen();
-							el.mozRequestFullScreen();
-							el.webkitRequestFullscreen();
-							el.msRequestFullscreen();
-
-							//setTimeout(this.context.canvas.fullscreen.bind(this.context.canvas),100);
+							this.context.canvas.fullscreen(true);
 
 						}
 					}else{
@@ -731,7 +799,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 				}
 
                 //fullScreenBtn draw
-				if((this.fullScreenBtn && !document.fullscreen)){
+				if((this.fullScreenBtn && !this.context.canvas.fullscreen())){
 					if(this.focused){
 						var w=50/8;
 						var alpha=this.context.drawing.alpha();
@@ -1662,6 +1730,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 			for(var i=0;i<10;i++){
 				this.camReset(i);
 			}
+			this.currCam=0;
         },
 
         //change cam active
@@ -2067,7 +2136,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 				this.shape(x);
 			}else{
 				this.ctx.beginPath();
-				this.fill("arc",x+d/2,y+d/2,d/2,d/2);
+				this.fill("circle",x+d/2,y+d/2,d/2,d/2);
 				if(color!=undefined){this.color(color,"fill");}
 				this.ctx.fill();
 			}
@@ -2080,7 +2149,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 				this.shape(x);
 			}else{
 				this.ctx.beginPath();
-				this.fill("arc",x+d/2,y+d/2,d/2,d/2);
+				this.fill("circle",x+d/2,y+d/2,d/2,d/2);
 				if(color!=undefined){this.color(color,"stroke");}
 				if(lineW<=0){lineW=1}
 				this.ctx.lineWidth=lineW;
@@ -2920,7 +2989,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
                         newW=w*2;
                         newH=h*2;
                     }
-					if(rotation!=0 && type!="circle" || this.rotated){
+					if((rotation!=0 && type!="circle") || this.rotated){
 						var max=this.maxRotated(newX,newY,newW,newH);
 						if(!this.inCamera(max[0],max[1],max[2],max[3])){
 							this.ctx.restore();
@@ -3093,7 +3162,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
                 case "rectB":
                     this.ctx.strokeRect((x*camW)-(camX*camW)+posX,(y*camH)-(camY*camH)+posY,w*camW,h*camH);
                     break;
-                case "arc":
+                case "circle":
                     this.ctx.arc((x*camW)-(camX*camW)+posX,(y*camH)-(camY*camH)+posY,w*((camW+camH)/2),0,2*Math.PI);
                     break;
 				case "ellipse":
@@ -5683,8 +5752,8 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 		},
         x:function(cam,touch){
             if(cam==undefined){cam=true;}
-            if(touch==undefined){touch=0;}
-            if(this.touches.length-1>=touch){
+            if(touch==undefined){touch=this.touches.length-1;}
+            if(this.touches.length>0){
                 if(cam){
                     return this.touches[touch].cX;
                 }else{
@@ -5694,8 +5763,8 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
         },
         y:function(cam,touch){
             if(cam==undefined){cam=true;}
-            if(touch==undefined){touch=0;}
-            if(this.touches.length-1>=touch){
+            if(touch==undefined){touch=this.touches.length-1;}
+            if(this.touches.length>0){
                 if(cam){
                     return this.touches[touch].cY;
                 }else{
@@ -5886,15 +5955,45 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 				context.mouse.x=mX;
 				context.mouse.y=mY;
 
-        var posX=context.drawing.cam[context.drawing.currCam].pos.x;
-        var posY=context.drawing.cam[context.drawing.currCam].pos.y;
-        var posW=Math.abs(context.canvas.src.width/context.drawing.cam[context.drawing.currCam].pos.w)
-        var posH=Math.abs(context.canvas.src.height/context.drawing.cam[context.drawing.currCam].pos.h)
-        camW=camW/posW;
-        camH=camH/posH;
+				var posX=context.drawing.cam[context.drawing.currCam].pos.x;
+				var posY=context.drawing.cam[context.drawing.currCam].pos.y;
+				var posW=Math.abs(context.canvas.src.width/context.drawing.cam[context.drawing.currCam].pos.w)
+				var posH=Math.abs(context.canvas.src.height/context.drawing.cam[context.drawing.currCam].pos.h)
+				camW=camW/posW;
+				camH=camH/posH;
 
 				context.mouse.cX = (mX+(camX*camW)-posX)/camW;
 				context.mouse.cY = (mY+(camY*camH)-posY)/camH;
+				
+				if(context.canvas.fullscreen()){
+					var w=context.canvas.w;
+					var h=context.canvas.h;
+				
+					var ratioWindow=window.innerWidth/window.innerHeight;
+					var ratioGame=w/h;
+
+					if(ratioWindow>ratioGame){
+						var actualH=window.innerHeight;
+						var actualW=window.innerHeight*ratioGame;
+
+						var barW=(window.innerWidth-actualW)/2;
+
+						var finalX=(evt.clientX-barW)*(w/actualW)
+
+						context.mouse.x=finalX;
+						context.mouse.cX = (finalX+(camX*camW)-posX)/camW;
+					}else{
+						var actualW=window.innerWidth;
+						var actualH=window.innerWidth/ratioGame;
+
+						var barW=(window.innerHeight-actualH)/2;
+
+						var finalY=(evt.clientY-barW)*(h/actualH)
+
+						context.mouse.y=finalY;
+						context.mouse.cY = (finalY+(camY*camH)-posY)/camH;
+					}
+				}
 			}
         });
 
@@ -5982,7 +6081,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 					touches[i].cX = (tX+(camX*camW)-posX)/camW;
 					touches[i].cY = (tY+(camY*camH)-posY)/camH;
 
-					if(document.fullscreen){
+					if(context.canvas.fullscreen()){
 						var ratioWindow=window.innerWidth/window.innerHeight;
 						var ratioGame=w/h;
 
@@ -6061,7 +6160,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
           touches[i].cX = (tX+(camX*camW)-posX)/camW;
 					touches[i].cY = (tY+(camY*camH)-posY)/camH;
 
-					if(document.fullscreen){
+					if(context.canvas.fullscreen()){
 						var ratioWindow=window.innerWidth/window.innerHeight;
 						var ratioGame=w/h;
 
@@ -6139,7 +6238,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
           touches[i].cX = (tX+(camX*camW)-posX)/camW;
 					touches[i].cY = (tY+(camY*camH)-posY)/camH;
 
-					if(document.fullscreen){
+					if(context.canvas.fullscreen()){
 						var ratioWindow=window.innerWidth/window.innerHeight;
 						var ratioGame=w/h;
 
@@ -6216,7 +6315,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
           touches[i].cX = (tX+(camX*camW)-posX)/camW;
 					touches[i].cY = (tY+(camY*camH)-posY)/camH;
 
-					if(document.fullscreen){
+					if(context.canvas.fullscreen()){
 						var ratioWindow=window.innerWidth/window.innerHeight;
 						var ratioGame=w/h;
 
@@ -6284,20 +6383,6 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 			}
         });
 
-		/*document.addEventListener("fullscreenchange", function(){
-			if(document.fullscreen){
-				setTimeout(context.canvas.fullscreen.bind(context),100);
-			}else{
-				if(context.canvas.lastW!=undefined){
-					setTimeout(context.canvas.resize.call(context.canvas,context.canvas.lastW,context.canvas.lastH),100);
-				}else{
-					setTimeout(context.canvas.fullscreen.bind(context),100);
-				}
-			}
-        });*/
-
-
-
         window.addEventListener("gamepadconnected", function(e){
 			context.gamepad.connected[e.gamepad.index]=true;
         });
@@ -6338,6 +6423,11 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
     this.resize=function(w,h,camsReset){
         return this.canvas.resize(w,h,camsReset);
     }
+	
+	this.keepRatio=function(bool){
+		if(bool!=undefined){this.canvas.keepRatio=bool;}
+        return this.canvas.keepRatio;
+    }
 
 	this.ratio=function(){
         return this.canvas.ratio();
@@ -6355,12 +6445,12 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
         return this.canvas.border(bool,x,y,c);
     }
 
-    this.fullscreen=function(bool){
-        return this.canvas.fullscreen(bool);
+    this.fullscreen=function(bool,ratio){
+        return this.canvas.fullscreen(bool,ratio);
     }
 
-	this.fullScreen=function(bool){
-        return this.canvas.fullscreen(bool);
+	this.fullScreen=function(bool,ratio){
+        return this.canvas.fullscreen(bool,ratio);
     }
 
     this.autoResize=function(bool,x,y){
@@ -6851,19 +6941,19 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 		}
 	}
 
-	this.xCam=function(x,num){
+	this.xToCam=function(x,num){
 		return this.drawing.xCam(x,num);
 	}
 
-	this.yCam=function(y,num){
+	this.yToCam=function(y,num){
 		return this.drawing.yCam(y,num);
 	}
 
-	this.camX=function(x,num){
+	this.camToX=function(x,num){
 		return this.drawing.camX(x,num);
 	}
 
-	this.camY=function(y,num){
+	this.camToY=function(y,num){
 		return this.drawing.camY(y,num);
 	}
 
@@ -7838,6 +7928,16 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
 		if(bool!=undefined){this.mouse.preventRight=bool;}
 		return this.mouse.preventRight;
 	}
+	
+	this.mouseRightClick=function(bool){
+		if(bool!=undefined){this.mouse.preventRight=bool;}
+		return this.mouse.preventRight;
+	}
+	
+	this.mRightClick=function(bool){
+		if(bool!=undefined){this.mouse.preventRight=bool;}
+		return this.mouse.preventRight;
+	}
 
 	//touch
 
@@ -7924,11 +8024,115 @@ function JT(id,w,h,fps,setupName,updateName,objName,mobileAudioSize,fullScreenBt
     this.tCY=function(touch){
         return this.touch.y(true,touch);
     }
-
-    //mobile
+	
+	//Mouse and touch
+	
+	this.check=function(x,y,w,h,cam,btnFingers){
+		if(!this.mobile.isAny()){
+			if(typeof x=="object"){
+				return this.mouse.check(x.x,x.y,x.w,x.h,false,x.cam,x.btn);
+			}else{
+				return this.mouse.check(x,y,w,h,false,cam,btnFingers);
+			}
+		}else{
+			if(typeof x=="object"){
+				return this.touch.check(x.x,x.y,x.w,x.h,false,x.cam,x.fingers);
+			}else{
+				return this.touch.check(x,y,w,h,false,cam,btnFingers);
+			}
+		}
+	}
+	
+	this.press=function(x,y,w,h,cam,btnFingers){
+		if(!this.mobile.isAny()){
+			if(typeof x=="object"){
+				return this.mouse.check(x.x,x.y,x.w,x.h,true,x.cam,x.btn);
+			}else{
+				return this.mouse.check(x,y,w,h,true,cam,btnFingers);
+			}
+		}else{
+			if(typeof x=="object"){
+				return this.touch.check(x.x,x.y,x.w,x.h,true,x.cam,x.fingers);
+			}else{
+				return this.touch.check(x,y,w,h,true,cam,btnFingers);
+			}
+		}
+	}
+	
+	this.down=function(btn){
+		if(!this.mobile.isAny()){
+			if(btn==undefined){btn=0;}
+			return this.mouse.down[btn];
+		}else{
+			return this.touch.down;
+		}
+	}
+	
+	this.release=function(){
+		if(!this.mobile.isAny()){
+			this.mouse.release();
+		}else{
+			this.touch.release();
+		}
+	}
+	
+	this.x=function(touch){
+		if(!this.mobile.isAny()){
+			return this.mouse.x;
+		}else{
+			return this.touch.x(false,touch);
+		}
+	}
+	
+	this.y=function(touch){
+		if(!this.mobile.isAny()){
+			return this.mouse.y;
+		}else{
+			return this.touch.y(false,touch);
+		}
+	}
+	
+	this.camX=function(touch){
+		if(!this.mobile.isAny()){
+			return this.mouse.cX;
+		}else{
+			return this.touch.x(true,touch);
+		}
+	}
+	
+	this.camY=function(touch){
+		if(!this.mobile.isAny()){
+			return this.mouse.cY;
+		}else{
+			return this.touch.y(true,touch);
+		}
+	}
+	
+	this.cX=function(touch){
+		if(!this.mobile.isAny()){
+			return this.mouse.cX;
+		}else{
+			return this.touch.x(true,touch);
+		}
+	}
+	
+	this.cY=function(touch){
+		if(!this.mobile.isAny()){
+			return this.mouse.cY;
+		}else{
+			return this.touch.y(true,touch);
+		}
+	}
+	
+	
+	//mobile
 
     this.isMobile=function(){
         return this.mobile.isAny();
+    }
+	
+	this.isIOS=function(){
+        return this.mobile.isIOS();
     }
 
 	//retro compatibility
@@ -8237,10 +8441,10 @@ TEMPLATE:
     <body>
         <div id="canContainer">
         <canvas id="can"></canvas>
-        <span>Made with <a href="https://github.com/ToniestTony/jt_lib">jt_lib18.js</a></span>
+        <span>Made with <a href="https://github.com/ToniestTony/jt_lib">jt_lib19.js</a></span>
             </div>
     </body>
-    <script src="jt_lib18.js"></script>
+    <script src="jt_lib19.js"></script>
     
     <script>
 
