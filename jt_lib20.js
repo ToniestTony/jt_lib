@@ -4833,6 +4833,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 			part.image=image;
 			part.anim=anim;
 			part.id=id;
+			if(id==undefined){part.id=""}
 
 			this.parts.push(part);
 		},
@@ -8081,8 +8082,8 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
         return this.assets.collision(name1,name2);
     }
 
-	this.camactive=function(bool){
-		return this.drawing.camActive(bool);
+	this.camactive=function(bool,num){
+		return this.drawing.camActive(bool,num);
 	}
 
 	this.fontsize=function(size){
