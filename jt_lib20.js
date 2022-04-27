@@ -82,6 +82,8 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
         w:undefined,
         h:undefined,
 		
+		additionalH:0,
+		
 		iosW:undefined,
 		iosH:undefined,
 		iosFullscreen:false,
@@ -110,6 +112,11 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
         cursorVisible:true,
 
         context:undefined,
+		//Additional height
+		addH:function(h){
+			this.additionalH=h;
+			this.resize(this.w,this.h)
+		},
         //Resize the canvas
         resize:function(w,h,camsReset){
 			//Resizing canvas resets a lot of ctx attributes, so we need to save/load them
@@ -136,7 +143,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 
             //Resize the actual HTML canvas
             this.src.width=w;
-            this.src.height=h;
+            this.src.height=h+this.additionalH;
 
             //Keep the width and height in attributes
             this.w=w;
@@ -179,7 +186,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 		ratio:function(){
 			return this.w/this.h;
 		},
-        setId(id){
+        setId:function(id){
             this.id=id;
             this.src = this.context.html.id(id);
             this.ctx = this.src.getContext("2d");
@@ -205,56 +212,115 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
             this.bordC=c;
             return this.bord;
         },
-        fullscreen:function(bool,ratio){
-			if(ratio==undefined){ratio=this.keepRatio;}
-			if(this.context.mobile.isIOS()){ratio=false;}
+        fullscreen:function(bool,fake){
+			fake=true;
+			
 			if(bool!=undefined){
-				if(ratio){
+				if(!fake){
+					if(!bool){
+						this.context.drawing.forceCam=false;
+					}
 					var el=document.getElementById(this.context.canvas.src.id)
 					if(bool){
-						try{el.requestFullscreen();}catch(error){}
-						try{el.webkitRequestFullscreen();}catch(error){}
-						try{el.mozRequestFullScreen();}catch(error){}
-						try{el.msRequestFullScreen();}catch(error){}
+						if (el.requestFullscreen) {
+							el.requestFullscreen();
+						}
+						else if (el.msRequestFullscreen) {
+							el.msRequestFullscreen();
+						}
+						else if (el.mozRequestFullScreen) {
+							el.mozRequestFullScreen();
+						}
+						else if (el.webkitRequestFullScreen) {
+							el.webkitRequestFullScreen();
+							/*
+								*Kept here for reference: keyboard support in full screen
+								* marioVideo.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);
+							*/
+						}
 					}else{
-						if(this.context.mobile.isIOS()){
+						/*if(this.context.mobile.isIOS()){
 							this.resize(this.iosW,this.iosH,true);
 							this.iosFullscreen=false;
-						}else{
-							try{document.exitFullscreen();}catch(error){}
-							try{document.cancelFullScreen();}catch(error){}
-							try{document.webkitCancelFullScreen();}catch(error){}
-							try{document.mozCancelFullScreen();}catch(error){}
-							try{document.msExitFullScreen();}catch(error){}
-						}
+						}else{*/
+							if (document.exitFullscreen) {
+								document.exitFullscreen();
+							}
+							else if (document.msExitFullscreen) {
+								document.msExitFullscreen();
+							}
+							else if (document.mozCancelFullScreen) {
+								document.mozCancelFullScreen();
+							}
+							else if (document.webkitCancelFullScreen) {
+								document.webkitCancelFullScreen();
+							}
+						//}
 					}
-				}else if(!ratio){
+				}else{
 					if(bool){
-						this.lastRatioW=this.src.width;
-						this.lastRatioH=this.src.height;
+						this.iosFullscreen=true;
 						
-						this.resize(window.innerWidth,window.innerHeight,true)
-						this.ratioFullscreen=true;
-						this.context.drawing.cam[0].x=0;
+						this.lastRatioW=this.w;
+						this.lastRatioH=this.h;
+						
+						var ratio=this.lastRatioW/this.lastRatioH;
+						
+						var diffX=window.innerWidth/this.lastRatioW;
+						var diffY=(window.innerHeight-this.additionalH)/this.lastRatioH;
+						
+						var w=window.innerWidth;
+						var h=window.innerHeight;
+						if(diffX<diffY){
+							//width to max
+							h=w/ratio+this.additionalH;
+						}else{
+							//height to max
+							w=(h-this.additionalH)*ratio;
+						}
+						
+						document.getElementById(this.context.canvas.src.id).style.width=w+"px";
+						document.getElementById(this.context.canvas.src.id).style.height=h+"px";
+						
+						/*this.context.drawing.cam[0].x=0;
 						this.context.drawing.cam[0].y=0;
 						this.context.drawing.cam[0].w=this.lastRatioW;
 						this.context.drawing.cam[0].h=this.lastRatioH;
+						this.context.drawing.cam[0].pos.w=w;
+						this.context.drawing.cam[0].pos.h=h;*/
 						
-						var diffX=window.innerWidth-this.lastRatioW;
+						this.resize(this.lastRatioW,this.lastRatioH,true)
+						
+						/*
+						
+						
+						
+						this.resize(w,h,true)
+						this.ratioFullscreen=true;
+						this.context.drawing.cam[0].x=0;
+						this.context.drawing.cam[0].y=0;
+						this.context.drawing.cam[0].w=w;
+						this.context.drawing.cam[0].h=h;*/
+						
+						/*var diffX=window.innerWidth-this.lastRatioW;
 						var diffY=window.innerHeight-this.lastRatioH;
 						var ratio=this.lastRatioW/this.lastRatioH;
 						
 						if((diffX/ratio)<(diffY*ratio)){
 							this.context.drawing.cam[0].pos.x=0;
 							this.context.drawing.cam[0].pos.w=window.innerWidth;
-							this.context.drawing.cam[0].pos.h=this.lastRatioH+diffX*ratio;
+							this.context.drawing.cam[0].pos.h=window.innerWidth/ratio;
 							this.context.drawing.cam[0].pos.y=window.innerHeight/2-this.context.drawing.cam[0].pos.h/2;
 						}else{
 							this.context.drawing.cam[0].pos.y=0;
 							this.context.drawing.cam[0].pos.h=window.innerHeight;
 							this.context.drawing.cam[0].pos.w=this.lastRatioW+diffY*ratio;
 							this.context.drawing.cam[0].pos.x=window.innerWidth/2-this.context.drawing.cam[0].pos.w/2;
-						}
+						}*/
+						//this.resize(this.context.drawing.cam[0].pos.w,this.context.drawing.cam[0].pos.h)
+						
+						//this.context.drawing.cam[0].w=this.context.drawing.cam[0].pos.w;
+						//this.context.drawing.cam[0].h=this.context.drawing.cam[0].pos.h;
 						
 						/*this.context.drawing.cam[0].pos.x=diffX/2;
 						this.context.drawing.cam[0].pos.y=diffY/2;
@@ -262,29 +328,28 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 						this.context.drawing.cam[0].pos.h=this.lastRatioW;*/
 						
 						this.context.drawing.cam[0].active=true;
+						this.context.drawing.forceCam=true;
 					}else{
+						this.iosFullscreen=false;
+						
+						document.getElementById(this.context.canvas.src.id).style.width=this.lastRatioW+"px";
+						document.getElementById(this.context.canvas.src.id).style.height=this.lastRatioH+this.additionalH+"px";
+						
 						this.resize(this.lastRatioW,this.lastRatioH,true)
-						this.ratioFullscreen=false;
-					}
-				}
-			}
-			if(!ratio){
-				return this.ratioFullscreen;
-			}
-			if(this.context.mobile.isIOS()){
-				return this.iosFullscreen;
-			}else{
-				if(this.ratioFullscreen || this.iosFullscreen){
-					return true;
-				}else{
-					if(document.fullscreenElement===null || !document.fullscreen){
-						return false;
-					}else{
-						return true;
+						this.context.drawing.forceCam=false;
 					}
 				}
 			}
 			
+			if(fake){
+				return this.iosFullscreen;
+			}
+			
+			if(document.fullscreenElement===null || !document.fullscreen){
+				return false;
+			}else{
+				return true;
+			}
         },
         revFullscreen:function(){
             var win = window,
@@ -397,12 +462,12 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 			}
 
             this.context.mouse.drawing=this.context.drawing;
-            this.context.mouse.canvas.w=this.context.canvas.src.width;
-            this.context.mouse.canvas.h=this.context.canvas.src.height;
+            this.context.mouse.canvas.w=this.context.canvas.w;
+            this.context.mouse.canvas.h=this.context.canvas.h;
 
             this.context.touch.drawing=this.context.drawing;
-			this.context.touch.canvas.w=this.context.canvas.src.width;
-            this.context.touch.canvas.h=this.context.canvas.src.height
+			this.context.touch.canvas.w=this.context.canvas.w;
+            this.context.touch.canvas.h=this.context.canvas.h
 			
             this.context.stats.loop=this.context.loop;
             this.context.stats.drawing=this.context.drawing;
@@ -427,6 +492,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 		//play all sounds
 		playAllSounds: function(){
 			//Fix sound delay
+			var mute=this.context.assets.mute();
 			this.context.assets.mute(true);
 			for(var soun in this.context.assets.sounds){
 				if(this.context.assets.sounds.hasOwnProperty(soun)){
@@ -443,7 +509,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 					}
 				}
 			}
-			this.context.assets.mute(false);
+			this.context.assets.mute(mute);
 			this.soundsPlayed=true;
 		},
         //start the main loop
@@ -570,8 +636,10 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
                 }
 				
 				if(this.context.canvas.ratioFullscreen || this.context.canvas.iosFullscreen){
-					if(this.context.keyboard.press(27)){
-						this.context.canvas.fullscreen(false,!this.context.canvas.ratioFullscreen)
+					if(this.context.keyboard.press(122)){
+						this.context.canvas.fullscreen(false,true)
+						this.delAlarm("jt_fullscreen")
+						this.context.keyboard.release(122);
 					}
 				}
 
@@ -664,6 +732,10 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 							this.context.touch.touches=[];
 
 							this.context.canvas.fullscreen(true);
+							if(!this.context.mobile.isAny()){
+								this.alarm("jt_fullscreen",180);
+							}
+							
 
 						}
 					}else{
@@ -709,6 +781,44 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 					}
 				}
 				
+				//Draw f11 to quit fullscreen
+				if(this.isAlarm("jt_fullscreen")){
+					var time=this.getAlarm("jt_fullscreen")
+					var ratio=time/180;
+					
+					var alpha=this.context.drawing.ctx.globalAlpha;
+					if(time<180/2){
+						this.context.drawing.ctx.globalAlpha=(time/(180/2));
+					}
+					this.context.drawing.ctx.globalAlpha=this.context.drawing.ctx.globalAlpha/2;
+					
+					
+					var color=this.context.color();
+					var cam=this.context.drawing.camActive();
+					var font=this.context.drawing.fontName;
+					var size=this.context.drawing.fontSize;
+					var align=this.context.drawing.align();
+					this.context.drawing.camActive(false);
+					var w=this.context.canvas.w/2;
+					var x=w/2;
+					var y=0;
+					var h=40;
+					this.context.drawing.ctx.fillStyle="white";
+					this.context.drawing.ctx.fillRect(x,y,w,h);
+					this.context.drawing.ctx.fillStyle="black";
+					this.context.drawing.ctx.textAlign="center";
+					this.context.drawing.ctx.font="20px Consolas";
+					this.context.drawing.ctx.globalAlpha=this.context.drawing.ctx.globalAlpha*2;
+					this.context.drawing.ctx.fillText("Press f11 to quit Fullscreen",x+w/2,10)
+					this.context.drawing.camActive(cam);
+					this.context.drawing.font(font,size);
+					this.context.drawing.align(align);
+					this.context.drawing.color(color);
+					this.context.drawing.ctx.globalAlpha=alpha;
+					
+					this.checkAlarm("jt_fullscreen",true);
+				}
+				
 				this.context.drawing.calledI=0;
 				this.context.drawing.calledA=0;
 				this.context.drawing.calledT=0;
@@ -724,8 +834,8 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 					var mX=this.context.mouse.x;
 					var mY=this.context.mouse.y;
 
-					var camW=Math.abs(this.context.canvas.src.width/this.context.drawing.cam[this.context.drawing.currCam].w)
-					var camH=Math.abs(this.context.canvas.src.height/this.context.drawing.cam[this.context.drawing.currCam].h)
+					var camW=Math.abs(this.context.canvas.w/this.context.drawing.cam[this.context.drawing.currCam].w)
+					var camH=Math.abs(this.context.canvas.h/this.context.drawing.cam[this.context.drawing.currCam].h)
 					var camX=this.context.drawing.cam[this.context.drawing.currCam].x;
 					var camY=this.context.drawing.cam[this.context.drawing.currCam].y;
 
@@ -788,12 +898,20 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 
 				if(document.activeElement.id!=this.context.canvas.id){
 					var alpha=this.context.drawing.alpha();
+					var align=this.context.drawing.align();
 					var before=this.context.drawing.camActive();
+					var font=this.context.drawing.fontName;
+					var size=this.context.drawing.fontSize;
+					var color=this.context.drawing.color();
 					this.context.drawing.camActive(false);
 					this.context.drawing.alpha(0.67);
 					this.context.drawing.rect(0,0,this.context.canvas.w,this.context.canvas.h,"black");
 					this.context.drawing.font("Consolas",20);
-					var string="Click here to play!";
+					var action="Click";
+					if(this.context.mobile.isAny()){
+						action="Touch"
+					}
+					var string=action+" here to play!";
 					//change font size
 					for(var i=0;i<9;i++){
 						if(this.context.drawing.ctx.measureText(string).width>this.context.canvas.w){
@@ -803,9 +921,13 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 						}
 					}
 
-					this.context.drawing.alpha(alpha);
+					this.context.drawing.alpha(1);
 					this.context.drawing.text(string,this.context.canvas.w/2,this.context.canvas.h/2-10,"white","center");
+					this.context.drawing.alpha(alpha);
 					this.context.drawing.camActive(before);
+					this.context.drawing.font(font,size);
+					this.context.drawing.align(align);
+					this.context.drawing.color(color);
 				}
 
 
@@ -998,6 +1120,13 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
                  return false;
              }
         },
+		getAlarm:function(name){
+			if(this.alarms[name]==undefined){
+				return undefined;
+			}else{
+				return this.alarms[name].time;
+			}
+		},
         shake:function(force,duration,reduce){
             if(this.normalX==undefined){
                 this.normalX=this.context.drawing.cam[this.context.drawing.currCam].x;
@@ -1408,6 +1537,9 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 
 		//the current camera
 		currCam:0,
+		
+		//force camera
+		forceCam:false,
 
         //font
         fontName:"Arial",
@@ -1639,9 +1771,9 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 		//Check if part of rect in in canvas
 		inCanvas:function(x,y,w,h){
 			var col=false;
-			if (x < this.canvas.w &&
+			if (x < this.canvas.src.width &&
                 x + w > 0 &&
-                y < this.canvas.h &&
+                y < this.canvas.src.height &&
                 h + y > 0) {
                 col=true;
             }
@@ -1650,8 +1782,8 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 		//Check if full rect in in canvas
 		inCanvasFull:function(x,y,w,h){
 			var col=false;
-			if(x>=0 && x+w<=this.canvas.w &&
-			y>=0 && y+h<=this.canvas.h){
+			if(x>=0 && x+w<=this.canvas.src.width &&
+			y>=0 && y+h<=this.canvas.src.height){
                 col=true;
             }
             return col;
@@ -2311,8 +2443,8 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
                     var tempW=image.img.width;
                     var tempH=image.img.height;
 
-                    var camW=Math.abs(this.canvas.src.width/this.cam[this.currCam].w)
-                    var camH=Math.abs(this.canvas.src.height/this.cam[this.currCam].h)
+                    var camW=Math.abs(this.canvas.w/this.cam[this.currCam].w)
+                    var camH=Math.abs(this.canvas.h/this.cam[this.currCam].h)
                     var camX=this.cam[this.currCam].x;
                     var camY=this.cam[this.currCam].y;
 
@@ -2357,16 +2489,16 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 
 						camX=this.cam[this.currCam].x;
 						camY=this.cam[this.currCam].y;
-						camW=Math.abs(this.canvas.src.width/this.cam[this.currCam].w)
-						camH=Math.abs(this.canvas.src.height/this.cam[this.currCam].h)
+						camW=Math.abs(this.canvas.w/this.cam[this.currCam].w)
+						camH=Math.abs(this.canvas.h/this.cam[this.currCam].h)
 
 						var pos=this.cam[this.currCam].pos;
-						if(pos.x!=0 || pos.y!=0 || pos.w!=this.canvas.src.width || pos.h!=this.canvas.src.height){
+						if(pos.x!=0 || pos.y!=0 || pos.w!=this.canvas.w || pos.h!=this.canvas.h){
 							posX=this.cam[this.currCam].pos.x;
 							posY=this.cam[this.currCam].pos.y;
 
-							posW=Math.abs(this.canvas.src.width/this.cam[this.currCam].pos.w);
-							posH=Math.abs(this.canvas.src.height/this.cam[this.currCam].pos.h);
+							posW=Math.abs(this.canvas.w/this.cam[this.currCam].pos.w);
+							posH=Math.abs(this.canvas.h/this.cam[this.currCam].pos.h);
 
 							camW=camW/posW;
 							camH=camH/posH;
@@ -2578,16 +2710,16 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 
 						camX=this.cam[this.currCam].x;
 						camY=this.cam[this.currCam].y;
-						camW=Math.abs(this.canvas.src.width/this.cam[this.currCam].w)
-						camH=Math.abs(this.canvas.src.height/this.cam[this.currCam].h)
+						camW=Math.abs(this.canvas.w/this.cam[this.currCam].w)
+						camH=Math.abs(this.canvas.h/this.cam[this.currCam].h)
 
 						var pos=this.cam[this.currCam].pos;
-						if(pos.x!=0 || pos.y!=0 || pos.w!=this.canvas.src.width || pos.h!=this.canvas.src.height){
+						if(pos.x!=0 || pos.y!=0 || pos.w!=this.canvas.w || pos.h!=this.canvas.h){
 							posX=this.cam[this.currCam].pos.x;
 							posY=this.cam[this.currCam].pos.y;
 
-							posW=Math.abs(this.canvas.src.width/this.cam[this.currCam].pos.w);
-							posH=Math.abs(this.canvas.src.height/this.cam[this.currCam].pos.h);
+							posW=Math.abs(this.canvas.w/this.cam[this.currCam].pos.w);
+							posH=Math.abs(this.canvas.h/this.cam[this.currCam].pos.h);
 
 							camW=camW/posW;
 							camH=camH/posH;
@@ -2721,8 +2853,8 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
                     if(col.gradient=="linear"){
 
                         if(this.cam[this.currCam].active==true){
-							var camW=Math.abs(this.canvas.src.width/this.cam[this.currCam].w)
-							var camH=Math.abs(this.canvas.src.height/this.cam[this.currCam].h)
+							var camW=Math.abs(this.canvas.w/this.cam[this.currCam].w)
+							var camH=Math.abs(this.canvas.h/this.cam[this.currCam].h)
 							var camX=this.cam[this.currCam].x;
 							var camY=this.cam[this.currCam].y;
 
@@ -2739,8 +2871,8 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
                     }else if(col.gradient=="radial"){
 
                         if(this.cam[this.currCam].active==true){
-							var camW=Math.abs(this.canvas.src.width/this.cam[this.currCam].w)
-							var camH=Math.abs(this.canvas.src.height/this.cam[this.currCam].h)
+							var camW=Math.abs(this.canvas.w/this.cam[this.currCam].w)
+							var camH=Math.abs(this.canvas.h/this.cam[this.currCam].h)
 							var camX=this.cam[this.currCam].x;
 							var camY=this.cam[this.currCam].y;
 
@@ -2900,16 +3032,16 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 
 				camX=this.cam[this.currCam].x;
 				camY=this.cam[this.currCam].y;
-				camW=Math.abs(this.canvas.src.width/this.cam[this.currCam].w)
-				camH=Math.abs(this.canvas.src.height/this.cam[this.currCam].h)
+				camW=Math.abs(this.canvas.w/this.cam[this.currCam].w)
+				camH=Math.abs(this.canvas.h/this.cam[this.currCam].h)
 
 				var pos=this.cam[this.currCam].pos;
-				if(pos.x!=0 || pos.y!=0 || pos.w!=this.canvas.src.width || pos.h!=this.canvas.src.height){
+				if(pos.x!=0 || pos.y!=0 || pos.w!=this.canvas.w || pos.h!=this.canvas.h){
 					posX=this.cam[this.currCam].pos.x;
 					posY=this.cam[this.currCam].pos.y;
 
-					posW=Math.abs(this.canvas.src.width/this.cam[this.currCam].pos.w);
-					posH=Math.abs(this.canvas.src.height/this.cam[this.currCam].pos.h);
+					posW=Math.abs(this.canvas.w/this.cam[this.currCam].pos.w);
+					posH=Math.abs(this.canvas.h/this.cam[this.currCam].pos.h);
 
 					camW=camW/posW;
 					camH=camH/posH;
@@ -3127,16 +3259,16 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 			if(this.cam[this.currCam].active){
 				camX=this.cam[this.currCam].x;
 				camY=this.cam[this.currCam].y;
-				camW=Math.abs(this.canvas.src.width/this.cam[this.currCam].w)
-				camH=Math.abs(this.canvas.src.height/this.cam[this.currCam].h)
+				camW=Math.abs(this.canvas.w/this.cam[this.currCam].w)
+				camH=Math.abs(this.canvas.h/this.cam[this.currCam].h)
 
 				var pos=this.cam[this.currCam].pos;
-				if(pos.x!=0 || pos.y!=0 || pos.w!=this.canvas.src.width || pos.h!=this.canvas.src.height){
+				if(pos.x!=0 || pos.y!=0 || pos.w!=this.canvas.w || pos.h!=this.canvas.h){
 					posX=this.cam[this.currCam].pos.x;
 					posY=this.cam[this.currCam].pos.y;
 
-					posW=Math.abs(this.canvas.src.width/this.cam[this.currCam].pos.w);
-					posH=Math.abs(this.canvas.src.height/this.cam[this.currCam].pos.h);
+					posW=Math.abs(this.canvas.w/this.cam[this.currCam].pos.w);
+					posH=Math.abs(this.canvas.h/this.cam[this.currCam].pos.h);
 
 					camW=camW/posW;
 					camH=camH/posH;
@@ -3285,8 +3417,8 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 
 
         scale:function(scaleX,scaleY,x,y,w,h){
-			var camW=Math.abs(this.canvas.src.width/this.cam[this.currCam].w)
-            var camH=Math.abs(this.canvas.src.height/this.cam[this.currCam].h)
+			var camW=Math.abs(this.canvas.w/this.cam[this.currCam].w)
+            var camH=Math.abs(this.canvas.h/this.cam[this.currCam].h)
             var camX=this.cam[this.currCam].x;
             var camY=this.cam[this.currCam].y;
 
@@ -3321,8 +3453,8 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 		},
         //rotate
         rotate:function(rotation,x,y,w,h){
-            var camW=Math.abs(this.canvas.src.width/this.cam[this.currCam].w)
-            var camH=Math.abs(this.canvas.src.height/this.cam[this.currCam].h)
+            var camW=Math.abs(this.canvas.w/this.cam[this.currCam].w)
+            var camH=Math.abs(this.canvas.h/this.cam[this.currCam].h)
             var camX=this.cam[this.currCam].x;
             var camY=this.cam[this.currCam].y;
             if(this.cam[this.currCam].active==false){
@@ -3573,13 +3705,13 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 
 		floor:function(num,digits){
       if(digits==undefined){digits=0;}
-			var mult=10**digits;
+			var mult=Math.pow(10,digits);
 			return Math.floor((num+Number.EPSILON)*mult)/mult;
 		},
 
 		ceil:function(num,digits){
       if(digits==undefined){digits=0;}
-			var mult=10**digits;
+			var mult=Math.pow(10,digits);
 			return Math.ceil((num+Number.EPSILON)*mult)/mult;
 		},
 
@@ -3593,7 +3725,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 
 		round:function(num,digits){
 			if(digits==undefined){digits=0;}
-			var mult=10**digits;
+			var mult=Math.pow(10,digits);
 			return Math.round((num+Number.EPSILON) * mult) / mult;
 		},
         
@@ -5730,7 +5862,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 		//round numbers
 		round:function(num,digits){
 			if(digits==undefined){digits=0;}
-			var mult=10**digits;
+			var mult=Math.pow(10,digits);
 			return Math.round((num+Number.EPSILON) * mult) / mult;
 		},
 		//Draw all stats
@@ -5847,12 +5979,12 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 
 				var rect = context.canvas.src.getBoundingClientRect();
 
-				var camW=Math.abs(context.canvas.src.width/context.drawing.cam[context.drawing.currCam].w)
-				var camH=Math.abs(context.canvas.src.height/context.drawing.cam[context.drawing.currCam].h)
+				var camW=Math.abs(context.canvas.w/context.drawing.cam[context.drawing.currCam].w)
+				var camH=Math.abs(context.canvas.h/context.drawing.cam[context.drawing.currCam].h)
 				var camX=context.drawing.cam[context.drawing.currCam].x;
 				var camY=context.drawing.cam[context.drawing.currCam].y;
 
-				var mX=Math.round(((evt.clientX-rect.left)/(rect.right-rect.left))*context.canvas.src.width)/context.canvas.pixelRate;
+				var mX=Math.round(((evt.clientX-rect.left)/(rect.right-rect.left))*context.canvas.w)/context.canvas.pixelRate;
 				var mY=Math.round(((evt.clientY-rect.top)/(rect.bottom-rect.top))*context.canvas.src.height)/context.canvas.pixelRate;
 
 				context.mouse.x=mX;
@@ -5860,15 +5992,15 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 
 				var posX=context.drawing.cam[context.drawing.currCam].pos.x;
 				var posY=context.drawing.cam[context.drawing.currCam].pos.y;
-				var posW=Math.abs(context.canvas.src.width/context.drawing.cam[context.drawing.currCam].pos.w)
-				var posH=Math.abs(context.canvas.src.height/context.drawing.cam[context.drawing.currCam].pos.h)
+				var posW=Math.abs(context.canvas.w/context.drawing.cam[context.drawing.currCam].pos.w)
+				var posH=Math.abs(context.canvas.h/context.drawing.cam[context.drawing.currCam].pos.h)
 				camW=camW/posW;
 				camH=camH/posH;
 
 				context.mouse.cX = (mX+(camX*camW)-posX)/camW;
 				context.mouse.cY = (mY+(camY*camH)-posY)/camH;
 				
-				if(context.canvas.fullscreen()){
+				/*if(context.canvas.fullscreen()){
 					var w=context.canvas.w;
 					var h=context.canvas.h;
 				
@@ -5896,7 +6028,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 						context.mouse.y=finalY;
 						context.mouse.cY = (finalY+(camY*camH)-posY)/camH;
 					}
-				}
+				}*/
 			}
         });
 
@@ -5968,8 +6100,8 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 
 				var rect = context.canvas.src.getBoundingClientRect();
 
-				var camW=Math.abs(context.canvas.src.width/context.drawing.cam[context.drawing.currCam].w)
-				var camH=Math.abs(context.canvas.src.height/context.drawing.cam[context.drawing.currCam].h)
+				var camW=Math.abs(context.canvas.w/context.drawing.cam[context.drawing.currCam].w)
+				var camH=Math.abs(context.canvas.h/context.drawing.cam[context.drawing.currCam].h)
 				var camX=context.drawing.cam[context.drawing.currCam].x;
 				var camY=context.drawing.cam[context.drawing.currCam].y;
 
@@ -5981,7 +6113,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 					var touch=evt.touches[i];
 					force++;
 					var w=context.canvas.w;
-					var h=context.canvas.h;
+					var h=context.canvas.src.height;
 
 					var tX=Math.round(((touch.clientX-rect.left)/(rect.right-rect.left))*w)/context.canvas.pixelRate;
 					var tY=Math.round(((touch.clientY-rect.top)/(rect.bottom-rect.top))*h)/context.canvas.pixelRate;
@@ -5992,15 +6124,15 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 
           var posX=context.drawing.cam[context.drawing.currCam].pos.x;
           var posY=context.drawing.cam[context.drawing.currCam].pos.y;
-          var posW=Math.abs(context.canvas.src.width/context.drawing.cam[context.drawing.currCam].pos.w)
-          var posH=Math.abs(context.canvas.src.height/context.drawing.cam[context.drawing.currCam].pos.h)
+          var posW=Math.abs(context.canvas.w/context.drawing.cam[context.drawing.currCam].pos.w)
+          var posH=Math.abs(context.canvas.h/context.drawing.cam[context.drawing.currCam].pos.h)
           camW=camW/posW;
           camH=camH/posH;
 
 					touches[i].cX = (tX+(camX*camW)-posX)/camW;
 					touches[i].cY = (tY+(camY*camH)-posY)/camH;
 
-					if(context.canvas.fullscreen()){
+					/*if(context.canvas.fullscreen()){
 						var ratioWindow=window.innerWidth/window.innerHeight;
 						var ratioGame=w/h;
 
@@ -6025,7 +6157,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 							touches[i].y=finalY;
 							touches[i].cY = (finalY+(camY*camH)-posY)/camH;
 						}
-					}
+					}*/
 				}
 				context.touch.touches=touches;
 
@@ -6047,15 +6179,15 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 
 				var rect = context.canvas.src.getBoundingClientRect();
 
-				var camW=Math.abs(context.canvas.src.width/context.drawing.cam[context.drawing.currCam].w)
-				var camH=Math.abs(context.canvas.src.height/context.drawing.cam[context.drawing.currCam].h)
+				var camW=Math.abs(context.canvas.w/context.drawing.cam[context.drawing.currCam].w)
+				var camH=Math.abs(context.canvas.h/context.drawing.cam[context.drawing.currCam].h)
 				var camX=context.drawing.cam[context.drawing.currCam].x;
 				var camY=context.drawing.cam[context.drawing.currCam].y;
 
         var posX=context.drawing.cam[context.drawing.currCam].pos.x;
         var posY=context.drawing.cam[context.drawing.currCam].pos.y;
-        var posW=Math.abs(context.canvas.src.width/context.drawing.cam[context.drawing.currCam].pos.w)
-        var posH=Math.abs(context.canvas.src.height/context.drawing.cam[context.drawing.currCam].pos.h)
+        var posW=Math.abs(context.canvas.w/context.drawing.cam[context.drawing.currCam].pos.w)
+        var posH=Math.abs(context.canvas.h/context.drawing.cam[context.drawing.currCam].pos.h)
         camW=camW/posW;
         camH=camH/posH;
 
@@ -6067,7 +6199,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 					var touch=evt.touches[i];
 					force++;
 					var w=context.canvas.w;
-					var h=context.canvas.h;
+					var h=context.canvas.src.height;
 
 					var tX=Math.round(((touch.clientX-rect.left)/(rect.right-rect.left))*w)/context.canvas.pixelRate;
 					var tY=Math.round(((touch.clientY-rect.top)/(rect.bottom-rect.top))*h)/context.canvas.pixelRate;
@@ -6079,7 +6211,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
           touches[i].cX = (tX+(camX*camW)-posX)/camW;
 					touches[i].cY = (tY+(camY*camH)-posY)/camH;
 
-					if(context.canvas.fullscreen()){
+					/*if(context.canvas.fullscreen()){
 						var ratioWindow=window.innerWidth/window.innerHeight;
 						var ratioGame=w/h;
 
@@ -6104,7 +6236,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 							touches[i].y=finalY;
 							touches[i].cY = (finalY+(camY*camH)-posY)/camH;
 						}
-					}
+					}*/
 				}
 
 				context.touch.touches=touches;
@@ -6125,15 +6257,15 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 
 				var rect = context.canvas.src.getBoundingClientRect();
 
-				var camW=Math.abs(context.canvas.src.width/context.drawing.cam[context.drawing.currCam].w)
-				var camH=Math.abs(context.canvas.src.height/context.drawing.cam[context.drawing.currCam].h)
+				var camW=Math.abs(context.canvas.w/context.drawing.cam[context.drawing.currCam].w)
+				var camH=Math.abs(context.canvas.h/context.drawing.cam[context.drawing.currCam].h)
 				var camX=context.drawing.cam[context.drawing.currCam].x;
 				var camY=context.drawing.cam[context.drawing.currCam].y;
 
         var posX=context.drawing.cam[context.drawing.currCam].pos.x;
         var posY=context.drawing.cam[context.drawing.currCam].pos.y;
-        var posW=Math.abs(context.canvas.src.width/context.drawing.cam[context.drawing.currCam].pos.w)
-        var posH=Math.abs(context.canvas.src.height/context.drawing.cam[context.drawing.currCam].pos.h)
+        var posW=Math.abs(context.canvas.w/context.drawing.cam[context.drawing.currCam].pos.w)
+        var posH=Math.abs(context.canvas.h/context.drawing.cam[context.drawing.currCam].pos.h)
         camW=camW/posW;
         camH=camH/posH;
 
@@ -6145,7 +6277,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 					var touch=evt.touches[i];
 					force++;
 					var w=context.canvas.w;
-					var h=context.canvas.h;
+					var h=context.canvas.src.height;
 
 					var tX=Math.round(((touch.clientX-rect.left)/(rect.right-rect.left))*w)/context.canvas.pixelRate;
 					var tY=Math.round(((touch.clientY-rect.top)/(rect.bottom-rect.top))*h)/context.canvas.pixelRate;
@@ -6157,7 +6289,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
           touches[i].cX = (tX+(camX*camW)-posX)/camW;
 					touches[i].cY = (tY+(camY*camH)-posY)/camH;
 
-					if(context.canvas.fullscreen()){
+					/*if(context.canvas.fullscreen()){
 						var ratioWindow=window.innerWidth/window.innerHeight;
 						var ratioGame=w/h;
 
@@ -6182,7 +6314,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 							touches[i].y=finalY;
 							touches[i].cY = (finalY+(camY*camH)-posY)/camH;
 						}
-					}
+					}*/
 				}
 
 				context.touch.touches=touches;
@@ -6202,15 +6334,15 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 
 				var rect = context.canvas.src.getBoundingClientRect();
 
-				var camW=Math.abs(context.canvas.src.width/context.drawing.cam[context.drawing.currCam].w)
-				var camH=Math.abs(context.canvas.src.height/context.drawing.cam[context.drawing.currCam].h)
+				var camW=Math.abs(context.canvas.w/context.drawing.cam[context.drawing.currCam].w)
+				var camH=Math.abs(context.canvas.h/context.drawing.cam[context.drawing.currCam].h)
 				var camX=context.drawing.cam[context.drawing.currCam].x;
 				var camY=context.drawing.cam[context.drawing.currCam].y;
 
         var posX=context.drawing.cam[context.drawing.currCam].pos.x;
         var posY=context.drawing.cam[context.drawing.currCam].pos.y;
-        var posW=Math.abs(context.canvas.src.width/context.drawing.cam[context.drawing.currCam].pos.w)
-        var posH=Math.abs(context.canvas.src.height/context.drawing.cam[context.drawing.currCam].pos.h)
+        var posW=Math.abs(context.canvas.w/context.drawing.cam[context.drawing.currCam].pos.w)
+        var posH=Math.abs(context.canvas.h/context.drawing.cam[context.drawing.currCam].pos.h)
         camW=camW/posW;
         camH=camH/posH;
 
@@ -6222,7 +6354,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 					var touch=evt.touches[i];
 					force++;
 					var w=context.canvas.w;
-					var h=context.canvas.h;
+					var h=context.canvas.src.height;
 
 					var tX=Math.round(((touch.clientX-rect.left)/(rect.right-rect.left))*w)/context.canvas.pixelRate;
 					var tY=Math.round(((touch.clientY-rect.top)/(rect.bottom-rect.top))*h)/context.canvas.pixelRate;
@@ -6343,6 +6475,10 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
         return this.canvas.resize(w,h,camsReset);
     }
 	
+	this.addH=function(h){
+        return this.canvas.addH(h);
+    }
+	
 	this.keepRatio=function(bool){
 		if(bool!=undefined){this.canvas.keepRatio=bool;}
         return this.canvas.keepRatio;
@@ -6400,11 +6536,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
     }
     
     this.getAlarm=function(name){
-        if(this.loop.alarms[name]==undefined){
-            return undefined;
-        }else{
-            return this.loop.alarms[name].time;
-        }
+		return this.loop.getAlarm(name);
     }
 
 	this.alarms=function(alarms){
