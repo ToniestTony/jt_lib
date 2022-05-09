@@ -8438,6 +8438,7 @@ TEMPLATE:
     <head>
         <title>App</title>
         <style>
+	@charset "utf-8";
             *{
                 padding: 0;
                 margin: 0;
