@@ -2,20 +2,21 @@
     <head>
         <title>App</title>
         <style>
+	@charset "utf-8";
             *{
                 padding: 0;
                 margin: 0;
             }
             
             #can{
-		position: absolute;
-		margin:auto;
-		top:0;
-		left:0;
-		right:0;
-		bottom:0;
-	        border:1px solid black;
-	     }
+				position: absolute;
+				margin:auto;
+				top:0;
+				left:0;
+				right:0;
+				bottom:0;
+				border:1px solid black;
+			}
 	
 		#can + span{
 			display: none;	
@@ -32,10 +33,10 @@
     <body>
         <div id="canContainer">
         <canvas id="can"></canvas>
-        <span>Made with <a href="https://github.com/ToniestTony/jt_lib">jt_lib18.js</a></span>
+        <span>Made with <a href="https://github.com/ToniestTony/jt_lib">jt_lib20.js</a></span>
             </div>
     </body>
-    <script src="jt_lib18.js"></script>
+    <script src="jt_lib20.js"></script>
     
     <script>
 
@@ -64,10 +65,9 @@
 		//frames per second
 		//setup function name
 		//update function name
-		//object which has the function name
-		//mobile audio button size (0 for none)
+		//name of the object which has the setup and update functions
 		//fullScreen button on mobile
-		jt=new JT("can",app.w,app.h,60,'setup','update','app',0,false);
+		jt=new JT("can",app.w,app.h,60,'setup','update','app',false);
 		
 		//jt.loadImage("image.png","name")
 		//jt.loadSound("sound.mp3","name")
