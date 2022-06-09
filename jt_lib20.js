@@ -3758,6 +3758,98 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
             return num;
             
         },
+		pointsFromLine:function(l,c,steps){
+			var line={x1:l.x1,y1:l.y1,x2:l.x2,y2:l.y2};
+			
+			var dist=Math.abs(this.dist({x:line.x1,y:line.y1},{x:line.x2,y:line.y2}))
+			var stepNum=Math.floor(dist);
+			if(steps!=undefined){stepNum=steps+1;}
+			var oneStep=Math.floor(dist)/stepNum;
+			
+			var points=[];
+
+			for(var i=0;i<dist;i+=oneStep){
+				var x=this.lerp(line.x1,line.x2,i/dist)
+				var y=this.lerp(line.y1,line.y2,i/dist)
+				if(c!=undefined){
+					points.push({x:x,y:y,c:c});
+				}else{
+					points.push({x:x,y:y});
+				}
+				
+			}
+			console.log(points)
+			return points;
+		},
+		rectsFromLine:function(l,w,h,c,steps){
+			var line={x1:l.x1,y1:l.y1,x2:l.x2,y2:l.y2};
+			
+			var dist=Math.abs(this.dist({x:line.x1,y:line.y1},{x:line.x2,y:line.y2}))
+			var stepNum=Math.floor(dist);
+			if(steps!=undefined){stepNum=steps+1;}
+			var oneStep=Math.floor(dist)/stepNum;
+			
+			var rects=[];
+
+			for(var i=0;i<dist;i+=oneStep){
+				var x=this.lerp(line.x1,line.x2,i/dist)
+				var y=this.lerp(line.y1,line.y2,i/dist)
+				if(c!=undefined){
+					rects.push({x:x-w/2,y:y-h/2,w:w,h:h,c:c});
+				}else{
+					rects.push({x:x-w/2,y:y-h/2,w:w,h:h});
+				}
+				
+			}
+			
+			return rects;
+		},
+		circlesFromLine:function(l,d,c,steps){
+			var line={x1:l.x1,y1:l.y1,x2:l.x2,y2:l.y2};
+			
+			var dist=Math.abs(this.dist({x:line.x1,y:line.y1},{x:line.x2,y:line.y2}))
+			var stepNum=Math.floor(dist);
+			if(steps!=undefined){stepNum=steps+1;}
+			var oneStep=Math.floor(dist)/stepNum;
+			
+			var circles=[];
+
+			for(var i=0;i<dist;i+=oneStep){
+				var x=this.lerp(line.x1,line.x2,i/dist)
+				var y=this.lerp(line.y1,line.y2,i/dist)
+				if(c!=undefined){
+					circles.push({x:x-d/2,y:y-d/2,d:d,c:c});
+				}else{
+					circles.push({x:x-d/2,y:y-d/2,d:d});
+				}
+				
+			}
+			
+			return circles;
+		},
+		ellipsesFromLine:function(l,dX,dY,c,steps){
+			var line={x1:l.x1,y1:l.y1,x2:l.x2,y2:l.y2};
+			
+			var dist=Math.abs(this.dist({x:line.x1,y:line.y1},{x:line.x2,y:line.y2}))
+			var stepNum=Math.floor(dist);
+			if(steps!=undefined){stepNum=steps+1;}
+			var oneStep=Math.floor(dist)/stepNum;
+			
+			var ellipses=[];
+
+			for(var i=0;i<dist;i+=oneStep){
+				var x=this.lerp(line.x1,line.x2,i/dist)
+				var y=this.lerp(line.y1,line.y2,i/dist)
+				if(c!=undefined){
+					ellipses.push({x:x-dX/2,y:y-dY/2,dX:dX,dY:dY,c:c});
+				}else{
+					ellipses.push({x:x-dX/2,y:y-dY/2,dX:dX,dY:dY});
+				}
+				
+			}
+			
+			return ellipses;
+		}
 
 
     },
@@ -4909,7 +5001,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 			}
 
 			return col;
-		},
+		}
     }
 
 
@@ -7373,6 +7465,22 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
     this.angleY=function(angle){
         return this.math.angleY(angle);
     }
+	
+	this.pointsFromLine=function(line,color,steps){
+		return this.math.pointsFromLine(line,color,steps);
+	}
+	
+	this.rectsFromLine=function(line,width,height,color,steps){
+		return this.math.rectsFromLine(line,width,height,color,steps);
+	}
+	
+	this.circlesFromLine=function(line,diameter,color,steps){
+		return this.math.circlesFromLine(line,diameter,color,steps);
+	}
+	
+	this.ellipsesFromLine=function(line,diameterX,diameterY,color,steps){
+		return this.math.ellipsesFromLine(line,diameterX,diameterY,color,steps);
+	}
 
 	this.ratioY=function(angle){
         return this.math.angleY(angle);
