@@ -144,6 +144,9 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
             //Resize the actual HTML canvas
             this.src.width=w;
             this.src.height=h+this.additionalH;
+			
+			this.lastRatioW=w;
+			this.lastRatioH=h;
 
             //Keep the width and height in attributes
             this.w=w;
@@ -213,8 +216,10 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
             return this.bord;
         },
         fullscreen:function(bool,fake){
-			fake=true;
-			
+			if(fake==undefined){
+				fake=true;
+			}
+			//fake=true;
 			if(bool!=undefined){
 				if(!fake){
 					if(!bool){
@@ -3778,7 +3783,6 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 				}
 				
 			}
-			console.log(points)
 			return points;
 		},
 		rectsFromLine:function(l,w,h,c,steps){
@@ -6568,7 +6572,8 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
     }
 	
 	this.addH=function(h){
-        return this.canvas.addH(h);
+		if(h!=undefined){this.canvas.addH(h)}
+        return this.canvas.additionalH;
     }
 	
 	this.keepRatio=function(bool){
