@@ -1,6 +1,8 @@
 # jt_lib
 A library to make HTML5 2D games/apps with the canvas much easier/faster! Made by Antoine (ToniestTony)
 
+I also made a fully interactive and complete documentation, **every single functions** has an interactive example, so it is perfect to try and learn the multiple features, try it here: https://toniesttony.github.io/jt.html
+
 Here are some of the features:
 
 * **Load** and draw images and animations, even rotate, scale and clip parts of them.
@@ -16,8 +18,9 @@ Here are some of the features:
 
 ## Getting started
 * Download the jt_lib20.js file and index.html for a quick template.
-* Start programming your awesome game in the setup and update functions of the template.
+* Start programming your awesome game in the setup and update functions of the template
 * **That's it!**
+* (learn and try out the functions in my complete and interactive documentation: https://toniesttony.github.io/jt.html)
 
 ## Keyboard.js
 * Link the file keyboard.js after the jt_library
