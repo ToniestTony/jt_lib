@@ -6699,6 +6699,10 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
     this.isAlarm=function(name){
         return this.loop.isAlarm(name);
     }
+	
+	this.getTime=function(name){
+		return this.loop.getAlarm(name);
+    }
     
     this.getAlarm=function(name){
 		return this.loop.getAlarm(name);
