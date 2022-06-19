@@ -33,10 +33,10 @@
     <body>
         <div id="canContainer">
         <canvas id="can"></canvas>
-        <span>Made with <a href="https://github.com/ToniestTony/jt_lib">jt_lib20.js</a></span>
+        <span>Made with <a href="https://github.com/ToniestTony/jt_lib">jt_lib21.js</a></span>
             </div>
     </body>
-    <script src="jt_lib20.js"></script>
+    <script src="jt_lib21.js"></script>
     
     <script>
 
@@ -49,7 +49,7 @@
 		},
 		//update is called every frame
 		update:function(){
-			jt.bg("white");
+			jt.bg("grey");
 		}
 	}
 
@@ -67,7 +67,7 @@
 		//update function name
 		//name of the object which has the setup and update functions
 		//fullScreen button on mobile
-		jt=new JT("can",app.w,app.h,60,'setup','update','app',false);
+		jt=new JT("can",app.w,app.h,60,'setup','update','app',true);
 		
 		//jt.loadImage("image.png","name")
 		//jt.loadSound("sound.mp3","name")
