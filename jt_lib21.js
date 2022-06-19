@@ -3,7 +3,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
     //initialize the canvas
     this.init=function(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility){
         //add attributes to the canvas object of JT
-        this.version=20;
+        this.version=21;
 		this.loop.version=this.version;
         var actualId=id;
 
@@ -266,16 +266,12 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 					}
 				}else{
 					if(bool){
-						//scroll to element
-						document.getElementById(this.id).scrollIntoView();
-						
 						//find all header spaces
 						var headerHeight=0;
 						var classes=document.getElementsByClassName("JTEcanvasfs");
 						for(var i=0;i<classes.length;i++){
 							headerHeight+=classes[i].offsetHeight;
 						}
-						console.log(headerHeight)
 						
 						this.iosFullscreen=true;
 						
@@ -347,6 +343,9 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 						
 						this.context.drawing.cam[0].active=true;
 						this.context.drawing.forceCam=true;
+						
+						//scroll to element
+						document.getElementById(this.id).scrollIntoView();
 					}else{
 						this.iosFullscreen=false;
 						
@@ -1110,24 +1109,28 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
                 var alarm=this.alarms[ala];
                 if(alarm!=undefined && !alarm.pause){
                     alarm.time--;
-                    if(alarm.time<=0){
-                        alarm.pause=true;
+                    if(alarm.time<0 && alarm.del){
+                        delete this.alarms[ala];
                     }
                 }
             }
         },
-        alarm:function(name,time){
+        alarm:function(name,time,autoDel){
+			var tim=time;
             if(time==undefined){
-                return this.checkAlarm(name,false);
-            }else{
-               if(this.alarms[name]!=undefined){
-                this.alarms[name]=undefined;
-                }
-                this.alarms[name]={};
-                this.alarms[name].time=time;
-                this.alarms[name].pause=false;
+                tim=this.fps;
             }
-
+			var del=autoDel;
+            if(autoDel==undefined){
+                del=false;
+            }
+			if(this.alarms[name]!=undefined){
+				this.alarms[name]=undefined;
+			}
+			this.alarms[name]={};
+			this.alarms[name].time=tim;
+			this.alarms[name].pause=false;
+			this.alarms[name].del=del;
         },
         checkAlarm:function(name,del){
             var dele=false;
@@ -1136,7 +1139,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
             }
             if(this.alarms[name]!=undefined && this.alarms[name].time<=0){
                 if(dele==true){
-                    this.alarms[name]=undefined;
+                    delete this.alarms[name];
                 }
                 return true;
             }else{
@@ -1144,20 +1147,36 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
             }
         },
         delAlarm:function(name){
-             if(this.alarms[name]!=undefined && this.alarms[name].time<=0){
-                 this.alarms[name]=undefined;
-                 return true;
-             }else{
-                 this.alarms[name]=undefined;
-                 return false;
-             }
+			if(name!==undefined){
+				 if(this.alarms[name]!=undefined && this.alarms[name].time<=0){
+					 delete this.alarms[name];
+					 return true;
+				 }else{
+					 delete this.alarms[name];
+					 return false;
+				 }
+			}else{
+				this.alarms={};
+			}
         },
         isAlarm:function(name){
-             if(this.alarms[name]!=undefined){
-                 return true;
-             }else{
-                 return false;
-             }
+			if(name!==undefined){
+				 if(this.alarms[name]!=undefined){
+					 return true;
+				 }else{
+					 return false;
+				 }
+			}else{
+				var len=0;
+				for(var ala in this.alarms){
+					len++;
+				}
+				if(len>0){
+					return true;
+				}else{
+					return false;
+				}
+			}
         },
 		getAlarm:function(name){
 			if(this.alarms[name]==undefined){
@@ -1166,13 +1185,51 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 				return this.alarms[name].time;
 			}
 		},
+		pauseAlarm:function(name,pause){
+			if(name!==undefined){
+				return this.alarms[name].pause=pause;
+			}else{
+				for(var ala in this.alarms){
+					this.alarms[ala].pause=pause;
+				}
+				return pause;
+			}
+		},
+		playingAlarm:function(name){
+			if(name!==undefined){
+				return !this.alarms[name].pause;
+			}else{
+				var playing=true;
+				for(var ala in this.alarms){
+					if(this.alarms[ala].pause){
+						playing=false;
+						break;
+					}
+				}
+				return playing;
+			}
+		},
+		pausedAlarm:function(name){
+			if(name!==undefined){
+				return this.alarms[name].pause;
+			}else{
+				var paused=true;
+				for(var ala in this.alarms){
+					if(!this.alarms[ala].pause){
+						paused=false;
+						break;
+					}
+				}
+				return paused;
+			}
+		},
         shake:function(force,duration,reduce){
             if(this.normalX==undefined){
                 this.normalX=this.context.drawing.cam[this.context.drawing.currCam].x;
                 this.normalY=this.context.drawing.cam[this.context.drawing.currCam].y;
             }
             if(force==undefined){
-                force=this.fps/2;
+                force=1;
             }
             if(duration==undefined){
                 duration=force
@@ -1193,6 +1250,8 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
                 this.shakeObj.duration+=duration;
                 this.shakeObj.reduce=reduce;
             }
+			
+			this.shaking();
 
         },
 
@@ -1510,11 +1569,11 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 		//check if a sound is playing
 		playing:function(name){
 			if(name===undefined){
-				var playing=false;
+				var playing=true;
 				for(var sound in this.sounds){
 					if(this.sounds.hasOwnProperty(sound)){
-						if(!this.sounds[sound].paused){
-							playing=true;
+						if(this.sounds[sound].paused){
+							playing=false;
 							break;
 						}
 					}
@@ -1527,11 +1586,11 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 		//check if a sound is paused
 		paused:function(name){
 			if(name===undefined){
-				var paused=false;
+				var paused=true;
 				for(var sound in this.sounds){
 					if(this.sounds.hasOwnProperty(sound)){
-						if(this.sounds[sound].paused){
-							paused=true;
+						if(!this.sounds[sound].paused){
+							paused=false;
 							break;
 						}
 					}
@@ -6684,8 +6743,8 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 
     //loop
 
-    this.alarm=function(name,time){
-        return this.loop.alarm(name,time);
+    this.alarm=function(name,time,autoDelete){
+        return this.loop.alarm(name,time,autoDelete);
     }
 
     this.checkAlarm=function(name,del){
@@ -6714,12 +6773,44 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 		}
 		return this.loop.alarms;
 	}
+	
+	this.pauseAlarm=function(name,pause){
+		if(pause!=undefined){
+			return this.loop.pauseAlarm(name,pause);
+		}else{
+			return this.loop.pauseAlarm(name,true);
+		}
+	}
+	
+	this.playAlarm=function(name,pause){
+		if(pause!=undefined){
+			return this.loop.pauseAlarm(name,!pause);
+		}else{
+			return this.loop.pauseAlarm(name,false);
+		}
+	}
+	
+	this.playingAlarm=function(name){
+		return this.loop.playingAlarm(name);
+	}
+	
+	this.pausedAlarm=function(name){
+		return this.loop.pausedAlarm(name);
+	}
 
     this.shake=function(force,duration,reduce){
         return this.loop.shake(force,duration,reduce);
     }
 
     this.shaking=function(){
+		if(this.loop.shakeObj==undefined){
+			return false;
+		}else{
+			return true;
+		}
+    }
+	
+	this.isShaking=function(){
 		if(this.loop.shakeObj==undefined){
 			return false;
 		}else{
@@ -8662,10 +8753,10 @@ TEMPLATE:
     <body>
         <div id="canContainer">
         <canvas id="can"></canvas>
-        <span>Made with <a href="https://github.com/ToniestTony/jt_lib">jt_lib20.js</a></span>
+        <span>Made with <a href="https://github.com/ToniestTony/jt_lib">jt_lib21.js</a></span>
             </div>
     </body>
-    <script src="jt_lib20.js"></script>
+    <script src="jt_lib21.js"></script>
     
     <script>
 
@@ -8678,7 +8769,7 @@ TEMPLATE:
 		},
 		//update is called every frame
 		update:function(){
-			jt.bg("white");
+			jt.bg("grey");
 		}
 	}
 
@@ -8696,7 +8787,7 @@ TEMPLATE:
 		//update function name
 		//name of the object which has the setup and update functions
 		//fullScreen button on mobile
-		jt=new JT("can",app.w,app.h,60,'setup','update','app',false);
+		jt=new JT("can",app.w,app.h,60,'setup','update','app',true);
 		
 		//jt.loadImage("image.png","name")
 		//jt.loadSound("sound.mp3","name")
