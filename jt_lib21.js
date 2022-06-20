@@ -49,8 +49,8 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
         this.canvas.context=this;
         this.canvas.setId(actualId);
         this.canvas.resize(w,h);
-		document.getElementById(actualId).style.width=w;
-		document.getElementById(actualId).style.height=h;
+		//document.getElementById(actualId).style.width=w;
+		//document.getElementById(actualId).style.height=h;
 
 
         if(setupName!=undefined){
