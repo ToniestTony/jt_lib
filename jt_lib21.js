@@ -513,17 +513,17 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 			this.context.assets.mute(true);
 			for(var soun in this.context.assets.sounds){
 				if(this.context.assets.sounds.hasOwnProperty(soun)){
-					if(soun!="title"){
+					//if(soun!="title"){
 						this.context.assets.play(soun)
-					}
+					//}
 				}
 			}
 
 			for(var soun in this.context.assets.sounds){
 				if(this.context.assets.sounds.hasOwnProperty(soun)){
-					if(soun!="title"){
+					//if(soun!="title"){
 						this.context.assets.stop(soun)
-					}
+					//}
 				}
 			}
 			this.context.assets.mute(mute);
@@ -935,6 +935,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 				}
 
 				if(document.activeElement.id!=this.context.canvas.id){
+					this.context.focus=false;
 					var alpha=this.context.drawing.alpha();
 					var align=this.context.drawing.align();
 					var before=this.context.drawing.camActive();
@@ -966,6 +967,8 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 					this.context.drawing.font(font,size);
 					this.context.drawing.align(align);
 					this.context.drawing.color(color);
+				}else{
+					this.context.focus=true;
 				}
 
 
@@ -5588,7 +5591,9 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 						if(this.buttons[button]!=undefined){
 							button=this.buttons[button];
 						}
-						this.gamepads[controller].buttons[button].value=0;
+						if(this.gamepads[controller].buttons[button]!=undefined){
+							this.gamepads[controller].buttons[button].value=0;
+						}
 					}
                 }
             }
