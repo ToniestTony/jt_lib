@@ -799,6 +799,23 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 					}
 				}
 				
+				//remove mouse scroll
+                if(this.context.mouse.scroll!=0){
+                    this.context.mouse.scroll=0;
+                }
+
+                //remove mouse press
+				this.context.mouse.press=[false,false,false,false,false]
+
+				//remove touch press
+                if(this.context.touch.press==true){
+                    this.context.touch.press=false;
+                }
+				
+				for(var i=0;i<this.context.touch.touches.length;i++){
+					this.context.touch.touches[i].down++;
+				}
+				
 				//Draw f11 to quit fullscreen
 				if(this.isAlarm("jt_fullscreen")){
 					var time=this.getAlarm("jt_fullscreen")
@@ -1029,20 +1046,6 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
                             }
                         }
                     }
-                }
-
-
-				//remove mouse scroll
-                if(this.context.mouse.scroll!=0){
-                    this.context.mouse.scroll=0;
-                }
-
-                //remove mouse press
-				this.context.mouse.press=[false,false,false,false,false]
-
-				//remove touch press
-                if(this.context.touch.press==true){
-                    this.context.touch.press=false;
                 }
 
                 //wave
@@ -3841,13 +3844,13 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 		floor:function(num,digits){
       if(digits==undefined){digits=0;}
 			var mult=Math.pow(10,digits);
-			return Math.floor((num+Number.EPSILON)*mult)/mult;
+			return Math.floor((num)*mult)/mult;
 		},
 
 		ceil:function(num,digits){
       if(digits==undefined){digits=0;}
 			var mult=Math.pow(10,digits);
-			return Math.ceil((num+Number.EPSILON)*mult)/mult;
+			return Math.ceil((num)*mult)/mult;
 		},
 
 		abs:function(num){
@@ -5964,10 +5967,10 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
             if(w==undefined){w=this.canvas.w;}
             if(h==undefined){h=this.canvas.h;}
 			if(num==undefined){num=-1;}
-            var checking=this.down;
+            var pressing=false
             if(press!=undefined){
                 if(press==true){
-                    checking=this.press;
+                    pressing=true;
                 }
             }
 
@@ -5976,24 +5979,30 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
             }
 
 			var force=0;
-			if(checking){
-				for(var i=0;i<this.touches.length;i++){
-					var touch=this.touches[i];
-					var tX=touch.cX;
-					var tY=touch.cY;
-					if(cam==false){
-						tX=touch.x;
-						tY=touch.y;
-					}else{
-						var c=this.drawing.cam[this.drawing.currCam].pos;
-						if(!(touch.x>=c.x && touch.x<=c.x+c.w && touch.y>=c.y && touch.y<=c.y+c.h)){
-							continue;
-						}
+			for(var i=0;i<this.touches.length;i++){
+				var touch=this.touches[i];
+				var tX=touch.cX;
+				var tY=touch.cY;
+				if(cam==false){
+					tX=touch.x;
+					tY=touch.y;
+				}else{
+					var c=this.drawing.cam[this.drawing.currCam].pos;
+					if(!(touch.x>=c.x && touch.x<=c.x+c.w && touch.y>=c.y && touch.y<=c.y+c.h)){
+						continue;
 					}
+				}
 
-					if(tX>=x && tX<= x+w && tY>=y && tY<=y+h){
+				if(tX>=x && tX<= x+w && tY>=y && tY<=y+h){
+					//touch on
+					if(pressing){
+						if(touch.down==0){
+							force++;
+						}
+					}else{
 						force++;
 					}
+					
 				}
 			}
 			if(num==-1){
@@ -6349,6 +6358,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 					touches[i]={};
 					touches[i].x=tX;
 					touches[i].y=tY;
+					touches[i].down=0;
 
           var posX=context.drawing.cam[context.drawing.currCam].pos.x;
           var posY=context.drawing.cam[context.drawing.currCam].pos.y;
@@ -6387,7 +6397,20 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 						}
 					}*/
 				}
-				context.touch.touches=touches;
+				
+				var newTouches=[];
+				
+				for(var i=0;i<touches.length;i++){
+					var found=false;
+					for(var j=0;j<context.touch.touches.length;j++){
+						if(touches[i].x==context.touch.touches[j].x && touches[i].y==context.touch.touches[j].y){
+							found=true;
+						}
+					}
+					if(!found){
+						context.touch.touches.push(touches[i]);
+					}
+				}
 
 				if(force>0){
 					context.touch.down=true;
@@ -6422,6 +6445,12 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 				var touches=[];
 
 				var force=0;
+				
+				var sameLength=true;
+				if(context.touch.touches.length!=evt.touches.length){
+					sameLength=false;
+				}
+				
 
 				for(var i=0;i<evt.touches.length;i++){
 					var touch=evt.touches[i];
@@ -6435,8 +6464,15 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 					touches[i]={};
 					touches[i].x=tX;
 					touches[i].y=tY;
+					if(sameLength){
+						touches[i].down=context.touch.touches[i].down;
+					}else{
+						touches[i].down=0;
+					}
+					
+					
 
-          touches[i].cX = (tX+(camX*camW)-posX)/camW;
+		  touches[i].cX = (tX+(camX*camW)-posX)/camW;
 					touches[i].cY = (tY+(camY*camH)-posY)/camH;
 
 					/*if(context.canvas.fullscreen()){
@@ -6466,8 +6502,35 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 						}
 					}*/
 				}
-
-				context.touch.touches=touches;
+				
+				if(!sameLength){
+					
+					for(var i=0;i<context.touch.touches.length;i++){
+						var closestJ=-1;
+						var closestDist=9999;
+						for(var j=0;j<touches.length;j++){
+							var dist=context.collision.dist({x:touches[j].x,y:touches[j].y},{x:context.touch.touches[i].x,y:context.touch.touches[i].y});
+							if(dist<closestDist){
+								closestDist=dist;
+								closestJ=j;
+							}
+						}
+						if(closestJ!=-1){
+							//found index
+							touches[closestJ].down=context.touch.touches[i].down;
+							context.touch.touches[i].x=touches[closestJ].x;
+							context.touch.touches[i].y=touches[closestJ].y;
+							context.touch.touches[i].cX=touches[closestJ].cX;
+							context.touch.touches[i].cY=touches[closestJ].cY;
+						}
+					}
+					
+				}else{
+					context.touch.touches=touches;
+				}
+				
+				
+				
 
 				if(force>0){
 					context.touch.down=true;
@@ -6513,6 +6576,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 					touches[i]={};
 					touches[i].x=tX;
 					touches[i].y=tY;
+					touches[i].down=0;
 
           touches[i].cX = (tX+(camX*camW)-posX)/camW;
 					touches[i].cY = (tY+(camY*camH)-posY)/camH;
@@ -6544,8 +6608,22 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 						}
 					}*/
 				}
+				
+				var newTouches=[];
+				
+				for(var i=0;i<context.touch.touches.length;i++){
+					var found=false;
+					for(var j=0;j<touches.length;j++){
+						if(context.touch.touches[i].x==touches[j].x && context.touch.touches[i].y==touches[j].y){
+							found=true;
+						}
+					}
+					if(found){
+						newTouches.push(context.touch.touches[i]);
+					}
+				}
 
-				context.touch.touches=touches;
+				context.touch.touches=newTouches;
 
 				if(force==0){
 					context.touch.down=false;
@@ -6590,6 +6668,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 					touches[i]={};
 					touches[i].x=tX;
 					touches[i].y=tY;
+					touches[i].down=0;
 
           touches[i].cX = (tX+(camX*camW)-posX)/camW;
 					touches[i].cY = (tY+(camY*camH)-posY)/camH;
@@ -6622,7 +6701,21 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 					}
 				}
 
-				context.touch.touches=touches;
+				var newTouches=[];
+				
+				for(var i=0;i<context.touch.touches.length;i++){
+					var found=false;
+					for(var j=0;j<touches.length;j++){
+						if(context.touch.touches[i].x==touches[j].x && context.touch.touches[i].y==touches[j].y){
+							found=true;
+						}
+					}
+					if(found){
+						newTouches.push(context.touch.touches[i]);
+					}
+				}
+
+				context.touch.touches=newTouches;
 
 				if(force==0){
 					context.touch.down=false;
