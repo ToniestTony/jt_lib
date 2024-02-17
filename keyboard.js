@@ -27,6 +27,7 @@ var keyboard={
 	on:false,
 	msg:"",
 	str:"",
+	maxChars:12,
 	max:25,
 	size:24,
 	sizeDefault:24,
@@ -71,10 +72,10 @@ var keyboard={
 		  if(size!=undefined){
 			this.size=size;
 		  }else{
-			this.size=24; 
+			this.size=this.sizeDefault; 
 		  }
 		  
-		  this.max=25*this.lines;
+		  this.max=this.maxChars*this.lines;
 			
 		  this.backspaceTimer=0;
 		  this.iteration=0;
@@ -306,7 +307,7 @@ var keyboard={
 		  jt.rect(textX+spacingW,textY+textH-writingH-5,textW-spacingW*2-textX*2,writingH,[255,255,255])
 
 		  jt.font("Consolas",this.size);
-		  jt.text(this.msg,textX+spacingW*2,textY+10,"black","left",jt.fontSize(),0,28,jt.fontSize());
+		  jt.text(this.msg,textX+spacingW*2,textY+10,"black","left",jt.fontSize(),0,36,jt.fontSize());
 		  jt.text(this.str.slice(0,25),textX+spacingW*2,textY+textH-writingH,"black","left");
 		  var lineH=0;
 		  var strW=jt.textW(this.str.slice(0,25));
