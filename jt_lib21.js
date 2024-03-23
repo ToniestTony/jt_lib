@@ -460,7 +460,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
         preload: function(context,fps){
 			this.context=context;
 			this.fps=fps;
-			this.waveIterations=Math.PI*2/this.fps;
+			this.waveIterations=1/this.fps;
 			this.ios=this.context.mobile.isIOS();
 			this.startLoop();
         },
@@ -543,7 +543,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
         changeLoop: function(){
             var context=this;
             clearInterval(this.interval)
-			this.waveIterations=Math.PI*2/this.fps;
+			this.waveIterations=1/this.fps;
             this.interval=setInterval(context.doLoop,1000/this.fps,context)
         },
 		//loading screen
@@ -1053,7 +1053,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
                 if(this.waveX>this.waveIterations*this.fps){
                     this.waveX=this.waveIterations;
                 }
-                this.waveY=Math.sin(this.waveX)
+                this.waveY=Math.sin(this.waveX*Math.PI*2)
                 this.waveYPos=(this.waveY+1)/2
 
 
@@ -3749,22 +3749,11 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
         between: function(num,min,max) {return num>=min && num<=max;},
         stay: function(num,min,max) {if(num<min){num=min}if(num>max){num=max}return num},
         wrap: function(num,min,max) {
-			var done=false;
-			var cpt=0;
-			while(!done){
-				if(cpt==100){
-					break;
-				}
-				if(num<min){
-					num=max-(min-num);
-				}else if(num>max){
-					num=min+(num-max)
-				}else{
-					done=true;
-				}
-				cpt++;
-			}
-            return num
+			if(min==undefined){return num;};
+			if(max==undefined){max=min;min=0;};
+			var range=max-min;
+			var num=((((num-min)%range)+range)%range)+min;
+            return num;
         },
 		wrapIndex: function(num,min,max) {
 			var done=false;
@@ -3993,7 +3982,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 
     this.collision={
         dist: function(obj1,obj2) {return Math.sqrt(Math.pow(obj2.x-obj1.x,2) + Math.pow(obj2.y-obj1.y,2))},
-		wrap: function(num,min,max) {var done=false;var cpt=0;while(!done){if(cpt==100){break;}if(num<min){num=max-(min-num);}else if(num>max){num=min+(num-max)}else{done=true;}cpt++;}return num},
+		wrap: function(num,min,max) {if(min==undefined){return num;};if(max==undefined){max=min;min=0;};var range=max-min;var num=((((num-min)%range)+range)%range)+min;return num;},
 		angleX:function(angle){return Math.sin(angle*Math.PI/180)},
         angleY:function(angle){return -Math.cos(angle*Math.PI/180)},
         angle:function(x,y,x2,y2){var deltaX=-x;var deltaY=y;if(x2!=undefined){deltaX=(x2-x)*-1;deltaY=y2-y;}var angle=Math.atan2(deltaX,deltaY)*180/Math.PI;var degrees=this.wrap(angle-180,0,359);return degrees;},
@@ -6983,29 +6972,19 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
         return this.loop.stop=bool;
     }
 
-    this.wavePi=function(num){
-        if(num==undefined){return this.loop.waveX;}
-        return this.loop.waveX=num;
-    }
-
-    this.waveTau=function(num){
-        if(num==undefined){return this.loop.waveX;}
-        return this.loop.waveX=num;
-    }
-
     this.waveX=function(num){
-        if(num==undefined){return this.loop.waveX/(this.loop.waveIterations*this.loop.fps);}
-        return this.loop.waveX=num*(this.loop.waveIterations*this.loop.fps);
+        if(num==undefined){return this.loop.waveX;}
+        return this.loop.waveX=num;
     }
 
     this.waveY=function(num){
         if(num==undefined){return this.loop.waveY;}
-        return this.loop.waveY=num;
+        return Math.sin(this.math.wrap(num,1)*Math.PI*2);
     }
 
     this.waveYPos=function(num){
         if(num==undefined){return this.loop.waveYPos;}
-        return this.loop.waveYPos=num;
+        return (Math.sin(this.math.wrap(num,1)*Math.PI*2)+1)/2
     }
 
 	this.debugging=function(bool){
@@ -8586,6 +8565,16 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 
 	this.addAlarm=function(name,time){
         return this.loop.alarm(name,time);
+    }
+	
+	 this.wavePi=function(num){
+        if(num==undefined){return this.loop.waveX;}
+        return this.loop.waveX=num;
+    }
+
+    this.waveTau=function(num){
+        if(num==undefined){return this.loop.waveX;}
+        return this.loop.waveX=num;
     }
 
 	this.wrapVal=function(num,min,max){
