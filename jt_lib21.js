@@ -278,6 +278,37 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 						this.lastRatioW=this.w;
 						this.lastRatioH=this.h;
 						
+						var w=0;
+						var h=0;
+						
+						var innerW=window.innerWidth;
+						var innerH=window.innerHeight;
+						
+						if(this.context.mobile.isAny()){
+							innerW=screen.width;
+							innerH=window.innerHeight;
+						}
+						
+						var ratioCan=this.w/this.h;
+						var ratioWH=innerW/innerH;
+						
+						console.log(ratioCan,ratioWH);
+						
+						if(ratioCan>ratioWH){
+							//Full width
+							var ratioW=this.w/innerW;
+							w=innerW;
+							h=this.h/ratioW;
+							
+						}else{
+							//Full height
+							var ratioH=this.h/innerH;
+							h=innerH;
+							w=this.w/ratioH;
+							
+						}
+						
+					/*
 						var ratio=this.lastRatioW/this.lastRatioH;
 						
 						var diffX=window.innerWidth/this.lastRatioW;
@@ -292,6 +323,11 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 							//height to max
 							w=(h-this.additionalH)*ratio;
 						}
+						
+						
+						console.log(w,h);
+						console.log(screen.width,screen.height);
+						*/
 						
 						document.getElementById(this.context.canvas.src.id).style.width=w+"px";
 						document.getElementById(this.context.canvas.src.id).style.height=h+"px";
@@ -1135,6 +1171,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 			}
 			this.alarms[name]={};
 			this.alarms[name].time=tim;
+			this.alarms[name].timeMax=tim;
 			this.alarms[name].pause=false;
 			this.alarms[name].del=del;
         },
@@ -1189,6 +1226,13 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 				return undefined;
 			}else{
 				return this.alarms[name].time;
+			}
+		},
+		getAlarmDuration:function(name){
+			if(this.alarms[name]==undefined){
+				return undefined;
+			}else{
+				return this.alarms[name].timeMax;
 			}
 		},
 		pauseAlarm:function(name,pause){
@@ -6853,6 +6897,22 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
     this.getAlarm=function(name){
 		return this.loop.getAlarm(name);
     }
+	
+	this.getAlarmDuration=function(name){
+		return this.loop.getAlarmDuration(name);
+	}
+	
+	this.getAlarmDur=function(name){
+		return this.loop.getAlarmDuration(name);
+	}
+	
+	this.getAlarmMax=function(name){
+		return this.loop.getAlarmDuration(name);
+	}
+	
+	this.getTimeMax=function(name){
+		return this.loop.getAlarmDuration(name);
+	}
 
 	this.alarms=function(alarms){
 		if(alarms!=undefined){
