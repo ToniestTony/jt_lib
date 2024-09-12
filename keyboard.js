@@ -27,10 +27,10 @@ var keyboard={
 	on:false,
 	msg:"",
 	str:"",
-	maxChars:12,
+  maxChars:16,
 	max:25,
-	size:24,
-	sizeDefault:24,
+	size:20,
+	sizeDefault:20,
 	lines:1,
 	
 	shift:false,
@@ -307,24 +307,27 @@ var keyboard={
 		  jt.rect(textX+spacingW,textY+textH-writingH-5,textW-spacingW*2-textX*2,writingH,[255,255,255])
 
 		  jt.font("Consolas",this.size);
-		  jt.text(this.msg,textX+spacingW*2,textY+10,"black","left",jt.fontSize(),0,36,jt.fontSize());
-		  jt.text(this.str.slice(0,25),textX+spacingW*2,textY+textH-writingH,"black","left");
+		  jt.text(this.msg,textX+spacingW*2,textY+10,"black","left",jt.fontSize(),0,28,jt.fontSize());
+    
+    	var maxPerLine=this.maxChars;
+		  jt.text(this.str.slice(0,maxPerLine),textX+spacingW*2,textY+textH-writingH,"black","left");
 		  var lineH=0;
-		  var strW=jt.textW(this.str.slice(0,25));
-		  if(this.str.length>25){
-			jt.text(this.str.slice(25,50),textX+spacingW*2,textY+textH-writingH+jt.fontSize(),"black","left");
+    	
+		  var strW=jt.textW(this.str.slice(0,maxPerLine));
+		  if(this.str.length>maxPerLine){
+			jt.text(this.str.slice(maxPerLine,maxPerLine*2),textX+spacingW*2,textY+textH-writingH+jt.fontSize(),"black","left");
 			lineH=jt.fontSize();
-			strW=jt.textW(this.str.slice(25,50));
+			strW=jt.textW(this.str.slice(maxPerLine,maxPerLine*2));
 		  }
-		  if(this.str.length>50){
-			jt.text(this.str.slice(50,75),textX+spacingW*2,textY+textH-writingH+jt.fontSize()*2,"black","left");
+		  if(this.str.length>maxPerLine*2){
+			jt.text(this.str.slice(maxPerLine*2,maxPerLine*3),textX+spacingW*2,textY+textH-writingH+jt.fontSize()*2,"black","left");
 			lineH=jt.fontSize()*2;
-			strW=jt.textW(this.str.slice(50,75));
+			strW=jt.textW(this.str.slice(maxPerLine*2,maxPerLine*3));
 		  }
-		  if(this.str.length>75){
-			jt.text(this.str.slice(75,100),textX+spacingW*2,textY+textH-writingH+jt.fontSize()*3,"black","left");
+		  if(this.str.length>maxPerLine*3){
+			jt.text(this.str.slice(maxPerLine*3,maxPerLine*4),textX+spacingW*2,textY+textH-writingH+jt.fontSize()*3,"black","left");
 			lineH=jt.fontSize()*3;
-			strW=jt.textW(this.str.slice(75,100));
+			strW=jt.textW(this.str.slice(maxPerLine*3,maxPerLine*4));
 		  }
 		  
 		  jt.alpha(this.waveYPos);
@@ -345,6 +348,10 @@ var keyboard={
 		  if(jt.touch.press==true){
 			jt.touch.press=false;
 		  }
+    
+    	for(var i=0;i<jt.touch.touches.length;i++){
+					jt.touch.touches[i].down++;
+      }
 
 		  
 		  
