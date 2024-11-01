@@ -5336,7 +5336,12 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 		},
 		
 		buttonName:function(button){
-			return this.buttonsName[button];
+			if(button==undefined || button==""){
+				return this.buttonsNames;
+			}else{
+				return this.buttonsName[button];
+			}
+			
 		},
 
         axes:function(axes,controller){
@@ -5355,6 +5360,9 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
         },
 
         check: function(button,controller,and) {
+			if(button==undefined || button==""){
+				return false;
+			}
             if(controller==undefined){
                 controller=0;
             }
@@ -5501,6 +5509,9 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 		},
 
         value: function(button,controller,and) {
+			if(button==undefined || button==""){
+				return false;
+			}
             if(controller==undefined){
                 controller=0;
             }
@@ -5547,6 +5558,9 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
         },
 
         press: function(button,controller,and) {
+			if(button==undefined || button==""){
+				return false;
+			}
             if(controller==undefined){
                 controller=0;
             }
@@ -5596,6 +5610,9 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
         },
 
         release: function(button,controller) {
+			if(button==undefined || button==""){
+				return false;
+			}
             if(controller==undefined){
                 controller=0;
             }
