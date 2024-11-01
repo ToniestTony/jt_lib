@@ -278,37 +278,6 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 						this.lastRatioW=this.w;
 						this.lastRatioH=this.h;
 						
-						var w=0;
-						var h=0;
-						
-						var innerW=window.innerWidth;
-						var innerH=window.innerHeight;
-						
-						if(this.context.mobile.isAny()){
-							innerW=screen.width;
-							innerH=window.innerHeight;
-						}
-						
-						var ratioCan=this.w/this.h;
-						var ratioWH=innerW/innerH;
-						
-						console.log(ratioCan,ratioWH);
-						
-						if(ratioCan>ratioWH){
-							//Full width
-							var ratioW=this.w/innerW;
-							w=innerW;
-							h=this.h/ratioW;
-							
-						}else{
-							//Full height
-							var ratioH=this.h/innerH;
-							h=innerH;
-							w=this.w/ratioH;
-							
-						}
-						
-					/*
 						var ratio=this.lastRatioW/this.lastRatioH;
 						
 						var diffX=window.innerWidth/this.lastRatioW;
@@ -323,11 +292,6 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 							//height to max
 							w=(h-this.additionalH)*ratio;
 						}
-						
-						
-						console.log(w,h);
-						console.log(screen.width,screen.height);
-						*/
 						
 						document.getElementById(this.context.canvas.src.id).style.width=w+"px";
 						document.getElementById(this.context.canvas.src.id).style.height=h+"px";
@@ -512,6 +476,11 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 			this.context.keyboard.keysName=this.context.math.arr(255,"undefined");
 			for(var key in this.context.keyboard.keys){
 				this.context.keyboard.keysName[this.context.keyboard.keys[key]]=key;
+			}
+			
+			this.context.gamepad.buttonsName=this.context.math.arr(17,"undefined");
+			for(var key in this.context.gamepad.buttons){
+				this.context.gamepad.buttonsName[this.context.gamepad.buttons[key]]=key;
 			}
 
             this.context.mouse.drawing=this.context.drawing;
@@ -5348,6 +5317,27 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
             return this.connected[controller];
         },
         buttonsdown:[],
+		
+		getButtons:function(controller){
+			if(controller==undefined){
+                controller=0;
+            }
+			var arr=[];
+			for(button in this.gamepads[controller].buttons){
+				if(this.gamepads[controller].buttons[button].value==1){
+					var pressed=false;
+					if(this.gamepads[controller].buttons[button].pressed<=1){
+						pressed=true;
+					}
+					arr.push({number:button,button:button,press:pressed});
+				}
+			}
+			return arr;
+		},
+		
+		buttonName:function(button){
+			return this.buttonsName[button];
+		},
 
         axes:function(axes,controller){
             if(axes==undefined){
@@ -8167,6 +8157,14 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
     this.pads=function(){
         return this.gamepad.gamepads;
     }
+	
+	this.buttonName=function(button){
+        return this.gamepad.buttonName(button);
+    }
+	
+	this.getButtons=function(controller){
+		return this.gamepad.getButtons(controller);
+	}
 
     this.gamepads=function(){
         return this.gamepad.gamepads;
