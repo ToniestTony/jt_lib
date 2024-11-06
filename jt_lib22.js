@@ -3,7 +3,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
     //initialize the canvas
     this.init=function(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility){
         //add attributes to the canvas object of JT
-        this.version=21;
+        this.version=22;
 		this.loop.version=this.version;
         var actualId=id;
 
@@ -878,15 +878,6 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 					
 					this.checkAlarm("jt_fullscreen",true);
 				}
-				
-				this.context.drawing.calledI=0;
-				this.context.drawing.calledA=0;
-				this.context.drawing.calledT=0;
-				this.context.drawing.calledS=0;
-				this.context.drawing.clippedI=0;
-				this.context.drawing.clippedA=0;
-				this.context.drawing.clippedT=0;
-				this.context.drawing.clippedS=0;
 
 				//update mouse and touch coordinates relative to the camera
 				if(this.context.drawing.cam[this.context.drawing.currCam].active){
@@ -993,9 +984,13 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 					this.context.focus=true;
 				}
 
-
 				//debug
 				if(this.debug){
+					//Draw stats
+					if(this.context.stats.drawStats){
+						this.context.stats.drawingStats(this.context.stats.drawStatsFps,this.context.stats.drawStatsDrawn,this.context.stats.drawStatsSeperate);
+					}
+					//Draw all debugs
 					for(var i=0;i<this.debugs.length;i++){
 						var d=this.debugs[i];
 						var cam=this.context.drawing.cam[this.context.drawing.currCam].active;
@@ -1013,6 +1008,16 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 						}
 					}
 				}
+				
+				//reset object count
+				this.context.drawing.calledI=0;
+				this.context.drawing.calledA=0;
+				this.context.drawing.calledT=0;
+				this.context.drawing.calledS=0;
+				this.context.drawing.clippedI=0;
+				this.context.drawing.clippedA=0;
+				this.context.drawing.clippedT=0;
+				this.context.drawing.clippedS=0;
 
 
                 //remove key presses
@@ -3783,6 +3788,9 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
             var ran=this.random(0,numbers.length-1);
             return numbers[ran];
         },
+		avg: function(numbers) {
+			return numbers.reduce((a,b)=>(a+b))/numbers.length;
+        },
 
         dist: function(obj1,obj2) {return Math.sqrt(Math.pow(obj1.x-obj2.x,2) + Math.pow(obj1.y-obj2.y,2))},
         distPoint: function(x1,y1,x2,y2) {return Math.sqrt(Math.pow(x1-x2,2) + Math.pow(y1-y2,2))},
@@ -6142,7 +6150,22 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 			var mult=Math.pow(10,digits);
 			return Math.round((num+Number.EPSILON) * mult) / mult;
 		},
+		//Draw stats params
+		drawStats:false,
+		drawStatsFps:true,
+		drawStatsDrawn:true,
+		drawStatsSeperate:true,
+		drawStatsLowest:1000,
+		drawStatsAvg:[],
+		drawStatsLastAvg:-1,
 		//Draw all stats
+		drawStatsState:function(activate,showFps,showDrawn,showSeparate){
+			if(activate==undefined){return this.drawStats;}else{this.drawStats=activate;}
+			if(showFps==undefined){this.drawStatsFps=true;}else{this.drawStatsFps=showFps;}
+			if(showDrawn==undefined){this.drawStatsDrawn=true;}else{this.drawStatsDrawn=showDrawn;}
+			if(showSeparate==undefined){this.drawStatsSeperate=true;}else{this.drawStatsSeperate=showSeparate;}
+			return this.drawStats;
+		},
 		drawingStats:function(showFps,showDrawn,showSeparate){
 			if(this.loop.debug){
 				if(showFps==undefined){showFps=true;}
@@ -6150,15 +6173,30 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 				if(showSeparate==undefined){showSeparate=true;}
 				
 				var h=0;
-				if(showFps){h+=10;this.drawing.calledT--;}
-				if(showDrawn){h+=10;this.drawing.calledT--;}
-				if(showSeparate){h+=40;this.drawing.calledT-=4;}
+				if(showFps){
+					h+=10;
+					//this.drawing.calledT--;
+				}
+				if(showDrawn){
+					h+=10;
+					//this.drawing.calledT--;
+				}
+				if(showSeparate){
+					h+=40;
+					//this.drawing.calledT-=4;
+				}
 				
 				if(h>0){
-					this.drawing.calledS--;
+					//this.drawing.calledS--;
 				
 					var delay=this.round(this.loop.delay/1000,3);
 					var fps=this.round((this.loop.fps/delay)/this.loop.fps,2);
+					
+					this.drawStatsAvg.push(fps);
+					
+					if(fps<this.drawStatsLowest){
+						this.drawStatsLowest=fps;
+					}
 					if(fps.toString().split(".").length==2){
 						if(fps.toString().split(".")[1].length==1){
 							fps=fps+"0";
@@ -6166,7 +6204,31 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 					}else{
 						fps=fps+".00";
 					}
-					var fpsText="Fps: "+fps;
+					
+					if(this.loop.frames==0){
+						this.drawStatsLowest=1000;
+						if(this.drawStatsAvg.length>=this.loop.fps-1){
+							this.drawStatsLastAvg=jt.avg(this.drawStatsAvg);
+							this.drawStatsAvg=[];
+						}
+					}
+					
+					var average=0;
+					
+					if(this.drawStatsLastAvg!=-1){
+						average=jt.round(this.drawStatsLastAvg,2);
+					}
+					
+					
+					if(average.toString().split(".").length==2){
+						if(average.toString().split(".")[1].length==1){
+							average=average+"0";
+						}
+					}else{
+						average=average+".00";
+					}
+					
+					var fpsText="Fps: "+fps+" ("+average+")";
 					
 					var calledAll=this.drawing.calledI+this.drawing.calledA+this.drawing.calledT+this.drawing.calledS;
 					var clippedAll=this.drawing.clippedI+this.drawing.clippedA+this.drawing.clippedT+this.drawing.clippedS;
@@ -6190,7 +6252,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 					var fS=10;
 					var y=0;
 		
-					this.loop.addDebugShape({x:0,y:0,w:85,h:h,c:[0,0,0,0.5],r:0,stay:false})
+					this.loop.addDebugShape({x:0,y:0,w:100,h:h,c:[0,0,0,0.5],r:0,stay:false})
 					
 					if(showFps){this.loop.addDebugText(fpsText,0,0,[0,255,0],"left",fS,0,50,fS,false);y++;}
 					if(showDrawn){this.loop.addDebugText(drawnText,00,fS*y,[0,255,0],"left",fS,0,50,fS,false);y++;}
@@ -7757,6 +7819,14 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
     this.choose=function(arr){
         return this.math.choose(arr);
     }
+	
+	this.avg=function(arr){
+        return this.math.avg(arr);
+    }
+	
+	this.average=function(arr){
+        return this.math.avg(arr);
+    }
 
     this.dist=function(obj1,obj2){
         return this.math.dist(obj1,obj2);
@@ -8838,6 +8908,10 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
     }
 	
 	//stats
+	this.drawStatsState=function(activate,showFps,showDrawn,showAll){
+        return this.stats.drawStatsState(activate,showFps,showDrawn,showAll);
+    }
+	
 	this.drawStats=function(showFps,showDrawn,showAll){
         return this.stats.drawingStats(showFps,showDrawn,showAll);
     }
@@ -8915,10 +8989,10 @@ TEMPLATE:
     <body>
         <div id="canContainer">
         <canvas id="can"></canvas>
-        <span>Made with <a href="https://github.com/ToniestTony/jt_lib">jt_lib21.js</a></span>
+        <span>Made with <a href="https://github.com/ToniestTony/jt_lib">jt_lib22.js</a></span>
             </div>
     </body>
-    <script src="jt_lib21.js"></script>
+    <script src="jt_lib22.js"></script>
     
     <script>
 
