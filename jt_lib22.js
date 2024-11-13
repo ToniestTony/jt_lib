@@ -748,7 +748,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 				 //fullScreenBtn update
 				if(this.fullScreenBtn && !this.context.canvas.fullscreen()){
 					if(this.focused){
-						var w=50/8;
+						var w=40/8;
 
 						//check if user pressed the button
 						if(this.context.mouse.check(0,0,w*8,w*8,true,false) || this.context.touch.check(0,0,w*8,w*8,true,false) || this.context.keyboard.press("f11")){
@@ -919,7 +919,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
                 //fullScreenBtn draw
 				if((this.fullScreenBtn && !this.context.canvas.fullscreen())){
 					if(this.focused){
-						var w=50/8;
+						var w=40/8;
 						var alpha=this.context.drawing.alpha();
 						this.context.drawing.alpha(0.67);
 						for(var y=0;y<8;y++){
@@ -5288,8 +5288,20 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 				this.drawing.alpha(1);
 			}
 		},
-		clear:function(){
-			this.parts=[];
+		clear:function(id){
+			if(id==undefined){
+				this.parts=[];
+			}else{
+				var arr=[];
+				for(var i=0;i<this.parts.length;i++){
+					if(this.parts[i].id!=undefined){
+						if(this.parts[i].id==id){
+							this.parts.splice(i,1);
+							i--;
+						}
+					}
+				}
+			}
 		}
 	}
 
@@ -8141,12 +8153,12 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 		}
 	}
 
-	this.delParts=function(){
-		return this.particles.clear();
+	this.delParts=function(id){
+		return this.particles.clear(id);
 	}
 
-	this.clearParts=function(){
-		return this.particles.clear();
+	this.clearParts=function(id){
+		return this.particles.clear(id);
 	}
 
 
