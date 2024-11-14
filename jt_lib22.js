@@ -8825,16 +8825,16 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 		return this.particles.drawingParticles();
 	}
 
-	this.particlesClear=function(){
-		return this.particles.clear();
+	this.particlesClear=function(id){
+		return this.particles.clear(id);
 	}
 
-	this.clearParticles=function(){
-		return this.particles.clear();
+	this.clearParticles=function(id){
+		return this.particles.clear(id);
 	}
 
-	this.partClear=function(){
-		return this.particles.clear();
+	this.partClear=function(id){
+		return this.particles.clear(id);
 	}
 
 	this.partDraw=function(){
