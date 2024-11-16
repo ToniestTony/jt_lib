@@ -419,6 +419,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 
         pause:false,
         stop:false,
+		pauseCpt:0,
 
         loaded:false,
         setupDone:false,
@@ -579,9 +580,19 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
                 window.clearInterval(this.interval);
                 this.stop=false;
             }
+			
+			//bypass pause with jt.update()
+			var pauseJt=false;
+			if(this.pause){
+				pauseJt=true;
+			}
+			
+			if(this.pauseCpt>0){
+				this.pauseCpt--;
+				pauseJt=false;
+			}
 
             //main loop
-            //if jt.pause==true, pause the function calling
             if(this.loaded==false){
 
                 this.loadCounter=0;
@@ -652,7 +663,8 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 				this.loadingScreen();
 				if(load){this.loaded=true;}
 
-            }else if(!this.pause){
+            }else if(!pauseJt){
+				//if jt.pause==true, pause the function calling
 
                 if(!this.setupDone){
                     this.setup();
@@ -2796,13 +2808,17 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 		},
 
         //Draw an animation
-        anim:function(name,newX,newY,w,h,rotation){
+        anim:function(name,newX,newY,w,h,rotation,sX,sY,sW,sH){
 			if(typeof name==="object"){
 				newX=name.x;
 				newY=name.y;
 				w=name.w;
 				h=name.h;
 				r=name.r;
+				sX=name.sX;
+				sY=name.sY;
+				sW=name.sW;
+				sH=name.sH;
 				name=name.anim;
 			}
             var anim=this.assets.anims[name];
@@ -2926,8 +2942,20 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
                         this.ctx.rotate(rotation*Math.PI/180);
                         this.ctx.translate(-transX,-transY);
                     }
+					
+					
+					
+					if(sX!=undefined){
+                        //this.ctx.drawingImage(image.img,sX,sY,sW,sH,camW-camX,camH-camY,tempW*camW,tempH*camH);
 
-                    this.ctx.drawImage(anim.img,anim.frame*anim.frameW,0,anim.frameW,anim.img.height,(x*camW)-(camX*camW)+posX,(y*camH)-(camY*camH)+posY,tempW*camW,tempH*camH);
+                        if(sW=="w"){sW=anim.frameW}
+                        if(sH=="h"){sH=anim.img.height}
+						
+						this.ctx.drawImage(anim.img,anim.frame*anim.frameW+sX,sY,sW,sH,(x*camW)-(camX*camW)+posX,(y*camH)-(camY*camH)+posY,tempW*camW,tempH*camH);
+                    }else{
+						
+						this.ctx.drawImage(anim.img,anim.frame*anim.frameW,0,anim.frameW,anim.img.height,(x*camW)-(camX*camW)+posX,(y*camH)-(camY*camH)+posY,tempW*camW,tempH*camH);
+                    }
 
                     this.ctx.restore();
                 }
@@ -7107,6 +7135,17 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
         if(bool==undefined){return this.loop.pause;}
         return this.loop.pause=bool;
     }
+	
+	this.pauseUpdate=function(frames){
+        if(frames==undefined){frames=1;}
+        return this.loop.pauseCpt=frames;
+    }
+	
+	this.pauseUpdateDelay=function(delay,frames){
+        if(delay==undefined){delay=1000;}
+        if(frames==undefined){frames=1;}
+        setTimeout(this.pauseUpdate.bind(this,frames),delay)
+    }
 
     this.stopJt=function(bool){
         if(bool==undefined){return this.loop.stop;}
@@ -7736,8 +7775,8 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 		return this.drawing.editPriority(bool);
 	}
 
-    this.anim=function(name,newX,newY,w,h,rotation){
-        return this.drawing.anim(name,newX,newY,w,h,rotation)
+    this.anim=function(name,newX,newY,w,h,rotation,sX,sY,sW,sH){
+        return this.drawing.anim(name,newX,newY,w,h,rotation,sX,sY,sW,sH)
     }
 
 	this.animPlay=function(name){
