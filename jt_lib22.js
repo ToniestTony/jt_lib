@@ -2155,6 +2155,9 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
             var height=obj.height;
             var color=obj.color;
             var outline=obj.outline;
+			var oC=obj.oC;
+			var outlineC=obj.outlineC;
+			var outlineColor=obj.outlineColor
 
             if(c==undefined){
                 if(color!=undefined){
@@ -2215,6 +2218,15 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
             if(lineW!=undefined){
               o=lineW;
             }
+			
+			if(oC==undefined){
+                if(outlineC!=undefined){
+                    oC=outlineC;
+                }
+				if(outlineColor!=undefined){
+                    oC=outlineColor;
+                }
+            }
             
             if(obj.attr!=undefined){
                 if(obj.attr.shape!=undefined){
@@ -2270,27 +2282,38 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 				if(o==undefined){
 					this.circle(x,y,d,c);
 				}else{
-					if(o!=undefined){
-						w=o;
+					w=o;
+					if(oC!=undefined){
+						this.circle(x,y,d,c);
+						this.circleB(x,y,d,oC,w);
+					}else{
+						this.circleB(x,y,d,c,w);
 					}
-					this.circleB(x,y,d,c,w);
 				}
             }else if(dX!=undefined){
                 //ellipse
 				if(o==undefined){
 					this.ellipse(x,y,dX,dY,c);
 				}else{
-					if(o!=undefined){
-						w=o;
+					w=o;
+					if(oC!=undefined){
+						this.ellipse(x,y,dX,dY,c);
+						this.ellipseB(x,y,dX,dY,oC,w);
+					}else{
+						this.ellipseB(x,y,dX,dY,c,w);
 					}
-					this.ellipseB(x,y,dX,dY,c,w);
 				}
             }else{
                 //rect
 				if(o==undefined){
 					this.rect(x,y,w,h,c,r);
 				}else{
-					this.rectB(x,y,w,h,c,r,o);
+					if(oC!=undefined){
+						this.rect(x,y,w,h,c,r);
+						this.rectB(x,y,w,h,oC,r,o);
+					}else{
+						this.rectB(x,y,w,h,c,r,o);
+					}
 				}
             }
 
@@ -7136,14 +7159,25 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
         return this.loop.pause=bool;
     }
 	
-	this.pauseUpdate=function(frames){
+	this.pauseUpdate=function(frames,delay){
+		if(frames!=undefined){
+			if(typeof frames=="boolean"){
+				return this.loop.pause=frames;
+			}
+		}
         if(frames==undefined){frames=1;}
-        return this.loop.pauseCpt=frames;
+		if(delay!=undefined){
+			this.pauseUpdateDelay(delay,frames);
+		}else{
+			if(!this.loop.pause){this.loop.pause=true;}
+			return this.loop.pauseCpt=frames;
+		}
     }
 	
 	this.pauseUpdateDelay=function(delay,frames){
         if(delay==undefined){delay=1000;}
         if(frames==undefined){frames=1;}
+		if(!this.loop.pause){this.loop.pause=true;}
         setTimeout(this.pauseUpdate.bind(this,frames),delay)
     }
 
