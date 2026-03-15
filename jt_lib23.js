@@ -3,7 +3,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
     //initialize the canvas
     this.init=function(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility){
         //add attributes to the canvas object of JT
-        this.version=22;
+        this.version=23;
 		this.loop.version=this.version;
         var actualId=id;
 
@@ -5293,6 +5293,25 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 				this.drawingParticle(i);
 			}
 		},
+		getParticlesIndex:function(id){
+			if(id==undefined){
+				var arr=[];
+				for(var i=0;i<this.parts.length;i++){
+					arr.push(i);
+				}
+				return arr;
+			}else{
+				var arr=[];
+				for(var i=0;i<this.parts.length;i++){
+					if(this.parts[i].id!=undefined){
+						if(this.parts[i].id==id){
+							arr.push(i);
+						}
+					}
+				}
+				return arr;
+			}
+		},
 		getParticles:function(id){
 			if(id==undefined){
 				return this.parts;
@@ -8213,6 +8232,14 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 	this.getParts=function(id){
 		return this.particles.getParticles(id);
 	}
+	
+	this.partsIndex=function(id){
+		return this.particles.getParticlesIndex(id);
+	}
+	
+	this.getPartsIndex=function(id){
+		return this.particles.getParticlesIndex(id);
+	}
 
 	this.drawParts=function(){
 		return this.particles.drawingParticles();
@@ -9074,10 +9101,10 @@ TEMPLATE:
     <body>
         <div id="canContainer">
         <canvas id="can"></canvas>
-        <span>Made with <a href="https://github.com/ToniestTony/jt_lib">jt_lib22.js</a></span>
+        <span>Made with <a href="https://github.com/ToniestTony/jt_lib">jt_lib23.js</a></span>
             </div>
     </body>
-    <script src="jt_lib22.js"></script>
+    <script src="jt_lib23.js"></script>
     
     <script>
 
