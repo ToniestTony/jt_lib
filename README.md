@@ -17,7 +17,7 @@ Here are some of the features:
 * **A bunch of other features!**
 
 ## Getting started
-* Download the jt_lib20.js file and index.html for a quick template.
+* Download the jt_lib23.js file and index.html for a quick template.
 * Start programming your awesome game in the setup and update functions of the template
 * **That's it!**
 * (learn and try out the functions in my complete and interactive documentation: https://toniesttony.github.io/jt.html)
