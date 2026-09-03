@@ -695,7 +695,22 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 
                 //add gamepads
 				if(navigator.getGamepads!=null){
-					var gamepads=navigator.getGamepads();
+					var gamepads=[];
+					var nav=navigator.getGamepads();
+					this.context.gamepad.connected=[];
+					for(var i=0;i<4;i++){
+						if(nav[i]!=undefined){
+							gamepads.push(nav[i]);
+							this.context.gamepad.connected.push(true);
+						}
+					}
+					
+					var left=4-gamepads.length;
+					for(var i=0;i<left;i++){
+						gamepads.push(undefined);
+						this.context.gamepad.connected.push(false);
+					}
+					
 					if(gamepads[0]==undefined && gamepads[1]==undefined && gamepads[2]==undefined && gamepads[3]==undefined){
 						//no gamepads
 					}else{
@@ -5207,7 +5222,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 	this.particles={
 		drawing:undefined,
 		parts:[],
-		addParticle:function(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,c,cRate,cMax,r,rRate,o,oRate,image,anim,id){
+		addParticle:function(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,c,cRate,cMax,r,rRate,o,oRate,text,align,image,anim,id){
 			var part={};
 			part.x=x;
 			if(x==undefined){part.x=this.drawing.canvas.w/2}
@@ -5252,6 +5267,10 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 			if(rRate==undefined){part.rRate=0}
 			part.o=o;
 			part.oRate=oRate;
+			
+			part.text=text;
+			part.align=align;
+			
 			part.image=image;
 			part.anim=anim;
 			part.id=id;
@@ -5335,7 +5354,12 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 			}
 
 			if(p.anim===undefined && p.image===undefined){
-				if(p.o===undefined){
+				if(p.text!==undefined){
+					this.drawing.font(this.drawing.fontName,p.w,p.c);
+					var align=p.align;
+					if(align==undefined){align="center";}
+					this.drawing.text(p.text,p.x+p.w/2,p.y+p.h/2,p.c,align,this.drawing.fontSize,p.r);
+				}else if(p.o===undefined){
 					if(p.h==0 && p.hRate==0){
 						this.drawing.circle(p.x-p.w/2,p.y-p.w/2,p.w,p.c);
 					}else{
