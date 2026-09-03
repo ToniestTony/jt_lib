@@ -5222,7 +5222,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 	this.particles={
 		drawing:undefined,
 		parts:[],
-		addParticle:function(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,c,cRate,cMax,r,rRate,o,oRate,text,align,image,anim,id){
+		addParticle:function(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,fX,fY,c,cRate,cMax,r,rRate,o,oRate,text,align,image,anim,id){
 			var part={};
 			part.x=x;
 			if(x==undefined){part.x=this.drawing.canvas.w/2}
@@ -5254,6 +5254,9 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 			if(aX==undefined){part.aX=0}
 			part.aY=aY;
 			if(aY==undefined){part.aY=0}
+			
+			part.fX=fX;
+			part.fY=fY;
 
 			part.c=c;
 			if(c==undefined){part.c=[0,0,0]}
@@ -5292,6 +5295,9 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 			p.vY+=p.aY;
 			p.x+=p.vX;
 			p.y+=p.vY;
+			
+			if(p.fX!=undefined){p.vX*=p.fX;}
+			if(p.fY!=undefined){p.vY*=p.fY;}
 
 			p.c[0]+=p.cRate[0];
 			if(p.cRate[0]>0){if(p.c[0]>p.cMax[0]){p.c[0]=p.cMax[0]}}else if(p.cRate[0]<0){if(p.c[0]<p.cMax[0]){p.c[0]=p.cMax[0]}}
@@ -5358,7 +5364,7 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 					this.drawing.font(this.drawing.fontName,p.w,p.c);
 					var align=p.align;
 					if(align==undefined){align="center";}
-					this.drawing.text(p.text,p.x+p.w/2,p.y+p.h/2,p.c,align,this.drawing.fontSize,p.r);
+					this.drawing.text(p.text,p.x,p.y-p.w/2,p.c,align,this.drawing.fontSize,p.r);
 				}else if(p.o===undefined){
 					if(p.h==0 && p.hRate==0){
 						this.drawing.circle(p.x-p.w/2,p.y-p.w/2,p.w,p.c);
@@ -8238,13 +8244,13 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 
 	//particles
 
-	this.addPart=function(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,c,cRate,cMax,r,rRate,o,oRate,text,align,image,anim,id){
+	this.addPart=function(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,fX,fY,c,cRate,cMax,r,rRate,o,oRate,text,align,image,anim,id){
 		if(typeof x=="object"){
 			var img=x.image;
 			if(img==undefined){img=x.img;}
-			return this.particles.addParticle(x.x,x.y,x.w,x.h,x.frames,x.wRate,x.hRate,x.alpha,x.alphaRate,x.vX,x.vY,x.aX,x.aY,x.c,x.cRate,x.cMax,x.r,x.rRate,x.o,x.oRate,x.text,x.align,img,x.anim,x.id);
+			return this.particles.addParticle(x.x,x.y,x.w,x.h,x.frames,x.wRate,x.hRate,x.alpha,x.alphaRate,x.vX,x.vY,x.aX,x.aY,x.fX,x.fY,x.c,x.cRate,x.cMax,x.r,x.rRate,x.o,x.oRate,x.text,x.align,img,x.anim,x.id);
 		}else{
-			return this.particles.addParticle(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,c,cRate,cMax,r,rRate,o,oRate,text,align,image,anim,id);
+			return this.particles.addParticle(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,fX,fY,c,cRate,cMax,r,rRate,o,oRate,text,align,image,anim,id);
 		}
 	}
 
@@ -8909,43 +8915,43 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
         return this.collision.rectCircle(rect,circle);
     }
 
-	this.particlesAdd=function(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,c,cRate,cMax,r,rRate,o,oRate,text,align,image,anim,id){
+	this.particlesAdd=function(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,fX,fY,c,cRate,cMax,r,rRate,o,oRate,text,align,image,anim,id){
 		if(typeof x=="object"){
 			var img=x.image;
 			if(img==undefined){img=x.img;}
-			return this.particles.addParticle(x.x,x.y,x.w,x.h,x.frames,x.wRate,x.hRate,x.alpha,x.alphaRate,x.vX,x.vY,x.aX,x.aY,x.c,x.cRate,x.cMax,x.r,x.rRate,x.o,x.oRate,x.text,x.align,img,x.anim,x.id);
+			return this.particles.addParticle(x.x,x.y,x.w,x.h,x.frames,x.wRate,x.hRate,x.alpha,x.alphaRate,x.vX,x.vY,x.aX,x.aY,x.fX,x.fY,x.c,x.cRate,x.cMax,x.r,x.rRate,x.o,x.oRate,x.text,x.align,img,x.anim,x.id);
 		}else{
-			return this.particles.addParticle(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,c,cRate,cMax,r,rRate,o,oRate,text,align,image,anim,id);
+			return this.particles.addParticle(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,fX,fY,c,cRate,cMax,r,rRate,o,oRate,text,align,image,anim,id);
 		}
 	}
 
-	this.addParticles=function(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,c,cRate,cMax,r,rRate,o,oRate,text,align,image,anim,id){
+	this.addParticles=function(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,fX,fY,c,cRate,cMax,r,rRate,o,oRate,text,align,image,anim,id){
 		if(typeof x=="object"){
 			var img=x.image;
 			if(img==undefined){img=x.img;}
-			return this.particles.addParticle(x.x,x.y,x.w,x.h,x.frames,x.wRate,x.hRate,x.alpha,x.alphaRate,x.vX,x.vY,x.aX,x.aY,x.c,x.cRate,x.cMax,x.r,x.rRate,x.o,x.oRate,x.text,x.align,img,x.anim,x.id);
+			return this.particles.addParticle(x.x,x.y,x.w,x.h,x.frames,x.wRate,x.hRate,x.alpha,x.alphaRate,x.vX,x.vY,x.aX,x.aY,x.fX,x.fY,x.c,x.cRate,x.cMax,x.r,x.rRate,x.o,x.oRate,x.text,x.align,img,x.anim,x.id);
 		}else{
-			return this.particles.addParticle(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,c,cRate,cMax,r,rRate,o,oRate,text,align,image,anim,id);
+			return this.particles.addParticle(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,fX,fY,c,cRate,cMax,r,rRate,o,oRate,text,align,image,anim,id);
 		}
 	}
 
-	this.particleAdd=function(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,c,cRate,cMax,r,rRate,o,oRate,text,align,image,anim,id){
+	this.particleAdd=function(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,fX,fY,c,cRate,cMax,r,rRate,o,oRate,text,align,image,anim,id){
 		if(typeof x=="object"){
 			var img=x.image;
 			if(img==undefined){img=x.img;}
-			return this.particles.addParticle(x.x,x.y,x.w,x.h,x.frames,x.wRate,x.hRate,x.alpha,x.alphaRate,x.vX,x.vY,x.aX,x.aY,x.c,x.cRate,x.cMax,x.r,x.rRate,x.o,x.oRate,x.text,x.align,img,x.anim,x.id);
+			return this.particles.addParticle(x.x,x.y,x.w,x.h,x.frames,x.wRate,x.hRate,x.alpha,x.alphaRate,x.vX,x.vY,x.aX,x.aY,x.fX,x.fY,x.c,x.cRate,x.cMax,x.r,x.rRate,x.o,x.oRate,x.text,x.align,img,x.anim,x.id);
 		}else{
-			return this.particles.addParticle(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,c,cRate,cMax,r,rRate,o,oRate,text,align,image,anim,id);
+			return this.particles.addParticle(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,fX,fY,c,cRate,cMax,r,rRate,o,oRate,text,align,image,anim,id);
 		}
 	}
 
-	this.addParticle=function(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,c,cRate,cMax,r,rRate,o,oRate,text,align,image,anim,id){
+	this.addParticle=function(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,fX,fY,c,cRate,cMax,r,rRate,o,oRate,text,align,image,anim,id){
 		if(typeof x=="object"){
 			var img=x.image;
 			if(img==undefined){img=x.img;}
-			return this.particles.addParticle(x.x,x.y,x.w,x.h,x.frames,x.wRate,x.hRate,x.alpha,x.alphaRate,x.vX,x.vY,x.aX,x.aY,x.c,x.cRate,x.cMax,x.r,x.rRate,x.o,x.oRate,x.text,x.align,img,x.anim,x.id);
+			return this.particles.addParticle(x.x,x.y,x.w,x.h,x.frames,x.wRate,x.hRate,x.alpha,x.alphaRate,x.vX,x.vY,x.aX,x.aY,x.fX,x.fY,x.c,x.cRate,x.cMax,x.r,x.rRate,x.o,x.oRate,x.text,x.align,img,x.anim,x.id);
 		}else{
-			return this.particles.addParticle(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,c,cRate,cMax,r,rRate,o,oRate,text,align,image,anim,id);
+			return this.particles.addParticle(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,fX,fY,c,cRate,cMax,r,rRate,o,oRate,text,align,image,anim,id);
 		}
 	}
 
@@ -8973,13 +8979,13 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 		return this.particles.drawingParticles();
 	}
 
-	this.partAdd=function(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,c,cRate,cMax,r,rRate,o,oRate,text,align,image,anim,id){
+	this.partAdd=function(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,fX,fY,c,cRate,cMax,r,rRate,o,oRate,text,align,image,anim,id){
 		if(typeof x=="object"){
 			var img=x.image;
 			if(img==undefined){img=x.img;}
-			return this.particles.addParticle(x.x,x.y,x.w,x.h,x.frames,x.wRate,x.hRate,x.alpha,x.alphaRate,x.vX,x.vY,x.aX,x.aY,x.c,x.cRate,x.cMax,x.r,x.rRate,x.o,x.oRate,x.text,x.align,img,x.anim,x.id);
+			return this.particles.addParticle(x.x,x.y,x.w,x.h,x.frames,x.wRate,x.hRate,x.alpha,x.alphaRate,x.vX,x.vY,x.aX,x.aY,x.fX,x.fY,x.c,x.cRate,x.cMax,x.r,x.rRate,x.o,x.oRate,x.text,x.align,img,x.anim,x.id);
 		}else{
-			return this.particles.addParticle(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,c,cRate,cMax,r,rRate,o,oRate,text,align,image,anim,id);
+			return this.particles.addParticle(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,fX,fY,c,cRate,cMax,r,rRate,o,oRate,text,align,image,anim,id);
 		}
 	}
 
