@@ -8238,13 +8238,13 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 
 	//particles
 
-	this.addPart=function(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,c,cRate,cMax,r,rRate,o,oRate,image,anim,id){
+	this.addPart=function(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,c,cRate,cMax,r,rRate,o,oRate,text,align,image,anim,id){
 		if(typeof x=="object"){
 			var img=x.image;
 			if(img==undefined){img=x.img;}
-			return this.particles.addParticle(x.x,x.y,x.w,x.h,x.frames,x.wRate,x.hRate,x.alpha,x.alphaRate,x.vX,x.vY,x.aX,x.aY,x.c,x.cRate,x.cMax,x.r,x.rRate,x.o,x.oRate,img,x.anim,x.id);
+			return this.particles.addParticle(x.x,x.y,x.w,x.h,x.frames,x.wRate,x.hRate,x.alpha,x.alphaRate,x.vX,x.vY,x.aX,x.aY,x.c,x.cRate,x.cMax,x.r,x.rRate,x.o,x.oRate,x.text,x.align,img,x.anim,x.id);
 		}else{
-			return this.particles.addParticle(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,c,cRate,cMax,r,rRate,o,oRate,image,anim,id);
+			return this.particles.addParticle(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,c,cRate,cMax,r,rRate,o,oRate,text,align,image,anim,id);
 		}
 	}
 
@@ -8909,35 +8909,43 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
         return this.collision.rectCircle(rect,circle);
     }
 
-	this.particlesAdd=function(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,c,cRate,cMax,r,id){
+	this.particlesAdd=function(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,c,cRate,cMax,r,rRate,o,oRate,text,align,image,anim,id){
 		if(typeof x=="object"){
-			return this.particles.addParticle(x.x,x.y,x.w,x.h,x.frames,x.wRate,x.hRate,x.alpha,x.alphaRate,x.vX,x.vY,x.aX,x.aY,x.c,x.cRate,x.cMax,x.r,x.id);
+			var img=x.image;
+			if(img==undefined){img=x.img;}
+			return this.particles.addParticle(x.x,x.y,x.w,x.h,x.frames,x.wRate,x.hRate,x.alpha,x.alphaRate,x.vX,x.vY,x.aX,x.aY,x.c,x.cRate,x.cMax,x.r,x.rRate,x.o,x.oRate,x.text,x.align,img,x.anim,x.id);
 		}else{
-			return this.particles.addParticle(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,c,cRate,cMax,r,id);
+			return this.particles.addParticle(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,c,cRate,cMax,r,rRate,o,oRate,text,align,image,anim,id);
 		}
 	}
 
-	this.addParticles=function(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,c,cRate,cMax,r,id){
+	this.addParticles=function(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,c,cRate,cMax,r,rRate,o,oRate,text,align,image,anim,id){
 		if(typeof x=="object"){
-			return this.particles.addParticle(x.x,x.y,x.w,x.h,x.frames,x.wRate,x.hRate,x.alpha,x.alphaRate,x.vX,x.vY,x.aX,x.aY,x.c,x.cRate,x.cMax,x.r,x.id);
+			var img=x.image;
+			if(img==undefined){img=x.img;}
+			return this.particles.addParticle(x.x,x.y,x.w,x.h,x.frames,x.wRate,x.hRate,x.alpha,x.alphaRate,x.vX,x.vY,x.aX,x.aY,x.c,x.cRate,x.cMax,x.r,x.rRate,x.o,x.oRate,x.text,x.align,img,x.anim,x.id);
 		}else{
-			return this.particles.addParticle(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,c,cRate,cMax,r,id);
+			return this.particles.addParticle(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,c,cRate,cMax,r,rRate,o,oRate,text,align,image,anim,id);
 		}
 	}
 
-	this.particleAdd=function(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,c,cRate,cMax,r,rRate,id){
+	this.particleAdd=function(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,c,cRate,cMax,r,rRate,o,oRate,text,align,image,anim,id){
 		if(typeof x=="object"){
-			return this.particles.addParticle(x.x,x.y,x.w,x.h,x.frames,x.wRate,x.hRate,x.alpha,x.alphaRate,x.vX,x.vY,x.aX,x.aY,x.c,x.cRate,x.cMax,x.r,x.rRate,x.id);
+			var img=x.image;
+			if(img==undefined){img=x.img;}
+			return this.particles.addParticle(x.x,x.y,x.w,x.h,x.frames,x.wRate,x.hRate,x.alpha,x.alphaRate,x.vX,x.vY,x.aX,x.aY,x.c,x.cRate,x.cMax,x.r,x.rRate,x.o,x.oRate,x.text,x.align,img,x.anim,x.id);
 		}else{
-			return this.particles.addParticle(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,c,cRate,cMax,r,rRate,id);
+			return this.particles.addParticle(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,c,cRate,cMax,r,rRate,o,oRate,text,align,image,anim,id);
 		}
 	}
 
-	this.addParticle=function(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,c,cRate,cMax,r,rRate,id){
+	this.addParticle=function(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,c,cRate,cMax,r,rRate,o,oRate,text,align,image,anim,id){
 		if(typeof x=="object"){
-			return this.particles.addParticle(x.x,x.y,x.w,x.h,x.frames,x.wRate,x.hRate,x.alpha,x.alphaRate,x.vX,x.vY,x.aX,x.aY,x.c,x.cRate,x.cMax,x.r,x.rRate,x.id);
+			var img=x.image;
+			if(img==undefined){img=x.img;}
+			return this.particles.addParticle(x.x,x.y,x.w,x.h,x.frames,x.wRate,x.hRate,x.alpha,x.alphaRate,x.vX,x.vY,x.aX,x.aY,x.c,x.cRate,x.cMax,x.r,x.rRate,x.o,x.oRate,x.text,x.align,img,x.anim,x.id);
 		}else{
-			return this.particles.addParticle(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,c,cRate,cMax,r,rRate,id);
+			return this.particles.addParticle(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,c,cRate,cMax,r,rRate,o,oRate,text,align,image,anim,id);
 		}
 	}
 
@@ -8965,11 +8973,13 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 		return this.particles.drawingParticles();
 	}
 
-	this.partAdd=function(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,c,cRate,cMax,r,rRate,id){
+	this.partAdd=function(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,c,cRate,cMax,r,rRate,o,oRate,text,align,image,anim,id){
 		if(typeof x=="object"){
-			return this.particles.addParticle(x.x,x.y,x.w,x.h,x.frames,x.wRate,x.hRate,x.alpha,x.alphaRate,x.vX,x.vY,x.aX,x.aY,x.c,x.cRate,x.cMax,x.r,x.rRate,x.id);
+			var img=x.image;
+			if(img==undefined){img=x.img;}
+			return this.particles.addParticle(x.x,x.y,x.w,x.h,x.frames,x.wRate,x.hRate,x.alpha,x.alphaRate,x.vX,x.vY,x.aX,x.aY,x.c,x.cRate,x.cMax,x.r,x.rRate,x.o,x.oRate,x.text,x.align,img,x.anim,x.id);
 		}else{
-			return this.particles.addParticle(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,c,cRate,cMax,r,rRate,id);
+			return this.particles.addParticle(x,y,w,h,frames,wRate,hRate,alpha,alphaRate,vX,vY,aX,aY,c,cRate,cMax,r,rRate,o,oRate,text,align,image,anim,id);
 		}
 	}
 
