@@ -5362,38 +5362,40 @@ function JT(id,w,h,fps,setupName,updateName,objName,fullScreenBtn,compatibility)
 		},
 		drawingParticle:function(i){
 			var p=this.parts[i];
-			//x,y,w,h,color,r
-			if(p.alpha!=1){
-				this.drawing.alpha(p.alpha);
-			}
-
-			if(p.anim===undefined && p.image===undefined){
-				if(p.text!==undefined){
-					this.drawing.font(this.drawing.fontName,p.w,p.c);
-					var align=p.align;
-					if(align==undefined){align="center";}
-					this.drawing.text(p.text,p.x,p.y-p.w/2,p.c,align,this.drawing.fontSize,p.r);
-				}else if(p.o===undefined){
-					if(p.h==0 && p.hRate==0){
-						this.drawing.circle(p.x-p.w/2,p.y-p.w/2,p.w,p.c);
-					}else{
-						this.drawing.rect(p.x-p.w/2,p.y-p.h/2,p.w,p.h,p.c,p.r);
-					}
-				}else{
-					if(p.h==0 && p.hRate==0){
-						this.drawing.circleB(p.x-p.w/2,p.y-p.w/2,p.w,p.c,p.o);
-					}else{
-						this.drawing.rectB(p.x-p.w/2,p.y-p.h/2,p.w,p.h,p.c,p.r,p.o);
-					}
+			if(p.delay<=0){
+				//x,y,w,h,color,r
+				if(p.alpha!=1){
+					this.drawing.alpha(p.alpha);
 				}
-			}else if(p.anim!==undefined){
-				this.drawing.anim(p.anim,p.x-p.w/2,p.y-p.h/2,p.w,p.h,p.r);
-			}else if(p.image!==undefined){
-				this.drawing.image(p.image,p.x-p.w/2,p.y-p.h/2,p.w,p.h,p.r);
-			}
 
-			if(p.alpha!=1){
-				this.drawing.alpha(1);
+				if(p.anim===undefined && p.image===undefined){
+					if(p.text!==undefined){
+						this.drawing.font(this.drawing.fontName,p.w,p.c);
+						var align=p.align;
+						if(align==undefined){align="center";}
+						this.drawing.text(p.text,p.x,p.y-p.w/2,p.c,align,this.drawing.fontSize,p.r);
+					}else if(p.o===undefined){
+						if(p.h==0 && p.hRate==0){
+							this.drawing.circle(p.x-p.w/2,p.y-p.w/2,p.w,p.c);
+						}else{
+							this.drawing.rect(p.x-p.w/2,p.y-p.h/2,p.w,p.h,p.c,p.r);
+						}
+					}else{
+						if(p.h==0 && p.hRate==0){
+							this.drawing.circleB(p.x-p.w/2,p.y-p.w/2,p.w,p.c,p.o);
+						}else{
+							this.drawing.rectB(p.x-p.w/2,p.y-p.h/2,p.w,p.h,p.c,p.r,p.o);
+						}
+					}
+				}else if(p.anim!==undefined){
+					this.drawing.anim(p.anim,p.x-p.w/2,p.y-p.h/2,p.w,p.h,p.r);
+				}else if(p.image!==undefined){
+					this.drawing.image(p.image,p.x-p.w/2,p.y-p.h/2,p.w,p.h,p.r);
+				}
+
+				if(p.alpha!=1){
+					this.drawing.alpha(1);
+				}
 			}
 		},
 		clear:function(id){
